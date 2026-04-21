@@ -22,3 +22,15 @@ export const createMealSession = async (req: any, res: any) => {
     res.status(500).json({ message: "Error", err });
   }
 };
+
+export const getAllMeals = async (req: any, res: any) => {
+    try {
+      const meals = await MealSession.find({ isActive: true })
+        .populate("creator", "name email")
+        .sort({ createdAt: -1 });
+  
+      res.json(meals);
+    } catch (err) {
+      res.status(500).json({ message: "Error fetching meals", err });
+    }
+  };
