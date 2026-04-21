@@ -1,14 +1,10 @@
 import express from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { createMealSession } from "../controllers/mealController.js";
 
 const router = express.Router();
 
-// Protected route
-router.post("/create", authMiddleware, (req: any, res) => {
-  res.json({
-    message: "You are allowed to access this route",
-    user: req.user,
-  });
-});
+// CREATE meal session (protected)
+router.post("/create", authMiddleware, createMealSession);
 
 export default router;
