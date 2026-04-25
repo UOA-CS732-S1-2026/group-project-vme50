@@ -1,10 +1,11 @@
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
-import app from "../server.js";
-import { connectDB } from "../config/db.js";
+import app from "../../server.js";
+import { connectDB } from "../../config/db.js";
 
-import User from "../models/User.js";
-import MealSession from "../models/MealSession.js";
+import User from "../../models/User.js";
+import MealSession from "../../models/MealSession.js";
 
 describe("Meal API", () => {
   /* =========================================================
