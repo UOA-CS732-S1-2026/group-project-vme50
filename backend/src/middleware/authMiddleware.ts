@@ -1,10 +1,6 @@
-import express from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import Blacklist from "../models/Blacklist.js";
-
-type Request = express.Request;
-type Response = express.Response;
-type NextFunction = express.NextFunction;
 
 interface AuthRequest extends Request {
   user?: string | jwt.JwtPayload;

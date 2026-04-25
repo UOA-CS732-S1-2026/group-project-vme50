@@ -1,7 +1,15 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
 import Blacklist from "../models/Blacklist.js";
+import { userRepository } from "../repositories/userRepository.js";
+
+const generateToken = (userId: string) => {
+  return jwt.sign(
+    { userId },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "7d" }
+  );
+};
 
 export const registerUser = async (data: {
   name: string;
@@ -14,26 +22,20 @@ export const registerUser = async (data: {
     throw new Error("Only University of Auckland students can register");
   }
 
-  const existingUser = await User.findOne({ email });
+  const existingUser = await userRepository.findByEmail(email);
   if (existingUser) {
     throw new Error("User already exists");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await User.create({
+  const user = await userRepository.createUser({
     name,
     email,
-    password: hashedPassword,
+    password: hashedPassword
   });
 
-  const token = jwt.sign(
-    { userId: user._id },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "7d" }
-  );
-
-  return token;
+  return generateToken(user._id.toString());
 };
 
 export const loginUser = async (data: {
@@ -42,31 +44,24 @@ export const loginUser = async (data: {
 }) => {
   const { email, password } = data;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new Error("Invalid credentials");
-  }
+  const user = await userRepository.findByEmail(email);
+  if (!user) throw new Error("Invalid credentials");
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error("Invalid credentials");
-  }
+  if (!isMatch) throw new Error("Invalid credentials");
 
-  const token = jwt.sign(
-    { userId: user._id },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "7d" }
-  );
-
-  return token;
+  return generateToken(user._id.toString());
 };
 
 export const logoutUser = async (token: string) => {
-  const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET as string
+  ) as any;
 
   await Blacklist.create({
     token,
-    expiresAt: new Date(decoded.exp * 1000),
+    expiresAt: new Date(decoded.exp * 1000)
   });
 
   return true;
