@@ -6,7 +6,12 @@ import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
 
-dotenv.config();
+/* ---------------- ENV SETUP ---------------- */
+if (process.env.NODE_ENV === "test") {
+  dotenv.config({ path: ".env.test" });
+} else {
+  dotenv.config();
+}
 
 const app = express();
 
@@ -24,27 +29,39 @@ app.get("/", (req, res) => {
   res.send("Platemates API running");
 });
 
-app.get("/api/test", (req, res) => {
-  res.json({ message: "Backend is working!" });
-});
-
 app.use("/api/auth", authRoutes);
-
-app.use("/api/meal", mealRoutes);
+app.use("/api/meals", mealRoutes);
 
 /* ---------------- Database ---------------- */
-mongoose
-  .connect(process.env.MONGO_URI!)
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((err) => {
+export const connectDB = async () => {
+  try {
+    const MONGO_URI = process.env.MONGO_URI;
+
+    if (!MONGO_URI) {
+      throw new Error("MONGO_URI is not defined");
+    }
+
+    await mongoose.connect(MONGO_URI);
+
+    console.log(
+      `MongoDB connected (${process.env.NODE_ENV || "development"})`
+    );
+  } catch (err) {
     console.error("MongoDB connection error:", err);
-  });
+  }
+};
 
 /* ---------------- Server ---------------- */
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Only start server if NOT testing
+if (process.env.NODE_ENV !== "test") {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  });
+}
+
+/* ---------------- Export for testing ---------------- */
+export default app;

@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+import Blacklist from "../models/Blacklist.js";
 import User from "../models/User.js";
 
 // REGISTER
@@ -32,7 +34,7 @@ export const register = async (req: any, res: any) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token });
+    res.status(201).json({ token });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
@@ -65,7 +67,27 @@ export const login = async (req: any, res: any) => {
   }
 };
 
-// LOGOUT (frontend handles it)
-export const logout = (req: any, res: any) => {
-  res.json({ message: "Logged out successfully" });
+export const logout = async (req: any, res: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+
+    // Save token to blacklist until it expires
+    await Blacklist.create({
+      token,
+      expiresAt: new Date(decoded.exp * 1000),
+    });
+
+    res.status(200).json({ message: "Logged out successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: "Logout failed" });
+  }
 };
