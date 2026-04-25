@@ -1,10 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
+import { connectDB } from "./config/db.js";
 
 /* ---------------- ENV SETUP ---------------- */
 if (process.env.NODE_ENV === "test") {
@@ -31,25 +31,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/meals", mealRoutes);
-
-/* ---------------- Database ---------------- */
-export const connectDB = async () => {
-  try {
-    const MONGO_URI = process.env.MONGO_URI;
-
-    if (!MONGO_URI) {
-      throw new Error("MONGO_URI is not defined");
-    }
-
-    await mongoose.connect(MONGO_URI);
-
-    console.log(
-      `MongoDB connected (${process.env.NODE_ENV || "development"})`
-    );
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-  }
-};
 
 /* ---------------- Server ---------------- */
 const PORT = process.env.PORT || 5000;
