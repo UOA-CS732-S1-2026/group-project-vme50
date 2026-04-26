@@ -4,18 +4,10 @@ import Blacklist from "../models/Blacklist.js";
 import { userRepository } from "../repositories/userRepository.js";
 
 const generateToken = (userId: string) => {
-  return jwt.sign(
-    { userId },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "7d" }
-  );
+  return jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: "7d" });
 };
 
-export const registerUser = async (data: {
-  name: string;
-  email: string;
-  password: string;
-}) => {
+export const registerUser = async (data: { name: string; email: string; password: string }) => {
   const { name, email, password } = data;
 
   if (!email.endsWith("@aucklanduni.ac.nz")) {
@@ -32,16 +24,13 @@ export const registerUser = async (data: {
   const user = await userRepository.createUser({
     name,
     email,
-    password: hashedPassword
+    password: hashedPassword,
   });
 
   return generateToken(user._id.toString());
 };
 
-export const loginUser = async (data: {
-  email: string;
-  password: string;
-}) => {
+export const loginUser = async (data: { email: string; password: string }) => {
   const { email, password } = data;
 
   const user = await userRepository.findByEmail(email);
@@ -54,14 +43,11 @@ export const loginUser = async (data: {
 };
 
 export const logoutUser = async (token: string) => {
-  const decoded = jwt.verify(
-    token,
-    process.env.JWT_SECRET as string
-  ) as any;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
   await Blacklist.create({
     token,
-    expiresAt: new Date(decoded.exp * 1000)
+    expiresAt: new Date(decoded.exp * 1000),
   });
 
   return true;

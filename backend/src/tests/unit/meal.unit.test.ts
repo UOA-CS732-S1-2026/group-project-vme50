@@ -46,7 +46,7 @@ describe("Meal Service", () => {
         time: new Date(),
         slots: 2,
       },
-      userId
+      userId,
     );
 
     expect(result).toBeDefined();
@@ -74,7 +74,7 @@ describe("Meal Service", () => {
     (MealSession.findById as any) = vi.fn().mockResolvedValue(
       mockSession({
         participants: [],
-      })
+      }),
     );
 
     const result = await mealService.joinMeal(mealId, userId);
@@ -87,12 +87,10 @@ describe("Meal Service", () => {
     (MealSession.findById as any) = vi.fn().mockResolvedValue(
       mockSession({
         participants: [mockObjectId(userId)],
-      })
+      }),
     );
 
-    await expect(mealService.joinMeal(mealId, userId)).rejects.toThrow(
-      "ALREADY_JOINED"
-    );
+    await expect(mealService.joinMeal(mealId, userId)).rejects.toThrow("ALREADY_JOINED");
   });
 
   /* ================= LEAVE SUCCESS ================= */
@@ -114,11 +112,9 @@ describe("Meal Service", () => {
     (MealSession.findById as any) = vi.fn().mockResolvedValue(
       mockSession({
         participants: [mockObjectId("other-user")],
-      })
+      }),
     );
 
-    await expect(mealService.leaveMeal(mealId, userId)).rejects.toThrow(
-      "NOT_IN_SESSION"
-    );
+    await expect(mealService.leaveMeal(mealId, userId)).rejects.toThrow("NOT_IN_SESSION");
   });
 });

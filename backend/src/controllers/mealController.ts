@@ -1,10 +1,5 @@
 import type { Request, Response } from "express";
-import {
-  createMeal,
-  getMeals,
-  joinMeal,
-  leaveMeal,
-} from "../services/mealService.js";
+import { createMeal, getMeals, joinMeal, leaveMeal } from "../services/mealService.js";
 
 export const createMealSession = async (req: any, res: Response) => {
   try {
@@ -33,14 +28,12 @@ export const joinMealSession = async (req: any, res: Response) => {
     const session = await joinMeal(req.params.id, req.user.userId);
     res.json({ message: "Joined session", session });
   } catch (err: any) {
-    if (err.message === "NOT_FOUND")
-      return res.status(404).json({ message: "Session not found" });
+    if (err.message === "NOT_FOUND") return res.status(404).json({ message: "Session not found" });
 
     if (err.message === "ALREADY_JOINED")
       return res.status(400).json({ message: "Already joined" });
 
-    if (err.message === "FULL")
-      return res.status(400).json({ message: "Session full" });
+    if (err.message === "FULL") return res.status(400).json({ message: "Session full" });
 
     res.status(400).json({ message: "Cannot join session" });
   }

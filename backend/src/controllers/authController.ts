@@ -1,9 +1,5 @@
 import type { Request, Response } from "express";
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-} from "../services/authService.js";
+import { registerUser, loginUser, logoutUser } from "../services/authService.js";
 
 // REGISTER
 export const register = async (req: Request, res: Response) => {
@@ -39,11 +35,11 @@ export const logout = async (req: Request, res: Response) => {
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
-    
+
     await logoutUser(token);
 
     return res.status(200).json({ message: "Logged out successfully" });
-  } catch (err) {
+  } catch (_err) {
     return res.status(500).json({ message: "Logout failed" });
   }
 };

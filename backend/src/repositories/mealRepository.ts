@@ -18,5 +18,5 @@ export const mealRepository = {
 
   async saveMeal(session: any) {
     return await session.save();
-  }
+  },
 };

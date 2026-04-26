@@ -6,11 +6,7 @@ interface AuthRequest extends Request {
   user?: string | jwt.JwtPayload;
 }
 
-export const authMiddleware = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -34,8 +30,7 @@ export const authMiddleware = async (
 
     req.user = decoded;
     next();
-
-  } catch (err) {
+  } catch (_err) {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

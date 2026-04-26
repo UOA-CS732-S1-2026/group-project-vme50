@@ -9,7 +9,7 @@ export const createMeal = async (data: any, userId: string) => {
   return await mealRepository.createMeal({
     ...data,
     creator: uid,
-    participants: [uid]
+    participants: [uid],
   });
 };
 
@@ -24,9 +24,7 @@ export const joinMeal = async (mealId: string, userId: string) => {
   if (!session.isActive) throw new Error("CLOSED");
 
   const alreadyJoined = session.participants.some((p: any) =>
-    typeof p.equals === "function"
-      ? p.equals(userId)
-      : String(p) === String(userId)
+    typeof p.equals === "function" ? p.equals(userId) : String(p) === String(userId),
   );
 
   if (alreadyJoined) throw new Error("ALREADY_JOINED");
@@ -44,9 +42,7 @@ export const leaveMeal = async (mealId: string, userId: string) => {
   if (!session) throw new Error("NOT_FOUND");
 
   const index = session.participants.findIndex((p: any) =>
-    typeof p.equals === "function"
-      ? p.equals(userId)
-      : String(p) === String(userId)
+    typeof p.equals === "function" ? p.equals(userId) : String(p) === String(userId),
   );
 
   if (index === -1) throw new Error("NOT_IN_SESSION");

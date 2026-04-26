@@ -45,10 +45,8 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/create", () => {
     it("should create meal successfully", async () => {
-      const userRes = await request(app)
-        .post("/api/auth/register")
-        .send(testUser);
-  
+      const userRes = await request(app).post("/api/auth/register").send(testUser);
+
       const mealRes = await request(app)
         .post("/api/meals/create")
         .set("Authorization", `Bearer ${userRes.body.token}`)
@@ -59,20 +57,18 @@ describe("Meal API", () => {
           time: "2026-04-23T18:00:00Z",
           slots: 2,
         });
-  
-        expect(mealRes.statusCode).toBe(201);
-        expect(mealRes.body.session).toBeDefined();
+
+      expect(mealRes.statusCode).toBe(201);
+      expect(mealRes.body.session).toBeDefined();
     });
 
     it("should fail without token", async () => {
-      const res = await request(app)
-        .post("/api/meals/create")
-        .send({
-          title: "No Auth",
-          location: "Nowhere",
-          time: "2026-04-23T18:00:00Z",
-          slots: 2,
-        });
+      const res = await request(app).post("/api/meals/create").send({
+        title: "No Auth",
+        location: "Nowhere",
+        time: "2026-04-23T18:00:00Z",
+        slots: 2,
+      });
 
       expect(res.statusCode).toBe(401);
     });
@@ -95,30 +91,26 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/:id/join", () => {
     it("should join another user's meal session", async () => {
-        const creatorRes = await request(app)
-          .post("/api/auth/register")
-          .send(testCreator);
+      const creatorRes = await request(app).post("/api/auth/register").send(testCreator);
 
-        const mealRes = await request(app)
-          .post("/api/meals/create")
-          .set("Authorization", `Bearer ${creatorRes.body.token}`)
-          .send({
-            title: "Test Meal",
-            description: "Created by creator",
-            location: "Auckland",
-            time: "2026-04-23T18:00:00Z",
-            slots: 2,
-          });
-    
-        const joinerRes = await request(app)
-          .post("/api/auth/register")
-          .send(testUser);
-    
-        const res = await request(app)
-          .post(`/api/meals/${mealRes.body.session._id}/join`)
-          .set("Authorization", `Bearer ${joinerRes.body.token}`);
-    
-        expect(res.statusCode).toBe(200);
+      const mealRes = await request(app)
+        .post("/api/meals/create")
+        .set("Authorization", `Bearer ${creatorRes.body.token}`)
+        .send({
+          title: "Test Meal",
+          description: "Created by creator",
+          location: "Auckland",
+          time: "2026-04-23T18:00:00Z",
+          slots: 2,
+        });
+
+      const joinerRes = await request(app).post("/api/auth/register").send(testUser);
+
+      const res = await request(app)
+        .post(`/api/meals/${mealRes.body.session._id}/join`)
+        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -127,34 +119,30 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/:id/leave", () => {
     it("should leave another user's meal session", async () => {
-        const creatorRes = await request(app)
-          .post("/api/auth/register")
-          .send(testCreator);
+      const creatorRes = await request(app).post("/api/auth/register").send(testCreator);
 
-        const mealRes = await request(app)
-          .post("/api/meals/create")
-          .set("Authorization", `Bearer ${creatorRes.body.token}`)
-          .send({
-            title: "Test Meal",
-            description: "Created by creator",
-            location: "Auckland",
-            time: "2026-04-23T18:00:00Z",
-            slots: 2,
-          });
-    
-        const joinerRes = await request(app)
-          .post("/api/auth/register")
-          .send(testUser);
-    
-        await request(app)
-          .post(`/api/meals/${mealRes.body.session._id}/join`)
-          .set("Authorization", `Bearer ${joinerRes.body.token}`);
-    
-        const res = await request(app)
-          .post(`/api/meals/${mealRes.body.session._id}/leave`)
-          .set("Authorization", `Bearer ${joinerRes.body.token}`);
-    
-        expect(res.statusCode).toBe(200);
-      });
+      const mealRes = await request(app)
+        .post("/api/meals/create")
+        .set("Authorization", `Bearer ${creatorRes.body.token}`)
+        .send({
+          title: "Test Meal",
+          description: "Created by creator",
+          location: "Auckland",
+          time: "2026-04-23T18:00:00Z",
+          slots: 2,
+        });
+
+      const joinerRes = await request(app).post("/api/auth/register").send(testUser);
+
+      await request(app)
+        .post(`/api/meals/${mealRes.body.session._id}/join`)
+        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+
+      const res = await request(app)
+        .post(`/api/meals/${mealRes.body.session._id}/leave`)
+        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+
+      expect(res.statusCode).toBe(200);
+    });
   });
 });

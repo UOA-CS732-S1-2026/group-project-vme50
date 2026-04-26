@@ -31,15 +31,11 @@ vi.mock("../../models/Blacklist.js", () => ({
 
 /* ================= IMPORTS ================= */
 
-import User from "../../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import User from "../../models/User.js";
 
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-} from "../../services/authService.js";
+import { registerUser, loginUser, logoutUser } from "../../services/authService.js";
 
 const mockedUser = User as any;
 const mockedBcrypt = bcrypt as any;
@@ -80,7 +76,7 @@ describe("Auth Service", () => {
         name: "John",
         email: "john@aucklanduni.ac.nz",
         password: "123",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -110,7 +106,7 @@ describe("Auth Service", () => {
       loginUser({
         email: "john@aucklanduni.ac.nz",
         password: "123",
-      })
+      }),
     ).rejects.toThrow();
   });
 
