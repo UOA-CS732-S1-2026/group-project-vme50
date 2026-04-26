@@ -4,6 +4,7 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import globals from "globals";
 import prettier from "eslint-plugin-prettier";
 import importPlugin from "eslint-plugin-import";
+import vitestPlugin from "eslint-plugin-vitest";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
@@ -64,6 +65,7 @@ export default defineConfig([
       "@typescript-eslint": tsPlugin,
       prettier,
       import: importPlugin,
+      vitest: vitestPlugin,
     },
 
     rules: {
@@ -90,6 +92,7 @@ export default defineConfig([
 
       // optional cleanup
       "import/order": "warn",
+      "vitest/no-focused-tests": "warn",
     },
   },
 ]);
