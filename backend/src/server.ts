@@ -1,18 +1,13 @@
+import "./config/env.js";
+
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
 import { connectDB } from "./config/db.js";
 
-/* ---------------- ENV SETUP ---------------- */
-if (process.env.NODE_ENV === "test") {
-  dotenv.config({ path: ".env.test" });
-} else {
-  dotenv.config();
-}
-
+/* ---------------- APP ---------------- */
 const app = express();
 
 /* ---------------- Middleware ---------------- */
