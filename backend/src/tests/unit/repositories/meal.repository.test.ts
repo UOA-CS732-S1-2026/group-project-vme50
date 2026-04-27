@@ -4,8 +4,21 @@ import { connectDB } from "../../../config/db.js";
 
 import User from "../../../models/User.js";
 import MealSession from "../../../models/MealSession.js";
+import { mealRepository } from "../../../repositories/mealRepository.js";
 
 describe("Meal Repository", () => {
+  /* =========================================================
+     TEST DATA
+  ========================================================= */
+  const testUser = {
+    name: "Test User",
+    email: "test@aucklanduni.ac.nz",
+    password: "123456",
+  };
+
+  /* =========================================================
+     SETUP
+  ========================================================= */
   beforeAll(async () => {
     await connectDB();
   });
@@ -19,40 +32,36 @@ describe("Meal Repository", () => {
     await mongoose.connection.close();
   });
 
-  /* ================= CREATE ================= */
-
+  /* ================= CREATE MEAL TEST ================= */
   it("should create meal session", async () => {
-    const user = await User.create({
-      name: "Creator",
-      email: "creator@aucklanduni.ac.nz",
-      password: "hashed",
-    });
+    const user = await User.create(testUser);
 
-    const meal = await MealSession.create({
+    const meal = await mealRepository.createMeal({
       title: "Test Meal",
       description: "Dinner",
       location: "Auckland",
-      time: new Date(Date.now() + 3600000),
+      time: new Date(),
       slots: 2,
       creator: user._id,
-      participants: [],
+      participants: [user._id],
+      isActive: true,
     });
 
     expect(meal).toBeDefined();
     expect(meal.title).toBe("Test Meal");
+    expect(meal.description).toBe("Dinner");
+    expect(meal.location).toBe("Auckland");
+    expect(meal.creator).toBe(user._id);
+    expect(meal.participants).toStrictEqual([user._id]);
+    expect(meal.isActive).toBe(true);
   });
 
-  /* ================= FIND ================= */
-
+  /* ================= GET ACTIVE MEALS TEST ================= */
   it("should get all active meals", async () => {
-    const user = await User.create({
-      name: "Creator",
-      email: "creator@aucklanduni.ac.nz",
-      password: "hashed",
-    });
+    const user = await User.create(testUser);
 
-    await MealSession.create({
-      title: "Meal 1",
+    const mealA = await MealSession.create({
+      title: "Old Meal",
       description: "A",
       location: "Auckland",
       time: new Date(),
@@ -62,63 +71,99 @@ describe("Meal Repository", () => {
       isActive: true,
     });
 
-    const meals = await MealSession.find({ isActive: true });
-
-    expect(meals.length).toBe(1);
-  });
-
-  /* ================= JOIN ================= */
-
-  it("should add participant to meal", async () => {
-    const user = await User.create({
-      name: "User",
-      email: "user@aucklanduni.ac.nz",
-      password: "hashed",
-    });
-
-    const meal = await MealSession.create({
-      title: "Meal",
-      description: "Test",
+    const mealB = await MealSession.create({
+      title: "New Meal",
+      description: "B",
       location: "Auckland",
       time: new Date(),
       slots: 2,
       creator: user._id,
       participants: [],
+      isActive: true,
     });
 
-    meal.participants.push(user._id);
-    await meal.save();
+    const meals = await mealRepository.findActiveMeals();
 
-    const updated = await MealSession.findById(meal._id);
-
-    expect(updated?.participants.length).toBe(1);
+    expect(meals).toBeDefined();
+    expect(meals.length).toBe(2);
+    expect(meals[0]?._id.toString()).toBe(mealB._id.toString());
+    expect(meals[1]?._id.toString()).toBe(mealA._id.toString());
   });
 
-  /* ================= REMOVE ================= */
-
-  it("should remove participant from meal", async () => {
-    const user = await User.create({
-      name: "User",
-      email: "user@aucklanduni.ac.nz",
-      password: "hashed",
-    });
+  /* ================= FIND MEAL BY ID TEST ================= */
+  it("should find meal by id", async () => {
+    const user = await User.create(testUser);
 
     const meal = await MealSession.create({
-      title: "Meal",
+      title: "Find Me",
       description: "Test",
       location: "Auckland",
       time: new Date(),
       slots: 2,
       creator: user._id,
       participants: [user._id],
+      isActive: true,
     });
 
-    meal.participants = meal.participants.filter((p) => !p.equals(user._id));
+    const foundMeal = await mealRepository.findMealById(meal._id.toString());
 
-    await meal.save();
+    expect(foundMeal).toBeDefined();
+    expect(foundMeal?._id.toString()).toBe(meal._id.toString());
+  });
 
-    const updated = await MealSession.findById(meal._id);
+  /* =========================================================
+     UPDATE MEAL TESTS
+  ========================================================= */
+  describe("Meal Session Updates", () => {
+    it("should save updated meal session (participant joined)", async () => {
+      const user = await User.create(testUser);
 
-    expect(updated?.participants.length).toBe(0);
+      const meal = await MealSession.create({
+        title: "Meal",
+        description: "Test",
+        location: "Auckland",
+        time: new Date(),
+        slots: 2,
+        creator: user._id,
+        participants: [],
+        isActive: true,
+      });
+
+      meal.participants.push(user._id);
+      let foundMeal = await mealRepository.findMealById(meal._id.toString());
+
+      expect(foundMeal?.participants.length).toBe(0);
+
+      await mealRepository.saveMeal(meal);
+      foundMeal = await mealRepository.findMealById(meal._id.toString());
+
+      expect(foundMeal?.participants.length).toBe(1);
+      expect(foundMeal?.participants[0]?.toString()).toBe(user._id.toString());
+    });
+
+    it("should save updated meal session (participant left)", async () => {
+      const user = await User.create(testUser);
+
+      const meal = await MealSession.create({
+        title: "Meal",
+        description: "Test",
+        location: "Auckland",
+        time: new Date(),
+        slots: 2,
+        creator: user._id,
+        participants: [user._id],
+        isActive: true,
+      });
+
+      meal.participants = meal.participants.filter((p: any) => !p.equals(user._id));
+      let foundMeal = await mealRepository.findMealById(meal._id.toString());
+
+      expect(foundMeal?.participants.length).toBe(1);
+
+      await mealRepository.saveMeal(meal);
+      foundMeal = await mealRepository.findMealById(meal._id.toString());
+
+      expect(foundMeal?.participants.length).toBe(0);
+    });
   });
 });

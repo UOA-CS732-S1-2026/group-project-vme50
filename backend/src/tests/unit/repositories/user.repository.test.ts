@@ -6,6 +6,18 @@ import User from "../../../models/User.js";
 import { userRepository } from "../../../repositories/userRepository.js";
 
 describe("User Repository", () => {
+  /* =========================================================
+     TEST DATA
+  ========================================================= */
+  const testUser = {
+    name: "Test User",
+    email: "test@aucklanduni.ac.nz",
+    password: "123456",
+  };
+
+  /* =========================================================
+     SETUP
+  ========================================================= */
   beforeAll(async () => {
     await connectDB();
   });
@@ -18,38 +30,40 @@ describe("User Repository", () => {
     await mongoose.connection.close();
   });
 
-  /* ================= CREATE ================= */
-
-  it("createUser → should insert user into DB", async () => {
-    const user = await userRepository.createUser({
-      name: "John",
-      email: "john@aucklanduni.ac.nz",
-      password: "hashed-password",
-    });
+  /* ================= CREATE USER TEST ================= */
+  it("should insert user into DB", async () => {
+    const user = await userRepository.createUser(testUser);
 
     expect(user).toBeDefined();
-    expect(user._id).toBeDefined();
-    expect(user.email).toBe("john@aucklanduni.ac.nz");
+    expect(user.name).toBe(testUser.name);
+    expect(user.email).toBe(testUser.email);
+
+    const foundUser = await User.findById(user._id);
+
+    expect(foundUser?._id.toString()).toBe(user._id.toString());
+    expect(foundUser?.email).toBe(user.email);
+    expect(foundUser?.name).toBe(user.name);
   });
 
-  /* ================= FIND ================= */
+  /* =========================================================
+     FIND USER TESTS
+  ========================================================= */
+  describe("userRepository findByEmail", () => {
+    it("should return user", async () => {
+      const user = await User.create(testUser);
 
-  it("findByEmail → should return user", async () => {
-    await User.create({
-      name: "John",
-      email: "john@aucklanduni.ac.nz",
-      password: "hashed",
+      const foundUser = await userRepository.findByEmail(user.email);
+
+      expect(foundUser).toBeDefined();
+      expect(foundUser?.name).toBe(user.name);
+      expect(foundUser?.email).toBe(user.email);
+      expect(foundUser?._id.toString()).toBe(user._id.toString());
     });
 
-    const user = await userRepository.findByEmail("john@aucklanduni.ac.nz");
+    it("should return null if not found", async () => {
+      const user = await userRepository.findByEmail("nonexistent@aucklanduni.ac.nz");
 
-    expect(user).not.toBeNull();
-    expect(user?.email).toBe("john@aucklanduni.ac.nz");
-  });
-
-  it("findByEmail → should return null if not found", async () => {
-    const user = await userRepository.findByEmail("no@user.com");
-
-    expect(user).toBeNull();
+      expect(user).toBeNull();
+    });
   });
 });
