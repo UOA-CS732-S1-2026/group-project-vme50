@@ -45,16 +45,27 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/create", () => {
     it("should create meal successfully", async () => {
-      const userRes = await request(app).post("/api/auth/register").send(testUser);
+      const res1 = await request(app).post("/api/auth/register").send(testUser);
+
+      expect(res1.statusCode).toBe(201);
+      expect(res1.body.token).toBeDefined();
+
+      const res2 = await request(app).post("/api/auth/login").send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      expect(res2.statusCode).toBe(200);
+      expect(res2.body.token).toBeDefined();
 
       const mealRes = await request(app)
         .post("/api/meals/create")
-        .set("Authorization", `Bearer ${userRes.body.token}`)
+        .set("Authorization", `Bearer ${res2.body.token}`)
         .send({
           title: "Test Meal",
           description: "Used for test",
           location: "Auckland",
-          time: "2026-04-23T18:00:00Z",
+          time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
 
@@ -63,14 +74,16 @@ describe("Meal API", () => {
     });
 
     it("should fail without token", async () => {
-      const res = await request(app).post("/api/meals/create").send({
-        title: "No Auth",
-        location: "Nowhere",
-        time: "2026-04-23T18:00:00Z",
-        slots: 2,
-      });
+      const mealRes = await request(app)
+        .post("/api/meals/create")
+        .send({
+          title: "No Auth",
+          location: "Nowhere",
+          time: new Date(Date.now() + 3600000).toISOString(),
+          slots: 2,
+        });
 
-      expect(res.statusCode).toBe(401);
+      expect(mealRes.statusCode).toBe(401);
     });
   });
 
@@ -91,26 +104,48 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/:id/join", () => {
     it("should join another user's meal session", async () => {
-      const creatorRes = await request(app).post("/api/auth/register").send(testCreator);
+      const creatorRes1 = await request(app).post("/api/auth/register").send(testCreator);
+
+      expect(creatorRes1.statusCode).toBe(201);
+      expect(creatorRes1.body.token).toBeDefined();
+
+      const creatorRes2 = await request(app).post("/api/auth/login").send({
+        email: testCreator.email,
+        password: testCreator.password,
+      });
+
+      expect(creatorRes2.statusCode).toBe(200);
+      expect(creatorRes2.body.token).toBeDefined();
 
       const mealRes = await request(app)
         .post("/api/meals/create")
-        .set("Authorization", `Bearer ${creatorRes.body.token}`)
+        .set("Authorization", `Bearer ${creatorRes2.body.token}`)
         .send({
           title: "Test Meal",
           description: "Created by creator",
           location: "Auckland",
-          time: "2026-04-23T18:00:00Z",
+          time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
 
-      const joinerRes = await request(app).post("/api/auth/register").send(testUser);
+      const joinerRes1 = await request(app).post("/api/auth/register").send(testUser);
 
-      const res = await request(app)
+      expect(joinerRes1.statusCode).toBe(201);
+      expect(joinerRes1.body.token).toBeDefined();
+
+      const joinerRes2 = await request(app).post("/api/auth/login").send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      expect(joinerRes2.statusCode).toBe(200);
+      expect(joinerRes2.body.token).toBeDefined();
+
+      const joinerRes3 = await request(app)
         .post(`/api/meals/${mealRes.body.session._id}/join`)
-        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+        .set("Authorization", `Bearer ${joinerRes2.body.token}`);
 
-      expect(res.statusCode).toBe(200);
+      expect(joinerRes3.statusCode).toBe(200);
     });
   });
 
@@ -119,30 +154,54 @@ describe("Meal API", () => {
   ========================================================= */
   describe("POST /api/meals/:id/leave", () => {
     it("should leave another user's meal session", async () => {
-      const creatorRes = await request(app).post("/api/auth/register").send(testCreator);
+      const creatorRes1 = await request(app).post("/api/auth/register").send(testCreator);
+
+      expect(creatorRes1.statusCode).toBe(201);
+      expect(creatorRes1.body.token).toBeDefined();
+
+      const creatorRes2 = await request(app).post("/api/auth/login").send({
+        email: testCreator.email,
+        password: testCreator.password,
+      });
+
+      expect(creatorRes2.statusCode).toBe(200);
+      expect(creatorRes2.body.token).toBeDefined();
 
       const mealRes = await request(app)
         .post("/api/meals/create")
-        .set("Authorization", `Bearer ${creatorRes.body.token}`)
+        .set("Authorization", `Bearer ${creatorRes2.body.token}`)
         .send({
           title: "Test Meal",
           description: "Created by creator",
           location: "Auckland",
-          time: "2026-04-23T18:00:00Z",
+          time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
 
-      const joinerRes = await request(app).post("/api/auth/register").send(testUser);
+      const leaverRes1 = await request(app).post("/api/auth/register").send(testUser);
 
-      await request(app)
+      expect(leaverRes1.statusCode).toBe(201);
+      expect(leaverRes1.body.token).toBeDefined();
+
+      const leaverRes2 = await request(app).post("/api/auth/login").send({
+        email: testUser.email,
+        password: testUser.password,
+      });
+
+      expect(leaverRes2.statusCode).toBe(200);
+      expect(leaverRes2.body.token).toBeDefined();
+
+      const leaverRes3 = await request(app)
         .post(`/api/meals/${mealRes.body.session._id}/join`)
-        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+        .set("Authorization", `Bearer ${leaverRes2.body.token}`);
 
-      const res = await request(app)
+      expect(leaverRes3.statusCode).toBe(200);
+
+      const leaverRes4 = await request(app)
         .post(`/api/meals/${mealRes.body.session._id}/leave`)
-        .set("Authorization", `Bearer ${joinerRes.body.token}`);
+        .set("Authorization", `Bearer ${leaverRes2.body.token}`);
 
-      expect(res.statusCode).toBe(200);
+      expect(leaverRes4.statusCode).toBe(200);
     });
   });
 });

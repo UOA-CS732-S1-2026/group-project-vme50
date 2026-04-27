@@ -4,7 +4,9 @@ import Blacklist from "../models/Blacklist.js";
 import { userRepository } from "../repositories/userRepository.js";
 
 const generateToken = (userId: string) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET as string, { expiresIn: "7d" });
+  return jwt.sign({ userId, jti: new Date().getTime() }, process.env.JWT_SECRET as string, {
+    expiresIn: "7d",
+  });
 };
 
 export const registerUser = async (data: { name: string; email: string; password: string }) => {
