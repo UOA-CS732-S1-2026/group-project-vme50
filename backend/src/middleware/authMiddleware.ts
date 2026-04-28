@@ -1,19 +1,12 @@
-import express from "express";
+import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
-type Request = express.Request;
-type Response = express.Response;
-type NextFunction = express.NextFunction;
+import Blacklist from "../models/Blacklist.js";
 
 interface AuthRequest extends Request {
   user?: string | jwt.JwtPayload;
 }
 
-export const authMiddleware = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -27,10 +20,17 @@ export const authMiddleware = (
   }
 
   try {
+    const blacklisted = await Blacklist.findOne({ token });
+
+    if (blacklisted) {
+      return res.status(401).json({ message: "Token is invalid (logged out)" });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch (_err) {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
