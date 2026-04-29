@@ -27,14 +27,17 @@
   --shadow-card:
     0 12px 32px rgba(80, 54, 30, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.55) inset;
-  --radius-card: 32px;
+  --radius-shell: 32px;
+  --radius-panel: 28px;
+  --radius-session: 20px;
+  --radius-card: 28px;
   --card-bg: rgba(255, 255, 255, 0.72);
   --card-border: rgba(255, 255, 255, 0.55);
   --card-shadow: 0 12px 32px rgba(80, 54, 30, 0.08);
   --blur-1: 18px;
   --blur-2: 28px;
   --radius-xl: 32px;
-  --radius-lg: 24px;
+  --radius-lg: 28px;
   --radius-md: 18px;
   --radius-sm: 14px;
   --space-1: 0.4rem;

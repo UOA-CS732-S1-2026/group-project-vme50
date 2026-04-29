@@ -857,7 +857,7 @@ function Icon({
     stroke: 'currentColor',
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
-    strokeWidth: 1.8,
+    strokeWidth: 2.1,
     viewBox: '0 0 24 24',
   }
 
@@ -865,144 +865,145 @@ function Icon({
     case 'arrow-left':
       return (
         <svg {...commonProps}>
-          <path d="M19 12H5" />
-          <path d="m10 17-5-5 5-5" />
+          <path d="M19 12H6" />
+          <path d="m11 17-5-5 5-5" />
         </svg>
       )
     case 'chevron-left':
       return (
         <svg {...commonProps}>
-          <path d="m14.5 6.5-5 5 5 5" />
+          <path d="m14 6.75-4.75 5.25L14 17.25" />
         </svg>
       )
     case 'chevron-right':
       return (
         <svg {...commonProps}>
-          <path d="m9.5 6.5 5 5-5 5" />
+          <path d="m10 6.75 4.75 5.25L10 17.25" />
         </svg>
       )
     case 'calendar':
       return (
         <svg {...commonProps}>
-          <rect x="4" y="6" width="16" height="14" rx="3" />
-          <path d="M8 4.5v3" />
-          <path d="M16 4.5v3" />
-          <path d="M4 10h16" />
+          <rect x="4.5" y="5.5" width="15" height="14" rx="3.25" />
+          <path d="M8 3.75v3.5" />
+          <path d="M16 3.75v3.5" />
+          <path d="M4.5 9.5h15" />
         </svg>
       )
     case 'search':
       return (
         <svg {...commonProps}>
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 4 4" />
+          <circle cx="11" cy="11" r="6.25" />
+          <path d="m16 16 3.75 3.75" />
         </svg>
       )
     case 'close':
       return (
         <svg {...commonProps}>
-          <path d="M6 6 18 18" />
-          <path d="M18 6 6 18" />
+          <path d="M7 7 17 17" />
+          <path d="M17 7 7 17" />
         </svg>
       )
     case 'email':
       return (
         <svg {...commonProps}>
-          <rect x="4" y="6" width="16" height="12" rx="2.5" />
-          <path d="m5.5 8 6.5 5 6.5-5" />
+          <rect x="4.5" y="6.25" width="15" height="11.5" rx="2.75" />
+          <path d="m5.75 8.25 6.25 4.9 6.25-4.9" />
         </svg>
       )
     case 'graduation-cap':
       return (
         <svg {...commonProps}>
-          <path d="m3.5 10 8.5-4.5 8.5 4.5-8.5 4.5-8.5-4.5Z" />
-          <path d="M7 12.1v4.2c1.2.9 3 1.5 5 1.5s3.8-.6 5-1.5v-4.2" />
+          <path d="m3.75 10 8.25-4.25L20.25 10 12 14.25 3.75 10Z" />
+          <path d="M7 12.35v3.8c1.2.95 3.05 1.6 5 1.6s3.8-.65 5-1.6v-3.8" />
         </svg>
       )
     case 'cuisine':
       return (
         <svg {...commonProps}>
-          <path d="M8 8.2c0-1.9 1.5-3.4 3.4-3.4 1.5 0 2.5.7 3.1 1.8" />
-          <path d="M5.2 12.3h13.6c0 3.2-2.8 5.7-6.8 5.7s-6.8-2.5-6.8-5.7Z" />
-          <path d="M12 12.3v-3.2" />
-          <path d="M16.8 8.1c.6-.9 1.4-1.5 2.2-1.9" />
+          <path d="M8.1 8.35a3.2 3.2 0 0 1 3.2-3.1c1.45 0 2.45.66 3.08 1.78" />
+          <path d="M5.35 12.4h13.3c0 3.1-2.75 5.6-6.65 5.6s-6.65-2.5-6.65-5.6Z" />
+          <path d="M12 12.4V9.2" />
+          <path d="M16.9 8.2c.58-.86 1.32-1.48 2.08-1.84" />
         </svg>
       )
     case 'spark':
       return (
         <svg {...commonProps}>
-          <path d="M12 3v4" />
-          <path d="M12 17v4" />
-          <path d="M3 12h4" />
-          <path d="M17 12h4" />
-          <path d="M6.4 6.4 9 9" />
-          <path d="m15 15 2.6 2.6" />
-          <path d="m15 9 2.6-2.6" />
-          <path d="M6.4 17.6 9 15" />
+          <path d="M12 3.75v3.5" />
+          <path d="M12 16.75v3.5" />
+          <path d="M3.75 12h3.5" />
+          <path d="M16.75 12h3.5" />
+          <path d="m6.8 6.8 2.45 2.45" />
+          <path d="m14.75 14.75 2.45 2.45" />
+          <path d="m14.75 9.25 2.45-2.45" />
+          <path d="m6.8 17.2 2.45-2.45" />
         </svg>
       )
     case 'plus':
       return (
         <svg {...commonProps}>
-          <path d="M12 5v14" />
-          <path d="M5 12h14" />
+          <path d="M12 6v12" />
+          <path d="M6 12h12" />
         </svg>
       )
     case 'minus':
       return (
         <svg {...commonProps}>
-          <path d="M5 12h14" />
+          <path d="M6 12h12" />
         </svg>
       )
     case 'refresh':
       return (
         <svg {...commonProps}>
-          <path d="M19.5 11.75a7.75 7.75 0 1 1-2.06-5.27" />
-          <path d="M19.5 5.25v4.5H15" />
+          <path d="M18.35 11.85a6.35 6.35 0 1 1-1.82-4.4" />
+          <path d="M14.75 5.95h4.15v4.15" />
+          <path d="m18.9 5.95-4.55 4.55" />
         </svg>
       )
     case 'user':
       return (
         <svg {...commonProps}>
-          <path d="M18 21a6 6 0 0 0-12 0" />
-          <circle cx="12" cy="8" r="4" />
+          <path d="M18.25 20.25a6.25 6.25 0 0 0-12.5 0" />
+          <circle cx="12" cy="8" r="3.75" />
         </svg>
       )
     case 'logout':
       return (
         <svg {...commonProps}>
-          <path d="M10 17l-5-5 5-5" />
-          <path d="M5 12h10" />
-          <path d="M14 5h4v14h-4" />
+          <path d="m9.75 16.75-4.5-4.75 4.5-4.75" />
+          <path d="M5.25 12h9.5" />
+          <path d="M14.75 4.75h4v14.5h-4" />
         </svg>
       )
     case 'location':
       return (
         <svg {...commonProps}>
-          <path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z" />
-          <circle cx="12" cy="10" r="2.3" />
+          <path d="M12 20.75s5.75-4.9 5.75-10.55a5.75 5.75 0 1 0-11.5 0c0 5.65 5.75 10.55 5.75 10.55Z" />
+          <circle cx="12" cy="10" r="2.15" />
         </svg>
       )
     case 'external-link':
       return (
         <svg {...commonProps}>
-          <path d="M14 5h5v5" />
-          <path d="M10 14 19 5" />
-          <path d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
+          <path d="M14.5 5.25h4.25V9.5" />
+          <path d="M9.5 14.5 18.75 5.25" />
+          <path d="M18.75 13.5v3a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 7.5 5.25h3" />
         </svg>
       )
     case 'clock':
       return (
         <svg {...commonProps}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M12 8v4.4l2.8 1.8" />
+          <circle cx="12" cy="12" r="8.25" />
+          <path d="M12 7.9v4.35l2.9 1.75" />
         </svg>
       )
     case 'seats':
       return (
         <svg {...commonProps}>
-          <path d="M6 18v-4.5A2.5 2.5 0 0 1 8.5 11h7A2.5 2.5 0 0 1 18 13.5V18" />
-          <path d="M8 11V8.5a2 2 0 1 1 4 0V11" />
-          <path d="M12 11V8a2 2 0 1 1 4 0v3" />
+          <path d="M6.25 18v-4.35a2.4 2.4 0 0 1 2.4-2.4h6.7a2.4 2.4 0 0 1 2.4 2.4V18" />
+          <path d="M8 11.25V8.7a1.95 1.95 0 1 1 3.9 0v2.55" />
+          <path d="M12.1 11.25V8.2a1.95 1.95 0 1 1 3.9 0v3.05" />
         </svg>
       )
   }
@@ -1128,9 +1129,9 @@ function ActivitySessionCard({ session }: { session: MealSession }) {
 
   return (
     <Link className="activity-session-card" key={getSessionId(session)} to={`/sessions/${getSessionId(session)}`}>
-      <div className="activity-session-top">
-        <strong>{copy.title}</strong>
-        <StatusChip className="activity-status-chip" warn={statusLabel !== 'Open'}>
+      <div className="activity-session-card-top">
+        <strong className="activity-session-title">{copy.title}</strong>
+        <StatusChip className={`status-badge activity-status-chip ${statusLabel !== 'Open' ? 'closed' : 'open'}`} warn={statusLabel !== 'Open'}>
           {statusLabel}
         </StatusChip>
       </div>
@@ -1145,7 +1146,7 @@ function ActivitySessionCard({ session }: { session: MealSession }) {
           <span>{formatDateTime(session.time)}</span>
         </span>
       </div>
-      <div className="activity-session-footer">
+      <div className="activity-session-people">
         <span className="activity-meta-item">
           <Icon name="seats" />
           <span>{session.participants.length} / {session.slots} people</span>
@@ -1172,7 +1173,7 @@ function ActivityColumn({
     <section className="activity-column">
       <div className="activity-column-header">
         <h3>{title}</h3>
-        <span>{sessions.length} {sessions.length === 1 ? 'session' : 'sessions'}</span>
+        <span className="activity-column-count">{sessions.length} {sessions.length === 1 ? 'session' : 'sessions'}</span>
       </div>
 
       {sessions.length === 0 ? (
@@ -1183,7 +1184,7 @@ function ActivityColumn({
         </div>
       ) : (
         <div className="activity-column-body">
-          <div className="activity-session-list">
+          <div className="activity-list">
             {sessions.map((session) => (
               <ActivitySessionCard key={getSessionId(session)} session={session} />
             ))}
@@ -2171,7 +2172,7 @@ function DashboardPage({
                 </select>
               </label>
               <button
-                className="ghost-button toolbar-button toolbar-refresh-button"
+                className={`ghost-button toolbar-button toolbar-refresh-button ${sessionLoading ? 'is-loading' : ''}`}
                 disabled={sessionLoading}
                 onClick={() => void onRefresh()}
                 type="button"
@@ -2319,7 +2320,7 @@ function DashboardPage({
               Create session
             </Link>
             <button
-              className="secondary-link quick-actions-secondary"
+              className={`secondary-link quick-actions-secondary ${sessionLoading ? 'is-loading' : ''}`}
               disabled={sessionLoading}
               onClick={() => void onRefresh()}
               type="button"
@@ -2869,9 +2870,11 @@ function ProfilePage({
         </div>
       </GlassCard>
 
-      <GlassCard className="page-card">
-        <PageHeader eyebrow="My activity" title="Hosted and joined sessions" />
-
+      <section className="activity-section">
+        <div className="activity-heading">
+          <p>My activity</p>
+          <h2>Hosted and joined sessions</h2>
+        </div>
         {activityError ? <p className="feedback error">{activityError}</p> : null}
 
         {activityLoading ? (
@@ -2897,7 +2900,7 @@ function ProfilePage({
             />
           </div>
         )}
-      </GlassCard>
+      </section>
     </main>
   )
 }
@@ -2991,11 +2994,10 @@ function getSessionCopy(session: MealSession) {
   const location = session.location.trim()
 
   const titleLooksLikeTest =
-    /^(ass|dd|fffff+|发发发|test|debug dinner|verification dinner)$/i.test(title) ||
-    /^([a-zA-Z])\1{2,}$/.test(title)
+    /^(debug dinner|verification dinner|integration test|test session)$/i.test(title)
 
   const descriptionLooksLikeTest =
-    /integration test meal|re-test after proposal-aligned frontend changes|test/i.test(description) ||
+    /integration test meal|re-test after proposal-aligned frontend changes/i.test(description) ||
     /^([a-zA-Z])\1{3,}$/.test(description)
 
   const locationLooksLikePlaceholder =
