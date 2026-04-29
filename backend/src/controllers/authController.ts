@@ -1,45 +1,52 @@
 import type { Request, Response } from "express";
 import { registerUser, loginUser, logoutUser } from "../services/authService.js";
 
-// REGISTER
+/* ================= REGISTER ================= */
 export const register = async (req: Request, res: Response) => {
   try {
-    const token = await registerUser(req.body);
-    return res.status(201).json({ token });
+    const data = await registerUser(req.body);
+    return res.status(201).json(data);
   } catch (err: any) {
-    return res.status(400).json({ message: err.message });
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// LOGIN
+/* ================= LOGIN ================= */
 export const login = async (req: Request, res: Response) => {
   try {
-    const token = await loginUser(req.body);
-    return res.json({ token });
+    const data = await loginUser(req.body);
+    return res.json(data);
   } catch (err: any) {
-    return res.status(400).json({ message: err.message });
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// LOGOUT
+/* ================= LOGOUT ================= */
 export const logout = async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
-    const token = authHeader.split(" ")[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).json({
+        success: false,
+        message: "No token provided",
+      });
     }
 
-    await logoutUser(token);
+    const result = await logoutUser(token);
 
-    return res.status(200).json({ message: "Logged out successfully" });
-  } catch (_err) {
-    return res.status(500).json({ message: "Logout failed" });
+    return res.status(200).json(result);
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
+      error: err.message,
+    });
   }
 };

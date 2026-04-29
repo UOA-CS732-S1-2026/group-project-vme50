@@ -56,8 +56,15 @@ describe("Auth Service", () => {
 
   it("registerUser → success", async () => {
     repo.findByEmail.mockResolvedValue(null);
+
     mockBcrypt.hash.mockResolvedValue("hashed");
-    repo.createUser.mockResolvedValue({ _id: "1" });
+
+    repo.createUser.mockResolvedValue({
+      _id: "1",
+      name: "John",
+      email: "john@aucklanduni.ac.nz",
+    });
+
     mockJwt.sign.mockReturnValue("token");
 
     const result = await registerUser({
@@ -66,7 +73,12 @@ describe("Auth Service", () => {
       password: "123",
     });
 
-    expect(result).toBe("token");
+    expect(result.data.token).toBe("token");
+    expect(result.data.user).toEqual({
+      id: "1",
+      name: "John",
+      email: "john@aucklanduni.ac.nz",
+    });
   });
 
   it("registerUser → existing user", async () => {
@@ -86,6 +98,8 @@ describe("Auth Service", () => {
   it("loginUser → success", async () => {
     repo.findByEmail.mockResolvedValue({
       _id: "1",
+      name: "John",
+      email: "john@aucklanduni.ac.nz",
       password: "hashed",
     });
 
@@ -97,7 +111,12 @@ describe("Auth Service", () => {
       password: "123",
     });
 
-    expect(result).toBe("token");
+    expect(result.data.token).toBe("token");
+    expect(result.data.user).toEqual({
+      id: "1",
+      name: "John",
+      email: "john@aucklanduni.ac.nz",
+    });
   });
 
   it("loginUser → invalid user", async () => {
@@ -120,7 +139,7 @@ describe("Auth Service", () => {
 
     const result = await logoutUser("token");
 
-    expect(result).toBe(true);
-    expect(mockBlacklist.create).toHaveBeenCalled();
+    expect(result.success).toBe(true);
+    expect(mockBlacklist.create).toHaveBeenCalledTimes(1);
   });
 });

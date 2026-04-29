@@ -1,52 +1,101 @@
 import type { Request, Response } from "express";
 import { createMeal, getMeals, joinMeal, leaveMeal } from "../services/mealService.js";
 
+/* ================= CREATE MEAL ================= */
 export const createMealSession = async (req: any, res: Response) => {
   try {
     const session = await createMeal(req.body, req.user.userId);
 
-    res.status(201).json({
+    return res.status(201).json({
+      success: true,
       message: "Meal session created",
-      session,
+      data: session,
     });
-  } catch {
-    res.status(500).json({ message: "Error creating meal" });
+  } catch (_err: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Error creating meal",
+    });
   }
 };
 
+/* ================= GET ALL MEALS ================= */
 export const getAllMeals = async (_req: Request, res: Response) => {
   try {
     const meals = await getMeals();
-    res.json(meals);
+
+    return res.status(200).json({
+      success: true,
+      data: meals,
+    });
   } catch {
-    res.status(500).json({ message: "Error fetching meals" });
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching meals",
+    });
   }
 };
 
+/* ================= JOIN MEAL ================= */
 export const joinMealSession = async (req: any, res: Response) => {
   try {
     const session = await joinMeal(req.params.id, req.user.userId);
-    res.json({ message: "Joined session", session });
-  } catch (err: any) {
-    if (err.message === "NOT_FOUND") return res.status(404).json({ message: "Session not found" });
 
-    if (err.message === "ALREADY_JOINED")
-      return res.status(400).json({ message: "Already joined" });
+    return res.status(200).json({
+      success: true,
+      message: "Joined session",
+      data: session,
+    });
+  } catch (_err: any) {
+    if (_err.message === "NOT_FOUND") {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found",
+      });
+    }
 
-    if (err.message === "FULL") return res.status(400).json({ message: "Session full" });
+    if (_err.message === "ALREADY_JOINED") {
+      return res.status(400).json({
+        success: false,
+        message: "Already joined",
+      });
+    }
 
-    res.status(400).json({ message: "Cannot join session" });
+    if (_err.message === "FULL") {
+      return res.status(400).json({
+        success: false,
+        message: "Session full",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Cannot join session",
+    });
   }
 };
 
+/* ================= LEAVE MEAL ================= */
 export const leaveMealSession = async (req: any, res: Response) => {
   try {
     const session = await leaveMeal(req.params.id, req.user.userId);
-    res.json({ message: "Left session", session });
-  } catch (err: any) {
-    if (err.message === "NOT_IN_SESSION")
-      return res.status(400).json({ message: "Not in session" });
 
-    res.status(400).json({ message: "Cannot leave session" });
+    return res.status(200).json({
+      success: true,
+      message: "Left session",
+      data: session,
+    });
+  } catch (_err: any) {
+    if (_err.message === "NOT_IN_SESSION") {
+      return res.status(400).json({
+        success: false,
+        message: "Not in session",
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Cannot leave session",
+    });
   }
 };

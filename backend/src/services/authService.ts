@@ -3,12 +3,20 @@ import jwt from "jsonwebtoken";
 import Blacklist from "../models/Blacklist.js";
 import { userRepository } from "../repositories/userRepository.js";
 
+/* ================= HELPER FUNCTIONS ================= */
 const generateToken = (userId: string) => {
   return jwt.sign({ userId, jti: new Date().getTime() }, process.env.JWT_SECRET as string, {
     expiresIn: "7d",
   });
 };
 
+const sanitizeUser = (user: any) => ({
+  id: user._id?.toString?.() ?? user._id,
+  name: user.name,
+  email: user.email,
+});
+
+/* ================= REGISTER ================= */
 export const registerUser = async (data: { name: string; email: string; password: string }) => {
   const { name, email, password } = data;
 
@@ -29,9 +37,19 @@ export const registerUser = async (data: { name: string; email: string; password
     password: hashedPassword,
   });
 
-  return generateToken(user._id.toString());
+  const token = generateToken(user._id.toString());
+
+  return {
+    success: true,
+    message: "User registered successfully",
+    data: {
+      token,
+      user: sanitizeUser(user),
+    },
+  };
 };
 
+/* ================= LOGIN ================= */
 export const loginUser = async (data: { email: string; password: string }) => {
   const { email, password } = data;
 
@@ -41,9 +59,19 @@ export const loginUser = async (data: { email: string; password: string }) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
 
-  return generateToken(user._id.toString());
+  const token = generateToken(user._id.toString());
+
+  return {
+    success: true,
+    message: "Login successful",
+    data: {
+      token,
+      user: sanitizeUser(user),
+    },
+  };
 };
 
+/* ================= LOGOUT ================= */
 export const logoutUser = async (token: string) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
@@ -52,5 +80,8 @@ export const logoutUser = async (token: string) => {
     expiresAt: new Date(decoded.exp * 1000),
   });
 
-  return true;
+  return {
+    success: true,
+    message: "Logged out successfully",
+  };
 };
