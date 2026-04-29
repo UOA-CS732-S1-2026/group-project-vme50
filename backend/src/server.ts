@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
+import metaRoutes from "./routes/meta.js";
+import platformRoutes from "./routes/platform.js";
 
 dotenv.config();
 
@@ -15,7 +17,15 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const isLocalViteOrigin = /^http:\/\/localhost:517\d$/.test(origin);
+      callback(isLocalViteOrigin ? null : new Error("Not allowed by CORS"), isLocalViteOrigin);
+    },
   })
 );
 
@@ -28,9 +38,18 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "Backend is working!" });
 });
 
-app.use("/api/auth", authRoutes);
+app.get("/api", (req, res) => {
+  res.json({
+    message: "Platemates API index",
+    docs: "/api/meta/endpoints",
+    modules: ["auth", "meal", "platform"],
+  });
+});
 
+app.use("/api/auth", authRoutes);
 app.use("/api/meal", mealRoutes);
+app.use("/api/meta", metaRoutes);
+app.use("/api/platform", platformRoutes);
 
 /* ---------------- Database ---------------- */
 mongoose

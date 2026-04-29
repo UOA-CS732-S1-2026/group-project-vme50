@@ -5,8 +5,12 @@ type Request = express.Request;
 type Response = express.Response;
 type NextFunction = express.NextFunction;
 
+export interface JwtUserPayload extends jwt.JwtPayload {
+  userId: string;
+}
+
 interface AuthRequest extends Request {
-  user?: string | jwt.JwtPayload;
+  user?: JwtUserPayload;
 }
 
 export const authMiddleware = (
@@ -27,10 +31,17 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtUserPayload;
+
+    if (!decoded?.userId) {
+      return res.status(401).json({ message: "Invalid token payload" });
+    }
+
     req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+export type AuthenticatedRequest = AuthRequest;
