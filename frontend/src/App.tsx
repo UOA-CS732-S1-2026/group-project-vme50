@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
+import type { FormEvent, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Link,
   NavLink,
   Navigate,
+  Outlet,
   Route,
   Routes,
   useLocation,
   useNavigate,
+  useOutletContext,
   useParams,
 } from 'react-router-dom'
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
@@ -16,6 +18,7 @@ import { DayPicker } from 'react-day-picker'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'react-day-picker/style.css'
+import authSceneUrl from './assets/pexels-lumeon-labs-2154956182-33473442.jpg'
 import './App.css'
 
 type AuthMode = 'login' | 'register'
@@ -137,10 +140,11 @@ type AuthPageProps = {
   authError: string
   authForm: AuthFormState
   authLoading: boolean
-  mode: AuthMode
   onAuthFormChange: (field: keyof AuthFormState, value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>, mode: AuthMode) => Promise<void>
 }
+
+type AuthOutletContext = AuthPageProps
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:5050'
@@ -224,6 +228,11 @@ function App() {
   const [globalNotice, setGlobalNotice] = useState('')
 
   const currentUserId = useMemo(() => getUserIdFromToken(token), [token])
+
+  useEffect(() => {
+    const image = new Image()
+    image.src = authSceneUrl
+  }, [])
 
   useEffect(() => {
     if (!token) {
@@ -527,6 +536,10 @@ function App() {
   }
 
   const isAuthenticated = Boolean(token)
+  const routeMotionKey =
+    !isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')
+      ? 'auth'
+      : location.pathname
 
   return (
     <div className={`app-shell ${isAuthenticated ? '' : 'app-shell-auth'}`}>
@@ -546,121 +559,107 @@ function App() {
         ) : null}
 
         <div className={`app-content ${isAuthenticated ? '' : 'app-content-auth'}`}>
-          <Routes key={location.pathname} location={location}>
-            <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="/" />
-            <Route
-              element={
-                <PublicOnlyRoute isAuthenticated={isAuthenticated}>
-                  <AuthPage
-                    authError={authError}
-                    authForm={authForm}
-                    authLoading={authLoading}
-                    mode="login"
-                    onAuthFormChange={(field, value) =>
-                      setAuthForm((current) => ({ ...current, [field]: value }))
-                    }
-                    onSubmit={handleAuthSubmit}
-                  />
-                </PublicOnlyRoute>
-              }
-              path="/login"
-            />
-            <Route
-              element={
-                <PublicOnlyRoute isAuthenticated={isAuthenticated}>
-                  <AuthPage
-                    authError={authError}
-                    authForm={authForm}
-                    authLoading={authLoading}
-                    mode="register"
-                    onAuthFormChange={(field, value) =>
-                      setAuthForm((current) => ({ ...current, [field]: value }))
-                    }
-                    onSubmit={handleAuthSubmit}
-                  />
-                </PublicOnlyRoute>
-              }
-              path="/register"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <DashboardPage
-                    actionSessionId={actionSessionId}
-                    currentUserId={currentUserId}
-                    globalNotice={globalNotice}
-                    joinedSession={joinedSession}
-                    onRefresh={refreshSessions}
-                    onSearchChange={setSearchQuery}
-                    onSessionAction={handleSessionAction}
-                    onSortModeChange={setSortMode}
-                    searchQuery={searchQuery}
-                    sessionError={sessionError}
-                    sessionLoading={sessionLoading}
-                    sessions={visibleSessions}
-                    sortMode={sortMode}
-                  />
-                </ProtectedRoute>
-              }
-              path="/dashboard"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <SessionDetailsPage
-                    actionSessionId={actionSessionId}
-                    closingSessionId={closingSessionId}
-                    currentUserId={currentUserId}
-                    joinedSession={joinedSession}
-                    onCloseSession={handleCloseSession}
-                    onRefresh={refreshSessions}
-                    onSessionAction={handleSessionAction}
-                    sessionError={sessionError}
-                    sessionLoading={sessionLoading}
-                    sessions={sessions}
-                  />
-                </ProtectedRoute>
-              }
-              path="/sessions/:sessionId"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <CreateSessionPage
-                    onCreateSession={handleCreateSession}
-                    onSessionFormChange={(field, value) =>
-                      setSessionForm((current) => ({ ...current, [field]: value }))
-                    }
-                    sessionError={sessionError}
-                    sessionForm={sessionForm}
-                    submittingSession={submittingSession}
-                  />
-                </ProtectedRoute>
-              }
-              path="/create-session"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <ProfilePage
-                    globalNotice={globalNotice}
-                    handleProfileSubmit={handleProfileSubmit}
-                    onProfileFieldChange={(field, value) =>
-                      setProfileForm((current) => ({ ...current, [field]: value }))
-                    }
-                    profile={profile}
-                    profileError={profileError}
-                    profileForm={profileForm}
-                    profileLoading={profileLoading}
-                    profileSaving={profileSaving}
-                    token={token}
-                  />
-                </ProtectedRoute>
-              }
-              path="/profile"
-            />
-            <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
-          </Routes>
+          <div className="route-content-shell" key={routeMotionKey}>
+            <Routes location={location}>
+              <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="/" />
+              <Route
+                element={
+                  <PublicOnlyRoute isAuthenticated={isAuthenticated}>
+                    <AuthLayout
+                      authError={authError}
+                      authForm={authForm}
+                      authLoading={authLoading}
+                      onAuthFormChange={(field, value) =>
+                        setAuthForm((current) => ({ ...current, [field]: value }))
+                      }
+                      onSubmit={handleAuthSubmit}
+                    />
+                  </PublicOnlyRoute>
+                }
+              >
+                <Route element={<AuthModePanel mode="login" />} path="/login" />
+                <Route element={<AuthModePanel mode="register" />} path="/register" />
+              </Route>
+              <Route
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <DashboardPage
+                      actionSessionId={actionSessionId}
+                      currentUserId={currentUserId}
+                      globalNotice={globalNotice}
+                      joinedSession={joinedSession}
+                      onRefresh={refreshSessions}
+                      onSearchChange={setSearchQuery}
+                      onSessionAction={handleSessionAction}
+                      onSortModeChange={setSortMode}
+                      searchQuery={searchQuery}
+                      sessionError={sessionError}
+                      sessionLoading={sessionLoading}
+                      sessions={visibleSessions}
+                      sortMode={sortMode}
+                    />
+                  </ProtectedRoute>
+                }
+                path="/dashboard"
+              />
+              <Route
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <SessionDetailsPage
+                      actionSessionId={actionSessionId}
+                      closingSessionId={closingSessionId}
+                      currentUserId={currentUserId}
+                      joinedSession={joinedSession}
+                      onCloseSession={handleCloseSession}
+                      onRefresh={refreshSessions}
+                      onSessionAction={handleSessionAction}
+                      sessionError={sessionError}
+                      sessionLoading={sessionLoading}
+                      sessions={sessions}
+                    />
+                  </ProtectedRoute>
+                }
+                path="/sessions/:sessionId"
+              />
+              <Route
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <CreateSessionPage
+                      onCreateSession={handleCreateSession}
+                      onSessionFormChange={(field, value) =>
+                        setSessionForm((current) => ({ ...current, [field]: value }))
+                      }
+                      sessionError={sessionError}
+                      sessionForm={sessionForm}
+                      submittingSession={submittingSession}
+                    />
+                  </ProtectedRoute>
+                }
+                path="/create-session"
+              />
+              <Route
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <ProfilePage
+                      globalNotice={globalNotice}
+                      handleProfileSubmit={handleProfileSubmit}
+                      onProfileFieldChange={(field, value) =>
+                        setProfileForm((current) => ({ ...current, [field]: value }))
+                      }
+                      profile={profile}
+                      profileError={profileError}
+                      profileForm={profileForm}
+                      profileLoading={profileLoading}
+                      profileSaving={profileSaving}
+                      token={token}
+                    />
+                  </ProtectedRoute>
+                }
+                path="/profile"
+              />
+              <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
+            </Routes>
+          </div>
         </div>
       </div>
     </div>
@@ -732,24 +731,6 @@ function BackgroundOrnaments() {
       <span className="ornament-particle ornament-particle-b" />
       <span className="ornament-particle ornament-particle-c" />
       <span className="ornament-particle ornament-particle-d" />
-      <span className="food-trail food-trail-burger">
-        <FoodTrailIcon kind="burger" />
-      </span>
-      <span className="food-trail food-trail-fries">
-        <FoodTrailIcon kind="fries" />
-      </span>
-      <span className="food-trail food-trail-drumstick">
-        <FoodTrailIcon kind="drumstick" />
-      </span>
-      <span className="food-trail food-trail-soda">
-        <FoodTrailIcon kind="soda" />
-      </span>
-      <span className="food-trail food-trail-hotpot">
-        <FoodTrailIcon kind="hotpot" />
-      </span>
-      <span className="food-trail food-trail-skewer">
-        <FoodTrailIcon kind="skewer" />
-      </span>
     </div>
   )
 }
@@ -845,68 +826,6 @@ function BrandLogo() {
   )
 }
 
-function FoodTrailIcon({
-  kind,
-}: {
-  kind: 'burger' | 'fries' | 'drumstick' | 'soda' | 'hotpot' | 'skewer'
-}) {
-  switch (kind) {
-    case 'burger':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 11.5c.7-2.6 3.3-4.5 7-4.5s6.3 1.9 7 4.5" fill="#f4b352" stroke="#9a5f1d" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M4.5 12.5h15" stroke="#7a4a17" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="M5.5 16.5h13l-1 2h-11z" fill="#8e5a2b" stroke="#6d441f" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M6.2 13.8h11.6" stroke="#5d8d3a" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="M8 9.5h.01M11 8.8h.01M14.2 9.4h.01" stroke="#fff3d8" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'fries':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 4.5v6M10.5 3.8v6.7M14 4.2v6.3M17 5v5.5" stroke="#f0c14d" strokeWidth="1.9" strokeLinecap="round" />
-          <path d="M6 10.5h12l-1.2 8h-9.6z" fill="#d85e3f" stroke="#98412a" strokeWidth="1.2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'drumstick':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9.5 9.5c2.3-2.3 6-2.5 8-.5s1.8 5.7-.5 8c-2 2-5 2.7-7.8 2.1l-2.7-2.7c-.6-2.8.1-5.8 3-6.9Z" fill="#c97b48" stroke="#8b512b" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="m5.8 16.2-1.6 1.6" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="m4.2 15.1 1.2-1.2" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="m6.8 17.7 1.1-1.1" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      )
-    case 'soda':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 3.5h4" stroke="#f5ead2" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M13 3.5v2l3 2" stroke="#f5ead2" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M8 7.5h8l-1 13h-6z" fill="#db5f5b" stroke="#973f3b" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M10 11.2c.8-.5 1.2-.5 2 0s1.2.5 2 0" stroke="#ffd8d8" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'hotpot':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 8h10v6a5 5 0 0 1-5 5 5 5 0 0 1-5-5z" fill="#cb6b4c" stroke="#8f4b2f" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M5.5 9.5h1.8M16.7 9.5h1.8" stroke="#8f4b2f" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M9 5.5c0 1 .8 1.2.8 2.2M12 4.8c0 1 .8 1.3.8 2.4M15 5.5c0 .9.7 1.2.7 2.1" stroke="#f7dfb3" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="M9 11.6c1 .7 1.9.7 2.9 0 .9-.7 1.8-.7 2.8 0" stroke="#ffd8b0" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'skewer':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 18.5 20 5.5" stroke="#6d441f" strokeWidth="1.4" strokeLinecap="round" />
-          <circle cx="8" cy="15.3" r="2" fill="#d96e4b" stroke="#94492b" strokeWidth="1.1" />
-          <circle cx="11.8" cy="12.3" r="2" fill="#f0c14d" stroke="#9d7021" strokeWidth="1.1" />
-          <circle cx="15.8" cy="9.2" r="2" fill="#6f8d49" stroke="#536936" strokeWidth="1.1" />
-        </svg>
-      )
-  }
-}
-
 function Icon({
   name,
 }: {
@@ -923,6 +842,7 @@ function Icon({
     | 'graduation-cap'
     | 'location'
     | 'logout'
+    | 'minus'
     | 'plus'
     | 'refresh'
     | 'search'
@@ -932,7 +852,7 @@ function Icon({
 }) {
   const commonProps = {
     'aria-hidden': true,
-    className: 'inline-icon',
+    className: `inline-icon icon icon-${name}`,
     fill: 'none',
     stroke: 'currentColor',
     strokeLinecap: 'round' as const,
@@ -1024,6 +944,12 @@ function Icon({
       return (
         <svg {...commonProps}>
           <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      )
+    case 'minus':
+      return (
+        <svg {...commonProps}>
           <path d="M5 12h14" />
         </svg>
       )
@@ -1275,11 +1201,196 @@ function LeafletMapResizeWatcher() {
     const frame = window.requestAnimationFrame(() => {
       map.invalidateSize()
     })
+    const timeout = window.setTimeout(() => {
+      map.invalidateSize()
+    }, 260)
 
-    return () => window.cancelAnimationFrame(frame)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.clearTimeout(timeout)
+    }
   }, [map])
 
   return null
+}
+
+function MapPreviewCard({
+  location,
+  latitude,
+  longitude,
+  onOpen,
+}: {
+  location: string
+  latitude: number
+  longitude: number
+  onOpen: () => void
+}) {
+  const position: [number, number] = [latitude, longitude]
+  const openInMapsHref = getMapsHref(location, latitude, longitude)
+
+  return (
+    <div className="map-preview-shell">
+      <button
+        aria-label="Open larger map"
+        className="map-preview-frame map-preview-button"
+        onClick={onOpen}
+        type="button"
+      >
+        <MapContainer
+          attributionControl
+          center={position}
+          className="leaflet-map leaflet-map-preview"
+          doubleClickZoom={false}
+          dragging={false}
+          fadeAnimation
+          inertia={false}
+          markerZoomAnimation
+          scrollWheelZoom={false}
+          touchZoom={false}
+          zoom={14}
+          zoomAnimation
+          zoomControl={false}
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+            maxZoom={20}
+            subdomains="abcd"
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          />
+          <Marker icon={brandMapMarker} position={position} />
+        </MapContainer>
+        <div aria-hidden="true" className="map-preview-overlay" />
+        <span className="map-preview-hint">Click to enlarge</span>
+      </button>
+
+      <div className="map-heading">
+        <p className="muted-text">Pin is based on the session location.</p>
+        <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
+          <Icon name="external-link" />
+          Open in Maps
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function MapModal({
+  isOpen,
+  isClosing,
+  latitude,
+  location,
+  longitude,
+  onClose,
+}: {
+  isOpen: boolean
+  isClosing: boolean
+  latitude: number
+  location: string
+  longitude: number
+  onClose: () => void
+}) {
+  const position: [number, number] = [latitude, longitude]
+  const openInMapsHref = getMapsHref(location, latitude, longitude)
+  const isVisible = isOpen || isClosing
+
+  useEffect(() => {
+    if (!isVisible) {
+      return
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isVisible, onClose])
+
+  if (!isVisible) {
+    return null
+  }
+
+  return createPortal(
+    <div
+      className={`map-modal-overlay ${isClosing ? 'is-closing' : 'is-open'}`}
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        aria-modal="true"
+        className={`map-modal-card ${isClosing ? 'is-closing' : 'is-open'}`}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <div className="map-modal-header">
+          <div>
+            <h3>Session location</h3>
+            <p>{location || 'Location not specified'}</p>
+          </div>
+          <button
+            aria-label="Close map"
+            className="ghost-button map-modal-close"
+            onClick={onClose}
+            type="button"
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+
+        <div className="map-modal-frame">
+          <MapContainer
+            attributionControl
+            center={position}
+            className="leaflet-map leaflet-map-expanded leaflet-map-interactive"
+            bounceAtZoomLimits={false}
+            doubleClickZoom
+            dragging
+            easeLinearity={0.22}
+            fadeAnimation
+            inertia
+            inertiaDeceleration={3000}
+            inertiaMaxSpeed={1500}
+            markerZoomAnimation
+            scrollWheelZoom
+            touchZoom
+            wheelDebounceTime={32}
+            wheelPxPerZoomLevel={100}
+            zoom={15}
+            zoomDelta={0.5}
+            zoomAnimation
+            zoomControl={false}
+            zoomSnap={0.25}
+          >
+            <LeafletMapResizeWatcher />
+            <TileLayer
+              attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+              maxZoom={20}
+              subdomains="abcd"
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            />
+            <Marker icon={brandMapMarker} position={position} />
+          </MapContainer>
+          <div aria-hidden="true" className="map-preview-overlay" />
+        </div>
+
+        <div className="map-modal-footer">
+          <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
+            <Icon name="external-link" />
+            Open in Maps
+          </a>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
 }
 
 function MapPreview({
@@ -1291,14 +1402,8 @@ function MapPreview({
   latitude: number
   longitude: number
 }) {
-  const position: [number, number] = [latitude, longitude]
-  const openInMapsHref =
-    Number.isFinite(latitude) && Number.isFinite(longitude)
-      ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
   const [isExpanded, setIsExpanded] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
-  const isModalVisible = isExpanded || isClosing
 
   function openModal() {
     setIsClosing(false)
@@ -1313,111 +1418,207 @@ function MapPreview({
     }, 180)
   }
 
+  return (
+    <>
+      <MapPreviewCard latitude={latitude} location={location} longitude={longitude} onOpen={openModal} />
+      <MapModal
+        isClosing={isClosing}
+        isOpen={isExpanded}
+        latitude={latitude}
+        location={location}
+        longitude={longitude}
+        onClose={closeModal}
+      />
+    </>
+  )
+}
+
+function LoopingWheelPicker({
+  values,
+  selectedValue,
+  onSelect,
+  formatValue,
+  disabledValues,
+}: {
+  values: number[]
+  selectedValue: number
+  onSelect: (value: number) => void
+  formatValue: (value: number) => string
+  disabledValues?: Set<number>
+}) {
+  const itemHeight = 44
+  const viewportHeight = 220
+  const centerOffset = (viewportHeight - itemHeight) / 2
+  const baseCount = values.length
+  const middleStartIndex = baseCount
+  const renderedValues = useMemo(() => [...values, ...values, ...values], [values])
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const scrollTimerRef = useRef<number | null>(null)
+  const isProgrammaticScrollRef = useRef(false)
+  const [activeVirtualIndex, setActiveVirtualIndex] = useState(middleStartIndex + values.indexOf(selectedValue))
+  const activeVirtualIndexRef = useRef(middleStartIndex + values.indexOf(selectedValue))
+
   useEffect(() => {
-    if (!isModalVisible) {
+    const selectedIndex = values.indexOf(selectedValue)
+    if (selectedIndex < 0) {
       return
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        closeModal()
+    const currentVirtualIndex = activeVirtualIndexRef.current
+    const candidateIndexes = [
+      selectedIndex,
+      selectedIndex + baseCount,
+      selectedIndex + baseCount * 2,
+      selectedIndex - baseCount,
+      selectedIndex + baseCount * 3,
+    ]
+    const nextVirtualIndex = candidateIndexes.reduce((closestIndex, candidateIndex) =>
+      Math.abs(candidateIndex - currentVirtualIndex) < Math.abs(closestIndex - currentVirtualIndex)
+        ? candidateIndex
+        : closestIndex,
+    )
+
+    const container = listRef.current
+    if (!container) {
+      activeVirtualIndexRef.current = nextVirtualIndex
+      setActiveVirtualIndex(nextVirtualIndex)
+      return
+    }
+
+    const targetTop = nextVirtualIndex * itemHeight
+    if (Math.abs(container.scrollTop - targetTop) < 1) {
+      activeVirtualIndexRef.current = nextVirtualIndex
+      setActiveVirtualIndex(nextVirtualIndex)
+      return
+    }
+
+    activeVirtualIndexRef.current = nextVirtualIndex
+    setActiveVirtualIndex(nextVirtualIndex)
+    isProgrammaticScrollRef.current = true
+    container.scrollTo({ top: targetTop, behavior: 'auto' })
+    window.setTimeout(() => {
+      isProgrammaticScrollRef.current = false
+    }, 0)
+  }, [selectedValue, values, middleStartIndex, baseCount])
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimerRef.current) {
+        window.clearTimeout(scrollTimerRef.current)
       }
     }
+  }, [])
 
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', handleKeyDown)
+  function getValueFromVirtualIndex(virtualIndex: number) {
+    const normalized = ((virtualIndex % baseCount) + baseCount) % baseCount
+    return values[normalized]
+  }
+
+  function recenterVirtualIndex(virtualIndex: number) {
+    if (virtualIndex < baseCount * 0.5) {
+      return virtualIndex + baseCount
     }
-  }, [isModalVisible])
+
+    if (virtualIndex > baseCount * 2.5) {
+      return virtualIndex - baseCount
+    }
+
+    return virtualIndex
+  }
+
+  function getNearestRenderIndex(scrollTop: number) {
+    return Math.round(scrollTop / itemHeight)
+  }
+
+  function setVirtualIndex(nextVirtualIndex: number) {
+    activeVirtualIndexRef.current = nextVirtualIndex
+    setActiveVirtualIndex(nextVirtualIndex)
+  }
+
+  function snapToIndex(virtualIndex: number, shouldSelect: boolean) {
+    const container = listRef.current
+    if (!container) {
+      return
+    }
+
+    const normalizedValue = getValueFromVirtualIndex(virtualIndex)
+    const recenteredIndex = recenterVirtualIndex(virtualIndex)
+
+    isProgrammaticScrollRef.current = true
+    setVirtualIndex(virtualIndex)
+    container.scrollTo({ top: virtualIndex * itemHeight, behavior: 'smooth' })
+    window.setTimeout(() => {
+      if (recenteredIndex !== virtualIndex) {
+        container.scrollTo({ top: recenteredIndex * itemHeight, behavior: 'auto' })
+        setVirtualIndex(recenteredIndex)
+      }
+      isProgrammaticScrollRef.current = false
+    }, 220)
+
+    if (shouldSelect && !disabledValues?.has(normalizedValue) && normalizedValue !== selectedValue) {
+      onSelect(normalizedValue)
+    }
+  }
+
+  function handleScroll() {
+    const container = listRef.current
+    if (!container || isProgrammaticScrollRef.current) {
+      return
+    }
+
+    let nearestVirtualIndex = getNearestRenderIndex(container.scrollTop)
+
+    if (container.scrollTop < baseCount * itemHeight * 0.5) {
+      container.scrollTop += baseCount * itemHeight
+      nearestVirtualIndex += baseCount
+    } else if (container.scrollTop > baseCount * itemHeight * 2.5) {
+      container.scrollTop -= baseCount * itemHeight
+      nearestVirtualIndex -= baseCount
+    }
+
+    setVirtualIndex(nearestVirtualIndex)
+
+    if (scrollTimerRef.current) {
+      window.clearTimeout(scrollTimerRef.current)
+    }
+
+    scrollTimerRef.current = window.setTimeout(() => {
+      snapToIndex(getNearestRenderIndex(container.scrollTop), true)
+    }, 90)
+  }
 
   return (
-    <>
-      <div className="map-preview-shell">
-        <button
-          aria-label="Open larger map"
-          className="map-preview-frame map-preview-button"
-          onClick={openModal}
-          type="button"
-        >
-          <MapContainer center={position} className="leaflet-map" scrollWheelZoom={false} zoom={14} zoomControl={false}>
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-              maxZoom={20}
-              subdomains="abcd"
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            />
-            <Marker icon={brandMapMarker} position={position} />
-          </MapContainer>
-          <div aria-hidden="true" className="map-preview-overlay" />
-          <span className="map-preview-hint">Click to enlarge</span>
-        </button>
+    <div className="timepicker-wheel-shell">
+      <div className="timepicker-wheel-mask" aria-hidden="true" />
+      <div className="timepicker-wheel-highlight" aria-hidden="true" />
+      <div
+        className="timepicker-wheel"
+        onScroll={handleScroll}
+        ref={listRef}
+        style={{ ['--wheel-center-offset' as string]: `${centerOffset}px` }}
+      >
+        <div aria-hidden="true" className="timepicker-wheel-spacer" />
+        {renderedValues.map((value, index) => {
+          const disabled = disabledValues?.has(value) ?? false
+          const isActive = index === activeVirtualIndex
 
-        <div className="map-heading">
-          <p className="muted-text">Pin is based on the session location.</p>
-          <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
-            <Icon name="external-link" />
-            Open in Maps
-          </a>
-        </div>
-      </div>
-
-      {isModalVisible
-        ? createPortal(
-            <div
-              className={`map-modal-overlay ${isClosing ? 'is-closing' : 'is-open'}`}
-              onClick={closeModal}
-              role="presentation"
+          return (
+            <button
+              aria-pressed={isActive}
+              className={`timepicker-wheel-item ${isActive ? 'is-active' : ''}`}
+              data-active={isActive || undefined}
+              disabled={disabled}
+              key={`${value}-${index}`}
+              onClick={() => snapToIndex(index, true)}
+              type="button"
             >
-              <div
-                aria-modal="true"
-                className={`map-modal-card ${isClosing ? 'is-closing' : 'is-open'}`}
-                onClick={(event) => event.stopPropagation()}
-                role="dialog"
-              >
-                <div className="map-modal-header">
-                  <div>
-                    <h3>Session location</h3>
-                    <p>{location}</p>
-                  </div>
-                  <button
-                    aria-label="Close map"
-                    className="ghost-button map-modal-close"
-                    onClick={closeModal}
-                    type="button"
-                  >
-                    <Icon name="close" />
-                  </button>
-                </div>
-
-                <div className="map-modal-frame">
-                  <MapContainer center={position} className="leaflet-map leaflet-map-expanded" scrollWheelZoom zoom={15}>
-                    <LeafletMapResizeWatcher />
-                    <TileLayer
-                      attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-                      maxZoom={20}
-                      subdomains="abcd"
-                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                    />
-                    <Marker icon={brandMapMarker} position={position} />
-                  </MapContainer>
-                  <div aria-hidden="true" className="map-preview-overlay" />
-                </div>
-
-                <div className="map-modal-footer">
-                  <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
-                    <Icon name="external-link" />
-                    Open in Maps
-                  </a>
-                </div>
-              </div>
-            </div>,
-            document.body,
+              {formatValue(value)}
+            </button>
           )
-        : null}
-    </>
+        })}
+        <div aria-hidden="true" className="timepicker-wheel-spacer" />
+      </div>
+    </div>
   )
 }
 
@@ -1430,66 +1631,88 @@ function DateTimeField({
   value: string
   onChange: (value: string) => void
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [openPanel, setOpenPanel] = useState<'date' | 'time' | null>(null)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
-  const triggerRef = useRef<HTMLButtonElement | null>(null)
-  const popoverRef = useRef<HTMLDivElement | null>(null)
-  const [popoverStyle, setPopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
+  const dateTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const timeTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const datePopoverRef = useRef<HTMLDivElement | null>(null)
+  const timePopoverRef = useRef<HTMLDivElement | null>(null)
+  const [datePopoverStyle, setDatePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [timePopoverStyle, setTimePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
   const selectedDateTime = parseDateTimeLocalValue(value)
   const minimumDateTime = parseDateTimeLocalValue(minimum) ?? new Date()
-  const selectedTime = selectedDateTime ? formatTimeInputValue(selectedDateTime) : ''
+  const selectedTime = selectedDateTime ? formatTimeInputValue(selectedDateTime) : formatTimeInputValue(minimumDateTime)
+  const [selectedHour, selectedMinute] = selectedTime.split(':').map(Number)
   const [visibleMonth, setVisibleMonth] = useState<Date>(selectedDateTime ?? minimumDateTime)
+  const hourOptions = useMemo(() => Array.from({ length: 24 }, (_, index) => index), [])
+  const minuteOptions = useMemo(() => Array.from({ length: 60 }, (_, index) => index), [])
+  const activeDate = selectedDateTime ?? minimumDateTime
+  const isMinimumDate =
+    activeDate.getFullYear() === minimumDateTime.getFullYear() &&
+    activeDate.getMonth() === minimumDateTime.getMonth() &&
+    activeDate.getDate() === minimumDateTime.getDate()
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!openPanel) {
       return
     }
 
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node
-      if (!wrapperRef.current?.contains(target) && !popoverRef.current?.contains(target)) {
-        setIsOpen(false)
+      const clickedInsideTrigger = wrapperRef.current?.contains(target)
+      const clickedInsideDatePopover = datePopoverRef.current?.contains(target)
+      const clickedInsideTimePopover = timePopoverRef.current?.contains(target)
+
+      if (!clickedInsideTrigger && !clickedInsideDatePopover && !clickedInsideTimePopover) {
+        setOpenPanel(null)
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setIsOpen(false)
+        setOpenPanel(null)
       }
     }
 
-    function updatePopoverPosition() {
-      const trigger = triggerRef.current
+    function updatePopoverPosition(panel: 'date' | 'time') {
+      const trigger = panel === 'date' ? dateTriggerRef.current : timeTriggerRef.current
       if (!trigger) {
         return
       }
 
       const rect = trigger.getBoundingClientRect()
-      const desiredWidth = Math.max(rect.width, 332)
+      const desiredWidth = Math.max(rect.width, panel === 'date' ? 332 : 364)
       const maxWidth = Math.min(desiredWidth, window.innerWidth - 24)
       const left = Math.min(Math.max(12, rect.left), window.innerWidth - maxWidth - 12)
       const top = rect.bottom + 8
 
-      setPopoverStyle({
+      const nextStyle = {
         top,
         left,
         width: maxWidth,
-      })
+      }
+
+      if (panel === 'date') {
+        setDatePopoverStyle(nextStyle)
+      } else {
+        setTimePopoverStyle(nextStyle)
+      }
     }
 
-    updatePopoverPosition()
+    updatePopoverPosition(openPanel)
     document.addEventListener('mousedown', handleClickOutside)
     window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('resize', updatePopoverPosition)
-    window.addEventListener('scroll', updatePopoverPosition, true)
+    const handleViewportChange = () => updatePopoverPosition(openPanel)
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
       window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('resize', updatePopoverPosition)
-      window.removeEventListener('scroll', updatePopoverPosition, true)
+      window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('scroll', handleViewportChange, true)
     }
-  }, [isOpen])
+  }, [openPanel])
 
   useEffect(() => {
     const nextMonth = parseDateTimeLocalValue(value)
@@ -1513,35 +1736,96 @@ function DateTimeField({
     const nextDate = mergeDateAndTime(day, selectedTime || formatTimeInputValue(minimumDateTime))
     onChange(nextDate)
     setVisibleMonth(day)
-    setIsOpen(false)
+    setOpenPanel(null)
   }
 
-  function handleTimeChange(nextTime: string) {
-    const baseDate = selectedDateTime ?? minimumDateTime
-    onChange(mergeDateAndTime(baseDate, nextTime))
+  function updateTime(nextHour: number, nextMinute: number) {
+    const safeHour = Math.max(0, Math.min(23, nextHour))
+    const safeMinute = Math.max(0, Math.min(59, nextMinute))
+    const nextTime = `${String(safeHour).padStart(2, '0')}:${String(safeMinute).padStart(2, '0')}`
+    onChange(mergeDateAndTime(activeDate, nextTime))
   }
+
+  function updateHour(nextHour: number) {
+    const nextMinute =
+      isMinimumDate && nextHour === minimumDateTime.getHours() && selectedMinute < minimumDateTime.getMinutes()
+        ? minimumDateTime.getMinutes()
+        : selectedMinute
+
+    updateTime(nextHour, nextMinute)
+  }
+
+  function updateMinute(nextMinute: number) {
+    updateTime(selectedHour, nextMinute)
+  }
+
+  function isTimeOptionDisabled(hour: number, minute: number) {
+    if (!isMinimumDate) {
+      return false
+    }
+
+    return hour < minimumDateTime.getHours() || (hour === minimumDateTime.getHours() && minute < minimumDateTime.getMinutes())
+  }
+
+  const selectedHourDisabled = isTimeOptionDisabled(selectedHour, selectedMinute)
+  const disabledHours = useMemo(() => {
+    if (!isMinimumDate) {
+      return new Set<number>()
+    }
+
+    return new Set(hourOptions.filter((hour) => hour < minimumDateTime.getHours()))
+  }, [hourOptions, isMinimumDate, minimumDateTime])
+
+  const disabledMinutes = useMemo(() => {
+    if (!isMinimumDate || selectedHour !== minimumDateTime.getHours()) {
+      return new Set<number>()
+    }
+
+    return new Set(minuteOptions.filter((minute) => minute < minimumDateTime.getMinutes()))
+  }, [isMinimumDate, minuteOptions, minimumDateTime, selectedHour])
 
   return (
     <div className="datetime-field" ref={wrapperRef}>
-      <button
-        aria-expanded={isOpen}
-        aria-haspopup="dialog"
-        className="datetime-trigger"
-        onClick={() => setIsOpen((current) => !current)}
-        ref={triggerRef}
-        type="button"
-      >
-        <span className="datetime-trigger-icon" aria-hidden="true">
-          <Icon name="calendar" />
-        </span>
-        <span className={`datetime-trigger-copy ${selectedDateTime ? '' : 'is-placeholder'}`}>
-          {selectedDateTime ? formatDateForPicker(selectedDateTime) : 'Choose a date'}
-        </span>
-      </button>
+      <div className="datetime-picker-stack">
+        <button
+          aria-expanded={openPanel === 'date'}
+          aria-haspopup="dialog"
+          className="datetime-trigger"
+          onClick={() => setOpenPanel((current) => (current === 'date' ? null : 'date'))}
+          ref={dateTriggerRef}
+          type="button"
+        >
+          <span className="datetime-trigger-icon" aria-hidden="true">
+            <Icon name="calendar" />
+          </span>
+          <span className={`datetime-trigger-copy ${selectedDateTime ? '' : 'is-placeholder'}`}>
+            {selectedDateTime ? formatDateForPicker(selectedDateTime) : 'Choose a date'}
+          </span>
+        </button>
 
-      {isOpen && popoverStyle
+        <button
+          aria-expanded={openPanel === 'time'}
+          aria-haspopup="dialog"
+          className="datetime-trigger"
+          onClick={() => setOpenPanel((current) => (current === 'time' ? null : 'time'))}
+          ref={timeTriggerRef}
+          type="button"
+        >
+          <span className="datetime-trigger-icon" aria-hidden="true">
+            <Icon name="clock" />
+          </span>
+          <span className={`datetime-trigger-copy ${selectedTime ? '' : 'is-placeholder'}`}>
+            {selectedTime ? formatTimeForPicker(selectedTime) : 'Choose a time'}
+          </span>
+          <span className="datetime-trigger-endcap" aria-hidden="true">
+            <Icon name="chevron-right" />
+          </span>
+        </button>
+      </div>
+
+      {openPanel === 'date' && datePopoverStyle
         ? createPortal(
-            <div className="datepicker-popover" ref={popoverRef} role="dialog" style={popoverStyle}>
+            <div className="picker-popover datepicker-popover" ref={datePopoverRef} role="dialog" style={datePopoverStyle}>
               <DayPicker
                 className="platemates-daypicker"
                 components={{
@@ -1567,22 +1851,128 @@ function DateTimeField({
           )
         : null}
 
-      <label className="datetime-time-field">
-        <span>Time</span>
-        <input min={selectedDateTime ? undefined : formatTimeInputValue(minimumDateTime)} onChange={(event) => handleTimeChange(event.target.value)} required type="time" value={selectedTime} />
-      </label>
+      {openPanel === 'time' && timePopoverStyle
+        ? createPortal(
+            <div className="picker-popover timepicker-popover" ref={timePopoverRef} role="dialog" style={timePopoverStyle}>
+              <div className="timepicker-header">
+                <span className="timepicker-label">Select time</span>
+                <strong className="timepicker-selected">{formatTimeForPicker(selectedTime)}</strong>
+              </div>
+              <div className="timepicker-grid">
+                <div className="timepicker-column-shell">
+                  <span className="timepicker-column-label">Hour</span>
+                  <LoopingWheelPicker
+                    disabledValues={disabledHours}
+                    formatValue={(hour) => String(hour).padStart(2, '0')}
+                    onSelect={updateHour}
+                    selectedValue={selectedHour}
+                    values={hourOptions}
+                  />
+                </div>
+                <div className="timepicker-column-shell">
+                  <span className="timepicker-column-label">Minute</span>
+                  <LoopingWheelPicker
+                    disabledValues={selectedHourDisabled ? new Set() : disabledMinutes}
+                    formatValue={(minute) => String(minute).padStart(2, '0')}
+                    onSelect={updateMinute}
+                    selectedValue={selectedMinute}
+                    values={minuteOptions}
+                  />
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
 
-function AuthPage({
+function autoResizeTextarea(element: HTMLTextAreaElement | null) {
+  if (!element) {
+    return
+  }
+
+  element.style.height = 'auto'
+  const nextHeight = Math.min(Math.max(element.scrollHeight, 150), 360)
+  element.style.height = `${nextHeight}px`
+  element.style.overflowY = element.scrollHeight > 360 ? 'auto' : 'hidden'
+}
+
+function AutoResizeTextarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const { onChange, value, ...rest } = props
+
+  useEffect(() => {
+    autoResizeTextarea(textareaRef.current)
+  }, [value])
+
+  return (
+    <textarea
+      {...rest}
+      onChange={(event) => {
+        autoResizeTextarea(event.target)
+        onChange?.(event)
+      }}
+      ref={textareaRef}
+      value={value}
+    />
+  )
+}
+
+function FormField({
+  children,
+  className = '',
+  label,
+}: {
+  children: ReactNode
+  className?: string
+  label: ReactNode
+}) {
+  return (
+    <label className={`create-field ${className}`.trim()}>
+      <span>{label}</span>
+      {children}
+    </label>
+  )
+}
+
+function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={`create-control ${props.className ?? ''}`.trim()} />
+}
+
+function TextAreaField({
+  limit = 200,
+  value,
+  ...rest
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { limit?: number }) {
+  const count = typeof value === 'string' ? value.length : 0
+  const countState =
+    count >= limit ? 'is-limit' : count >= Math.max(limit - 20, Math.floor(limit * 0.85)) ? 'is-near-limit' : ''
+
+  return (
+    <div className="create-textarea-shell">
+      <AutoResizeTextarea
+        {...rest}
+        className={`create-control create-textarea ${rest.className ?? ''}`.trim()}
+        maxLength={limit}
+        value={value}
+      />
+      <span className={`create-textarea-count ${countState}`.trim()}>{count} / {limit}</span>
+    </div>
+  )
+}
+
+function AuthLayout({
   authError,
   authForm,
   authLoading,
-  mode,
   onAuthFormChange,
   onSubmit,
 }: AuthPageProps) {
+  const location = useLocation()
+  const mode: AuthMode = location.pathname === '/register' ? 'register' : 'login'
+
   return (
     <main className="auth-layout">
       <GlassCard className="auth-page-card">
@@ -1600,7 +1990,7 @@ function AuthPage({
 
             <div className="auth-showcase-copy">
               <p className="section-kicker">Private dining circle</p>
-              <h1>{mode === 'login' ? 'Return to your table.' : 'Reserve your place.'}</h1>
+              <h1>Return to your table.</h1>
               <p className="hero-copy">
                 A quieter way to organise shared meals, with thoughtful hosts, elegant scheduling, and
                 less friction between intent and arrival.
@@ -1638,67 +2028,88 @@ function AuthPage({
             </div>
           </aside>
 
-          <div className="auth-form-shell">
-            <div className="auth-form-header">
-              <div>
-                <p className="section-kicker">{mode === 'login' ? 'Welcome back' : 'New member'}</p>
-                <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-              </div>
-              <span className="pill auth-pill">{mode === 'login' ? 'Member access' : 'Join now'}</span>
+          <div className={`auth-form-shell ${mode === 'register' ? 'is-register' : 'is-login'}`}>
+            <div className="auth-card-stage">
+              <Outlet
+                context={{
+                  authError,
+                  authForm,
+                  authLoading,
+                  onAuthFormChange,
+                  onSubmit,
+                } satisfies AuthOutletContext}
+              />
             </div>
-
-            <form className="stack-form" onSubmit={(event) => void onSubmit(event, mode)}>
-              {mode === 'register' ? (
-                <label>
-                  <span>Name</span>
-                  <input
-                    onChange={(event) => onAuthFormChange('name', event.target.value)}
-                    placeholder="Your full name"
-                    required
-                    value={authForm.name}
-                  />
-                </label>
-              ) : null}
-
-              <label>
-                <span>University email</span>
-                <input
-                  onChange={(event) => onAuthFormChange('email', event.target.value)}
-                  placeholder="you@aucklanduni.ac.nz"
-                  required
-                  type="email"
-                  value={authForm.email}
-                />
-              </label>
-
-              <label>
-                <span>Password</span>
-                <input
-                  onChange={(event) => onAuthFormChange('password', event.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  type="password"
-                  value={authForm.password}
-                />
-              </label>
-
-              {authError ? <p className="feedback error">{authError}</p> : null}
-
-              <button className="primary-button" disabled={authLoading} type="submit">
-                {authLoading ? 'Working...' : mode === 'login' ? 'Continue' : 'Create account'}
-              </button>
-            </form>
-
-            <p className="auth-switch-text">
-              {mode === 'login' ? 'Need an account?' : 'Already have an account?'}{' '}
-              <Link className="inline-link" to={mode === 'login' ? '/register' : '/login'}>
-                {mode === 'login' ? 'Register' : 'Login'}
-              </Link>
-            </p>
           </div>
         </div>
       </GlassCard>
     </main>
+  )
+}
+
+function AuthModePanel({ mode }: { mode: AuthMode }) {
+  const { authError, authForm, authLoading, onAuthFormChange, onSubmit } =
+    useOutletContext<AuthOutletContext>()
+
+  return (
+    <div className="auth-mode-panel" key={mode}>
+      <div className="auth-form-header">
+        <div>
+          <p className="section-kicker">{mode === 'login' ? 'Welcome back' : 'New member'}</p>
+          <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
+        </div>
+        <span className="pill auth-pill">{mode === 'login' ? 'Member access' : 'Join now'}</span>
+      </div>
+
+      <form className="stack-form" onSubmit={(event) => void onSubmit(event, mode)}>
+        {mode === 'register' ? (
+          <label>
+            <span>Name</span>
+            <input
+              onChange={(event) => onAuthFormChange('name', event.target.value)}
+              placeholder="Your full name"
+              required
+              value={authForm.name}
+            />
+          </label>
+        ) : null}
+
+        <label>
+          <span>University email</span>
+          <input
+            onChange={(event) => onAuthFormChange('email', event.target.value)}
+            placeholder="you@aucklanduni.ac.nz"
+            required
+            type="email"
+            value={authForm.email}
+          />
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input
+            onChange={(event) => onAuthFormChange('password', event.target.value)}
+            placeholder="Enter your password"
+            required
+            type="password"
+            value={authForm.password}
+          />
+        </label>
+
+        {authError ? <p className="feedback error">{authError}</p> : null}
+
+        <button className="primary-button" disabled={authLoading} type="submit">
+          {authLoading ? 'Working...' : mode === 'login' ? 'Continue' : 'Create account'}
+        </button>
+      </form>
+
+      <p className="auth-switch-text">
+        {mode === 'login' ? 'Need an account?' : 'Already have an account?'}{' '}
+        <Link className="inline-link" to={mode === 'login' ? '/register' : '/login'}>
+          {mode === 'login' ? 'Register' : 'Login'}
+        </Link>
+      </p>
+    </div>
   )
 }
 
@@ -2200,8 +2611,21 @@ function CreateSessionPage({
   submittingSession,
 }: CreateSessionPageProps) {
   const slotCount = Number(sessionForm.slots) || 2
-  const decreaseSlots = () => onSessionFormChange('slots', String(Math.max(2, slotCount - 1)))
-  const increaseSlots = () => onSessionFormChange('slots', String(Math.min(12, slotCount + 1)))
+  const [slotDirection, setSlotDirection] = useState<'increase' | 'decrease'>('increase')
+  const decreaseSlots = () => {
+    if (slotCount <= 2) {
+      return
+    }
+    setSlotDirection('decrease')
+    onSessionFormChange('slots', String(Math.max(2, slotCount - 1)))
+  }
+  const increaseSlots = () => {
+    if (slotCount >= 12) {
+      return
+    }
+    setSlotDirection('increase')
+    onSessionFormChange('slots', String(Math.min(12, slotCount + 1)))
+  }
 
   return (
     <main className="page-shell create-page-shell">
@@ -2221,25 +2645,23 @@ function CreateSessionPage({
         {sessionError ? <p className="feedback error">{sessionError}</p> : null}
 
         <form className="stack-form create-flow-form" onSubmit={onCreateSession}>
-          <label className="create-primary-field">
-            <span>Title</span>
-            <input
+          <FormField className="create-primary-field" label="Title">
+            <TextInput
               onChange={(event) => onSessionFormChange('title', event.target.value)}
               placeholder="Hotpot on Dominion Road"
               required
               value={sessionForm.title}
             />
-          </label>
+          </FormField>
 
-          <label>
-            <span>Location</span>
-            <input
+          <FormField label="Location">
+            <TextInput
               onChange={(event) => onSessionFormChange('location', event.target.value)}
               placeholder="Dominion Road, Auckland"
               required
               value={sessionForm.location}
             />
-          </label>
+          </FormField>
 
           <div className="create-section-group">
             <div className="create-section-heading">
@@ -2261,40 +2683,44 @@ function CreateSessionPage({
                 <div className="slot-stepper" role="group" aria-label="Group size">
                   <button
                     aria-label="Decrease group size"
-                    className="slot-stepper-button"
+                    className="slot-stepper-button icon-button"
                     disabled={slotCount <= 2}
                     onClick={decreaseSlots}
                     type="button"
                   >
-                    −
+                    <Icon name="minus" />
                   </button>
                   <div className="slot-stepper-value" aria-live="polite">
-                    <strong>{slotCount}</strong>
-                    <span>people</span>
+                    <strong
+                      className={`slot-stepper-number slot-stepper-number-${slotDirection}`}
+                      key={`${slotCount}-${slotDirection}`}
+                    >
+                      {slotCount}
+                    </strong>
+                    <span className="slot-stepper-unit">people</span>
                   </div>
                   <button
                     aria-label="Increase group size"
-                    className="slot-stepper-button"
+                    className="slot-stepper-button icon-button"
                     disabled={slotCount >= 12}
                     onClick={increaseSlots}
                     type="button"
                   >
-                    +
+                    <Icon name="plus" />
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <label>
-            <span>Description <em>(optional)</em></span>
-            <textarea
+          <FormField label={<><span>Description</span> <em>(optional)</em></>}>
+            <TextAreaField
               onChange={(event) => onSessionFormChange('description', event.target.value)}
               placeholder="Looking for 3 people to share dishes after class."
               rows={4}
               value={sessionForm.description}
             />
-          </label>
+          </FormField>
 
           <input name="slots" type="hidden" value={sessionForm.slots} />
 
@@ -2368,7 +2794,7 @@ function ProfilePage({
 
             <label>
               <span>Bio</span>
-              <textarea
+              <AutoResizeTextarea
                 disabled={profileLoading || profileSaving}
                 onChange={(event) => onProfileFieldChange('bio', event.target.value)}
                 rows={4}
@@ -2693,6 +3119,12 @@ function getFallbackCoordinates(location: string) {
   return matched?.coordinates ?? AUCKLAND_CENTER
 }
 
+function getMapsHref(location: string, latitude: number, longitude: number) {
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
+}
+
 function getUserIdFromToken(token: string) {
   if (!token) {
     return null
@@ -2760,6 +3192,19 @@ function formatTimeInputValue(value: Date) {
   const hours = String(value.getHours()).padStart(2, '0')
   const minutes = String(value.getMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
+}
+
+function formatTimeForPicker(value: string) {
+  const [hours, minutes] = value.split(':').map(Number)
+
+  if ([hours, minutes].some((part) => Number.isNaN(part))) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('en-NZ', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(2026, 0, 1, hours, minutes))
 }
 
 function mergeDateAndTime(date: Date, timeValue: string) {
