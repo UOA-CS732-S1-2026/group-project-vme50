@@ -87,8 +87,16 @@ type Coordinates = {
   source: 'geocoded' | 'fallback'
 }
 
+type SearchSuggestion = {
+  session: MealSession
+  copy: ReturnType<typeof getSessionCopy>
+  distanceKm: number | null
+  score: number
+}
+
 type DashboardPageProps = {
   actionSessionId: string | null
+  allSessions: MealSession[]
   currentUserId: string | null
   globalNotice: string
   joinedSession: MealSession | null
@@ -117,6 +125,7 @@ type SessionDetailsPageProps = {
 }
 
 type CreateSessionPageProps = {
+  allSessions: MealSession[]
   onCreateSession: (event: FormEvent<HTMLFormElement>) => Promise<void>
   sessionError: string
   sessionForm: SessionFormState
@@ -156,6 +165,26 @@ const locationFallbacks: Array<{ match: RegExp; coordinates: Coordinates }> = [
   { match: /cbd|queen street|auckland central/i, coordinates: AUCKLAND_CENTER },
   { match: /newmarket/i, coordinates: { lat: -36.8698, lng: 174.7773, source: 'fallback' } },
   { match: /mount eden|mt eden/i, coordinates: { lat: -36.8841, lng: 174.7464, source: 'fallback' } },
+]
+
+const titleSuggestionSeeds = [
+  'Hotpot on Dominion Road',
+  'Hotpot dinner',
+  'Hotpot near me',
+  'Sushi after class',
+  'Late-night noodles',
+  'Study dinner in Newmarket',
+  'BBQ in the CBD',
+  'Dessert run after lectures',
+]
+
+const placeSuggestionSeeds = [
+  { name: 'Dominion Road', address: 'Dominion Road, Auckland', lat: -36.8878, lng: 174.7468 },
+  { name: 'Auckland CBD', address: 'Queen Street, Auckland CBD', lat: -36.8485, lng: 174.7633 },
+  { name: 'Newmarket', address: 'Broadway, Newmarket, Auckland', lat: -36.8698, lng: 174.7773 },
+  { name: 'Mount Eden', address: 'Mount Eden Road, Auckland', lat: -36.8841, lng: 174.7464 },
+  { name: 'Ponsonby', address: 'Ponsonby Road, Auckland', lat: -36.8574, lng: 174.7466 },
+  { name: 'Parnell', address: 'Parnell Road, Auckland', lat: -36.8547, lng: 174.7846 },
 ]
 
 const emptySessionForm: SessionFormState = {
@@ -228,6 +257,7 @@ function App() {
   const [globalNotice, setGlobalNotice] = useState('')
 
   const currentUserId = useMemo(() => getUserIdFromToken(token), [token])
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300)
 
   useEffect(() => {
     const image = new Image()
@@ -269,7 +299,7 @@ function App() {
   )
 
   const visibleSessions = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const normalizedQuery = debouncedSearchQuery.trim().toLowerCase()
 
     const filtered = sessions.filter((session) => {
       if (normalizedQuery.length === 0) {
@@ -277,7 +307,7 @@ function App() {
       }
 
       return [session.title, session.description, session.location].some((value) =>
-        value.toLowerCase().includes(normalizedQuery),
+        fuzzyMatchScore(value, normalizedQuery) > -1,
       )
     })
 
@@ -292,7 +322,7 @@ function App() {
 
       return Date.parse(left.time) - Date.parse(right.time)
     })
-  }, [searchQuery, sessions, sortMode])
+  }, [debouncedSearchQuery, sessions, sortMode])
 
   async function refreshSessions() {
     if (!token) {
@@ -585,6 +615,7 @@ function App() {
                   <ProtectedRoute isAuthenticated={isAuthenticated}>
                     <DashboardPage
                       actionSessionId={actionSessionId}
+                      allSessions={sessions}
                       currentUserId={currentUserId}
                       globalNotice={globalNotice}
                       joinedSession={joinedSession}
@@ -625,6 +656,7 @@ function App() {
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>
                     <CreateSessionPage
+                      allSessions={sessions}
                       onCreateSession={handleCreateSession}
                       onSessionFormChange={(field, value) =>
                         setSessionForm((current) => ({ ...current, [field]: value }))
@@ -2116,6 +2148,7 @@ function AuthModePanel({ mode }: { mode: AuthMode }) {
 
 function DashboardPage({
   actionSessionId,
+  allSessions,
   currentUserId,
   globalNotice,
   joinedSession,
@@ -2129,8 +2162,83 @@ function DashboardPage({
   sessions,
   sortMode,
 }: DashboardPageProps) {
+  const navigate = useNavigate()
+  const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null)
+  const [didRequestLocation, setDidRequestLocation] = useState(false)
   const activeSessionTitle = joinedSession ? getSessionCopy(joinedSession).title : null
   const activeSessionId = joinedSession ? getSessionId(joinedSession) : null
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300)
+
+  useEffect(() => {
+    if (didRequestLocation || !debouncedSearchQuery.trim() || !('geolocation' in navigator)) {
+      return
+    }
+
+    setDidRequestLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserCoordinates({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+      },
+      () => {
+        setUserCoordinates(null)
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 300000,
+      },
+    )
+  }, [debouncedSearchQuery, didRequestLocation])
+
+  const searchSuggestions = useMemo(() => {
+    const normalizedQuery = debouncedSearchQuery.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return []
+    }
+
+    return allSessions
+      .map((session) => {
+        const copy = getSessionCopy(session)
+        const fields = [copy.title, copy.location, copy.description]
+        const score = fields.reduce((best, field) => Math.max(best, fuzzyMatchScore(field, normalizedQuery)), -1)
+
+        if (score < 0) {
+          return null
+        }
+
+        const coordinates = getFallbackCoordinates(copy.location)
+        const distanceKm = userCoordinates
+          ? haversineDistanceKm(userCoordinates, { lat: coordinates.lat, lng: coordinates.lng })
+          : null
+
+        return {
+          session,
+          copy,
+          distanceKm,
+          score,
+        } satisfies SearchSuggestion
+      })
+      .filter((item): item is SearchSuggestion => Boolean(item))
+      .sort((left, right) => {
+        if (left.distanceKm !== null && right.distanceKm !== null && left.distanceKm !== right.distanceKm) {
+          return left.distanceKm - right.distanceKm
+        }
+
+        if (left.score !== right.score) {
+          return right.score - left.score
+        }
+
+        return Date.parse(left.session.time) - Date.parse(right.session.time)
+      })
+      .slice(0, 8)
+  }, [allSessions, debouncedSearchQuery, userCoordinates])
+
+  function handleSuggestionSelect(sessionId: string) {
+    navigate(`/sessions/${sessionId}`)
+  }
 
   return (
     <main className="page-shell dashboard-shell">
@@ -2205,6 +2313,34 @@ function DashboardPage({
                 </button>
               ) : null}
             </label>
+            {searchSuggestions.length > 0 ? (
+              <div className="search-suggestions-card" role="listbox" aria-label="Suggested sessions">
+                {searchSuggestions.map((suggestion) => {
+                  const sessionId = getSessionId(suggestion.session)
+                  return (
+                    <button
+                      className="search-suggestion-item"
+                      key={sessionId}
+                      onClick={() => handleSuggestionSelect(sessionId)}
+                      type="button"
+                    >
+                      <div className="search-suggestion-copy">
+                        <strong>{renderHighlightedText(suggestion.copy.title, debouncedSearchQuery)}</strong>
+                        <span>
+                          {renderHighlightedText(suggestion.copy.location, debouncedSearchQuery)}
+                        </span>
+                      </div>
+                      <div className="search-suggestion-meta">
+                        <span>{formatDateTime(suggestion.session.time)}</span>
+                        {suggestion.distanceKm !== null ? (
+                          <span>{formatDistanceLabel(suggestion.distanceKm)}</span>
+                        ) : null}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
           </div>
 
           {sessionError ? <p className="feedback error">{sessionError}</p> : null}
@@ -2605,14 +2741,107 @@ function SessionDetailsPage({
 }
 
 function CreateSessionPage({
+  allSessions,
   onCreateSession,
   onSessionFormChange,
   sessionError,
   sessionForm,
   submittingSession,
 }: CreateSessionPageProps) {
+  const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null)
+  const [didRequestLocation, setDidRequestLocation] = useState(false)
+  const [titleFocused, setTitleFocused] = useState(false)
+  const [locationFocused, setLocationFocused] = useState(false)
+  const [activeTitleIndex, setActiveTitleIndex] = useState(-1)
+  const [activeLocationIndex, setActiveLocationIndex] = useState(-1)
+  const [selectedLocationCoordinates, setSelectedLocationCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const slotCount = Number(sessionForm.slots) || 2
+  const debouncedTitleQuery = useDebouncedValue(sessionForm.title, 300)
+  const debouncedLocationQuery = useDebouncedValue(sessionForm.location, 300)
   const [slotDirection, setSlotDirection] = useState<'increase' | 'decrease'>('increase')
+
+  useEffect(() => {
+    if (didRequestLocation || !('geolocation' in navigator)) {
+      return
+    }
+
+    setDidRequestLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserCoordinates({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+      },
+      () => {
+        setUserCoordinates(null)
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: 300000,
+      },
+    )
+  }, [didRequestLocation])
+
+  const titleSuggestions = useMemo(() => {
+    const normalizedQuery = normalizeSearchText(debouncedTitleQuery)
+    if (!normalizedQuery) {
+      return buildTitleSuggestions(allSessions).slice(0, 6)
+    }
+
+    return buildTitleSuggestions(allSessions)
+      .map((item) => ({
+        ...item,
+        score: fuzzyMatchScore(item.title, normalizedQuery),
+      }))
+      .filter((item) => item.score > -1)
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 8)
+  }, [allSessions, debouncedTitleQuery])
+
+  const locationSuggestions = useMemo(() => {
+    const normalizedQuery = normalizeSearchText(debouncedLocationQuery)
+    const allPlaces = buildPlaceSuggestions(allSessions, userCoordinates)
+
+    const matched = allPlaces
+      .map((place) => {
+        const score = Math.max(
+          fuzzyMatchScore(place.name, normalizedQuery),
+          fuzzyMatchScore(place.address, normalizedQuery),
+        )
+
+        return {
+          ...place,
+          score: normalizedQuery ? score : 0,
+        }
+      })
+      .filter((place) => (normalizedQuery ? place.score > -1 : true))
+      .sort((left, right) => {
+        if (left.distanceKm !== null && right.distanceKm !== null && left.distanceKm !== right.distanceKm) {
+          return left.distanceKm - right.distanceKm
+        }
+        return right.score - left.score
+      })
+
+    return matched.slice(0, 8)
+  }, [allSessions, debouncedLocationQuery, userCoordinates])
+
+  useEffect(() => {
+    const fallback = sessionForm.location.trim()
+      ? getFallbackCoordinates(sessionForm.location.trim())
+      : null
+
+    setSelectedLocationCoordinates(
+      fallback
+        ? {
+            lat: fallback.lat,
+            lng: fallback.lng,
+          }
+        : null,
+    )
+  }, [sessionForm.location])
+
   const decreaseSlots = () => {
     if (slotCount <= 2) {
       return
@@ -2626,6 +2855,52 @@ function CreateSessionPage({
     }
     setSlotDirection('increase')
     onSessionFormChange('slots', String(Math.min(12, slotCount + 1)))
+  }
+
+  function handleTitleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (!titleSuggestions.length) {
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveTitleIndex((current) => Math.min(current + 1, titleSuggestions.length - 1))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveTitleIndex((current) => Math.max(current - 1, 0))
+    } else if (event.key === 'Enter' && activeTitleIndex >= 0) {
+      event.preventDefault()
+      onSessionFormChange('title', titleSuggestions[activeTitleIndex].title)
+      setTitleFocused(false)
+      setActiveTitleIndex(-1)
+    } else if (event.key === 'Escape') {
+      setTitleFocused(false)
+      setActiveTitleIndex(-1)
+    }
+  }
+
+  function handleLocationKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (!locationSuggestions.length) {
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setActiveLocationIndex((current) => Math.min(current + 1, locationSuggestions.length - 1))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setActiveLocationIndex((current) => Math.max(current - 1, 0))
+    } else if (event.key === 'Enter' && activeLocationIndex >= 0) {
+      event.preventDefault()
+      const selected = locationSuggestions[activeLocationIndex]
+      onSessionFormChange('location', selected.address)
+      setSelectedLocationCoordinates({ lat: selected.lat, lng: selected.lng })
+      setLocationFocused(false)
+      setActiveLocationIndex(-1)
+    } else if (event.key === 'Escape') {
+      setLocationFocused(false)
+      setActiveLocationIndex(-1)
+    }
   }
 
   return (
@@ -2647,22 +2922,127 @@ function CreateSessionPage({
 
         <form className="stack-form create-flow-form" onSubmit={onCreateSession}>
           <FormField className="create-primary-field" label="Title">
-            <TextInput
-              onChange={(event) => onSessionFormChange('title', event.target.value)}
-              placeholder="Hotpot on Dominion Road"
-              required
-              value={sessionForm.title}
-            />
+            <div className="create-autocomplete">
+              <TextInput
+                onBlur={() => {
+                  window.setTimeout(() => {
+                    setTitleFocused(false)
+                  }, 120)
+                }}
+                onChange={(event) => {
+                  onSessionFormChange('title', event.target.value)
+                  setTitleFocused(true)
+                  setActiveTitleIndex(-1)
+                }}
+                onFocus={() => setTitleFocused(true)}
+                onKeyDown={handleTitleKeyDown}
+                placeholder="Hotpot on Dominion Road"
+                required
+                value={sessionForm.title}
+              />
+              {titleFocused && titleSuggestions.length > 0 ? (
+                <div className="create-autocomplete-panel" role="listbox" aria-label="Title suggestions">
+                  {titleSuggestions.map((suggestion, index) => (
+                    <button
+                      className={`create-autocomplete-item ${activeTitleIndex === index ? 'is-active' : ''}`}
+                      key={suggestion.id}
+                      onMouseDown={(event) => {
+                        event.preventDefault()
+                        onSessionFormChange('title', suggestion.title)
+                        setTitleFocused(false)
+                        setActiveTitleIndex(-1)
+                      }}
+                      type="button"
+                    >
+                      <strong>{renderHighlightedText(suggestion.title, debouncedTitleQuery)}</strong>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </FormField>
 
           <FormField label="Location">
-            <TextInput
-              onChange={(event) => onSessionFormChange('location', event.target.value)}
-              placeholder="Dominion Road, Auckland"
-              required
-              value={sessionForm.location}
-            />
+            <div className="create-autocomplete">
+              <TextInput
+                onBlur={() => {
+                  window.setTimeout(() => {
+                    setLocationFocused(false)
+                  }, 120)
+                }}
+                onChange={(event) => {
+                  onSessionFormChange('location', event.target.value)
+                  setLocationFocused(true)
+                  setActiveLocationIndex(-1)
+                }}
+                onFocus={() => setLocationFocused(true)}
+                onKeyDown={handleLocationKeyDown}
+                placeholder="Dominion Road, Auckland"
+                required
+                value={sessionForm.location}
+              />
+              {locationFocused && locationSuggestions.length > 0 ? (
+                <div className="create-autocomplete-panel" role="listbox" aria-label="Location suggestions">
+                  {locationSuggestions.map((suggestion, index) => (
+                    <button
+                      className={`create-autocomplete-item ${activeLocationIndex === index ? 'is-active' : ''}`}
+                      key={suggestion.id}
+                      onMouseDown={(event) => {
+                        event.preventDefault()
+                        onSessionFormChange('location', suggestion.address)
+                        setSelectedLocationCoordinates({ lat: suggestion.lat, lng: suggestion.lng })
+                        setLocationFocused(false)
+                        setActiveLocationIndex(-1)
+                      }}
+                      type="button"
+                    >
+                      <div className="create-autocomplete-copy">
+                        <strong>{renderHighlightedText(suggestion.name, debouncedLocationQuery)}</strong>
+                        <span>{renderHighlightedText(suggestion.address, debouncedLocationQuery)}</span>
+                      </div>
+                      <div className="create-autocomplete-meta">
+                        {suggestion.distanceKm !== null ? <span>{formatDistanceLabel(suggestion.distanceKm)}</span> : null}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </FormField>
+
+          {selectedLocationCoordinates ? (
+            <div className="create-location-preview">
+              <div className="create-location-preview-header">
+                <span>Location preview</span>
+                <span>{sessionForm.location}</span>
+              </div>
+              <div className="create-location-preview-map">
+                <MapContainer
+                  attributionControl={false}
+                  center={[selectedLocationCoordinates.lat, selectedLocationCoordinates.lng]}
+                  className="leaflet-map leaflet-map-preview"
+                  doubleClickZoom={false}
+                  dragging={false}
+                  fadeAnimation
+                  inertia={false}
+                  markerZoomAnimation
+                  scrollWheelZoom={false}
+                  touchZoom={false}
+                  zoom={14}
+                  zoomAnimation
+                  zoomControl={false}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors &copy; CARTO"
+                    maxZoom={20}
+                    subdomains="abcd"
+                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  />
+                  <Marker icon={brandMapMarker} position={[selectedLocationCoordinates.lat, selectedLocationCoordinates.lng]} />
+                </MapContainer>
+              </div>
+            </div>
+          ) : null}
 
           <div className="create-section-group">
             <div className="create-section-heading">
@@ -2986,6 +3366,176 @@ function normalizeMealSession(session: MealSession) {
     ...session,
     id: session.id || session._id || '',
   }
+}
+
+function useDebouncedValue<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => window.clearTimeout(timeout)
+  }, [delay, value])
+
+  return debouncedValue
+}
+
+function normalizeSearchText(value: string) {
+  return value.toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+function fuzzyMatchScore(source: string, query: string) {
+  const normalizedSource = normalizeSearchText(source)
+  const normalizedQuery = normalizeSearchText(query)
+
+  if (!normalizedQuery) {
+    return 0
+  }
+
+  const directIndex = normalizedSource.indexOf(normalizedQuery)
+  if (directIndex >= 0) {
+    return 120 - directIndex
+  }
+
+  let queryIndex = 0
+  let score = 0
+
+  for (let index = 0; index < normalizedSource.length && queryIndex < normalizedQuery.length; index += 1) {
+    if (normalizedSource[index] === normalizedQuery[queryIndex]) {
+      score += 2
+      queryIndex += 1
+    }
+  }
+
+  return queryIndex === normalizedQuery.length ? score : -1
+}
+
+function renderHighlightedText(text: string, query: string) {
+  const normalizedQuery = normalizeSearchText(query)
+
+  if (!normalizedQuery) {
+    return text
+  }
+
+  const lowerText = text.toLowerCase()
+  const directIndex = lowerText.indexOf(normalizedQuery)
+  if (directIndex >= 0) {
+    const before = text.slice(0, directIndex)
+    const match = text.slice(directIndex, directIndex + normalizedQuery.length)
+    const after = text.slice(directIndex + normalizedQuery.length)
+
+    return (
+      <>
+        {before}
+        <mark className="search-highlight">{match}</mark>
+        {after}
+      </>
+    )
+  }
+
+  const matchedIndices = new Set<number>()
+  let queryIndex = 0
+  for (let index = 0; index < lowerText.length && queryIndex < normalizedQuery.length; index += 1) {
+    if (lowerText[index] === normalizedQuery[queryIndex]) {
+      matchedIndices.add(index)
+      queryIndex += 1
+    }
+  }
+
+  return text.split('').map((character, index) =>
+    matchedIndices.has(index) ? (
+      <mark className="search-highlight" key={`${character}-${index}`}>
+        {character}
+      </mark>
+    ) : (
+      <span key={`${character}-${index}`}>{character}</span>
+    ),
+  )
+}
+
+function haversineDistanceKm(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number },
+) {
+  const earthRadiusKm = 6371
+  const latDelta = degreesToRadians(to.lat - from.lat)
+  const lngDelta = degreesToRadians(to.lng - from.lng)
+  const startLat = degreesToRadians(from.lat)
+  const endLat = degreesToRadians(to.lat)
+
+  const a =
+    Math.sin(latDelta / 2) ** 2 +
+    Math.cos(startLat) * Math.cos(endLat) * Math.sin(lngDelta / 2) ** 2
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+function degreesToRadians(value: number) {
+  return (value * Math.PI) / 180
+}
+
+function formatDistanceLabel(distanceKm: number) {
+  if (distanceKm < 1) {
+    return `${Math.round(distanceKm * 1000)} m away`
+  }
+
+  return `${distanceKm.toFixed(1)} km away`
+}
+
+function buildTitleSuggestions(sessions: MealSession[]) {
+  const seeded = titleSuggestionSeeds.map((title) => ({
+    id: `seed-title-${title}`,
+    title,
+  }))
+
+  const fromSessions = sessions
+    .map((session) => {
+      const title = getSessionCopy(session).title
+      return title ? { id: `session-title-${getSessionId(session)}`, title } : null
+    })
+    .filter((item): item is { id: string; title: string } => Boolean(item))
+
+  return dedupeBy([...seeded, ...fromSessions], (item) => normalizeSearchText(item.title))
+}
+
+function buildPlaceSuggestions(sessions: MealSession[], userCoordinates: { lat: number; lng: number } | null) {
+  const sessionPlaces = sessions
+    .map((session) => {
+      const copy = getSessionCopy(session)
+      const fallback = getFallbackCoordinates(copy.location)
+      return {
+        id: `session-place-${getSessionId(session)}`,
+        name: copy.location,
+        address: copy.location,
+        lat: fallback.lat,
+        lng: fallback.lng,
+      }
+    })
+    .filter((item) => item.name)
+
+  const allPlaces = dedupeBy(
+    [...placeSuggestionSeeds.map((place) => ({ id: `seed-place-${place.name}`, ...place })), ...sessionPlaces],
+    (item) => normalizeSearchText(item.address),
+  )
+
+  return allPlaces.map((place) => ({
+    ...place,
+    distanceKm: userCoordinates ? haversineDistanceKm(userCoordinates, { lat: place.lat, lng: place.lng }) : null,
+  }))
+}
+
+function dedupeBy<T>(items: T[], getKey: (item: T) => string) {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const key = getKey(item)
+    if (seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+    return true
+  })
 }
 
 function getSessionCopy(session: MealSession) {
