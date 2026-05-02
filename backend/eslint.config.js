@@ -21,6 +21,7 @@ export default defineConfig([
     ".env",
     ".env.*",
     "!.env.example",
+    "!.env.test",
 
     // logs
     "npm-debug.log*",

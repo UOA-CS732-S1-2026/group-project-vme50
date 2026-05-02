@@ -20,6 +20,7 @@ export default defineConfig([
     ".env",
     ".env.*",
     "!.env.example", // allow example env file in repo
+    "!.env.test",
 
     // Logs (noise files)
     "*.log",
