@@ -22,28 +22,28 @@ We use GitHub Actions to automatically run checks on every push and pull request
 
 These checks ensure code quality, consistency, and stability across the project.
 
-## 🚨 What CI Runs When you push code, CI runs the equivalent of:
+🚨 What CI runs when you push code, CI runs the equivalent of this in the **project root**:
 
 ```bash
 npm run ci
 ```
 
-This typically includes:
-    • Running tests
-    • Checking for lint errors
-    • Checking for formatting issues
+This typically includes:  
+    • Running tests  
+    • Checking for lint errors  
+    • Checking for formatting issues  
+  
+Your CI will fail if:  
+    • Any test fails  
+    • There are linting errors or warnings  
+    • Code formatting does not match project rules  
+  
+If CI fails, your push or merge will be blocked until all issues are fixed.  
 
-Your CI will fail if:
-    • Any test fails
-    • There are linting errors or warnings
-    • Code formatting does not match project rules
-    
-If CI fails, your push or merge will be blocked until all issues are fixed.
-
-# 🚀 Local Terminal Commands (IMPORTANT)
-
-## 🧹 1. Run this in the **project root** before pushing (format + lint):
-
+🚀 Local Terminal Command (IMPORTANT)  
+  
+Run this in the **project root** before pushing (format + lint):  
+  
 ```bash
 npm run fix
 ```
