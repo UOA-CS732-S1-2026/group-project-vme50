@@ -1,7 +1,10 @@
 # Please edit this gitignore file to suit your needs. You may
 # look at other .gitignore files in the provided examples for inspiration.
 
+# OS files
 .DS_Store
+
+# dependencies
 node_modules
 
 # Environment variables - Edit if necessary
@@ -9,3 +12,8 @@ node_modules
 .env.*
 !.env.example
 !.env.test
+
+# build outputs
+dist/
+build/
+coverage/

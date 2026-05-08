@@ -13,13 +13,13 @@ describe("Meal API", () => {
   ========================================================= */
   const testUser = {
     name: "Test User",
-    email: "test@aucklanduni.ac.nz",
+    email: "test123@aucklanduni.ac.nz",
     password: "123456",
   };
 
   const testCreator = {
     name: "Creator",
-    email: "creator@aucklanduni.ac.nz",
+    email: "test321@aucklanduni.ac.nz",
     password: "123456",
   };
 
