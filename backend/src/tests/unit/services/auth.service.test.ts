@@ -62,14 +62,14 @@ describe("Auth Service", () => {
     repo.createUser.mockResolvedValue({
       _id: "1",
       name: "John",
-      email: "john@aucklanduni.ac.nz",
+      email: "john123@aucklanduni.ac.nz",
     });
 
     mockJwt.sign.mockReturnValue("token");
 
     const result = await registerUser({
       name: "John",
-      email: "john@aucklanduni.ac.nz",
+      email: "john123@aucklanduni.ac.nz",
       password: "123",
     });
 
@@ -77,7 +77,7 @@ describe("Auth Service", () => {
     expect(result.data.user).toEqual({
       id: "1",
       name: "John",
-      email: "john@aucklanduni.ac.nz",
+      email: "john123@aucklanduni.ac.nz",
     });
   });
 
@@ -87,7 +87,7 @@ describe("Auth Service", () => {
     await expect(
       registerUser({
         name: "John",
-        email: "john@aucklanduni.ac.nz",
+        email: "john123@aucklanduni.ac.nz",
         password: "123",
       }),
     ).rejects.toThrow("User already exists");
