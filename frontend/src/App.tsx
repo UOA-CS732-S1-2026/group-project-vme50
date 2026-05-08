@@ -5,25 +5,28 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 
 import ProtectedRoute from "./components/redirect/ProtectedRoute";
+import PageTitle from "./hooks/usePageTitle";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      <PageTitle>
+        <Routes>
+          {/* PUBLIC ROUTES */}
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* PROTECTED ROUTE */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+          {/* PROTECTED ROUTE */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </PageTitle>
     </BrowserRouter>
   );
 }
