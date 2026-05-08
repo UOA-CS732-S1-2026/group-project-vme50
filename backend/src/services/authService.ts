@@ -24,7 +24,14 @@ export const registerUser = async (data: { name: string; email: string; password
     throw new Error("Only University of Auckland students can register");
   }
 
+  const upiRegex = /^[A-Za-z]{4}\d{3}@aucklanduni\.ac\.nz$/;
+
+  if (!upiRegex.test(email)) {
+    throw new Error("Invalid UPI format!");
+  }
+
   const existingUser = await userRepository.findByEmail(email);
+
   if (existingUser) {
     throw new Error("User already exists");
   }
