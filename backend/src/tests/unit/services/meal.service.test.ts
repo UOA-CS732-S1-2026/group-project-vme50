@@ -8,6 +8,7 @@ vi.mock("../../../repositories/mealRepository.js", () => ({
     findMealById: vi.fn(),
     findActiveMeals: vi.fn(),
     saveMeal: vi.fn(),
+    findMealByUser: vi.fn(),
   },
 }));
 
@@ -46,8 +47,12 @@ describe("Meal Service", () => {
       {
         title: "Meal",
         description: "Test",
-        location: "Auckland",
-        time: new Date(),
+        location: {
+          address: "Auckland",
+          lat: -36.8485,
+          lng: 174.7633,
+        },
+        time: new Date(Date.now() + 60 * 60 * 1000),
         slots: 2,
       },
       USER_ID,

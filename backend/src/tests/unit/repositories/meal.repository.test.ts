@@ -39,7 +39,11 @@ describe("Meal Repository", () => {
     const meal = await mealRepository.createMeal({
       title: "Test Meal",
       description: "Dinner",
-      location: "Auckland",
+      location: {
+        address: "Auckland",
+        lat: -36.8485,
+        lng: 174.7633,
+      },
       time: new Date(),
       slots: 2,
       creator: user._id,
@@ -50,7 +54,11 @@ describe("Meal Repository", () => {
     expect(meal).toBeDefined();
     expect(meal.title).toBe("Test Meal");
     expect(meal.description).toBe("Dinner");
-    expect(meal.location).toBe("Auckland");
+    expect(meal.location).toMatchObject({
+      address: "Auckland",
+      lat: -36.8485,
+      lng: 174.7633,
+    });
     expect(meal.creator).toBe(user._id);
     expect(meal.participants).toStrictEqual([user._id]);
     expect(meal.isActive).toBe(true);
@@ -63,7 +71,11 @@ describe("Meal Repository", () => {
     const mealA = await MealSession.create({
       title: "Old Meal",
       description: "A",
-      location: "Auckland",
+      location: {
+        address: "Auckland",
+        lat: -36.8485,
+        lng: 174.7633,
+      },
       time: new Date(),
       slots: 2,
       creator: user._id,
@@ -74,7 +86,11 @@ describe("Meal Repository", () => {
     const mealB = await MealSession.create({
       title: "New Meal",
       description: "B",
-      location: "Auckland",
+      location: {
+        address: "Auckland",
+        lat: -36.8485,
+        lng: 174.7633,
+      },
       time: new Date(),
       slots: 2,
       creator: user._id,
@@ -97,7 +113,11 @@ describe("Meal Repository", () => {
     const meal = await MealSession.create({
       title: "Find Me",
       description: "Test",
-      location: "Auckland",
+      location: {
+        address: "Auckland",
+        lat: -36.8485,
+        lng: 174.7633,
+      },
       time: new Date(),
       slots: 2,
       creator: user._id,
@@ -121,7 +141,11 @@ describe("Meal Repository", () => {
       const meal = await MealSession.create({
         title: "Meal",
         description: "Test",
-        location: "Auckland",
+        location: {
+          address: "Auckland",
+          lat: -36.8485,
+          lng: 174.7633,
+        },
         time: new Date(),
         slots: 2,
         creator: user._id,
@@ -147,7 +171,11 @@ describe("Meal Repository", () => {
       const meal = await MealSession.create({
         title: "Meal",
         description: "Test",
-        location: "Auckland",
+        location: {
+          address: "Auckland",
+          lat: -36.8485,
+          lng: 174.7633,
+        },
         time: new Date(),
         slots: 2,
         creator: user._id,
