@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/redirect/ProtectedRoute";
 import PageTitle from "./hooks/usePageTitle";
 
+import "./utils/fixLeafletIcon.util";
+
 function App() {
   return (
     <BrowserRouter>

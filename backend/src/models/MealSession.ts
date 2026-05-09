@@ -6,26 +6,46 @@ const mealSessionSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: 30,
     },
 
     description: {
       type: String,
-      required: true,
+      trim: true,
+      maxlength: 300,
+      default: "",
     },
 
     location: {
-      type: String,
-      required: true,
+      address: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 100,
+      },
+
+      lat: {
+        type: Number,
+        required: true,
+      },
+
+      lng: {
+        type: Number,
+        required: true,
+      },
     },
 
     time: {
       type: Date,
       required: true,
+      index: true,
     },
 
     slots: {
       type: Number,
       required: true,
+      min: 1,
+      max: 10,
       default: 2,
     },
 
@@ -33,6 +53,7 @@ const mealSessionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
 
     participants: [
@@ -45,6 +66,7 @@ const mealSessionSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   { timestamps: true },

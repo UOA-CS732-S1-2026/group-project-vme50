@@ -63,7 +63,11 @@ describe("Meal API", () => {
         .send({
           title: "Test Meal",
           description: "Used for test",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
@@ -122,7 +126,11 @@ describe("Meal API", () => {
         .send({
           title: "Test Meal",
           description: "Created by creator",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
@@ -172,7 +180,11 @@ describe("Meal API", () => {
         .send({
           title: "Test Meal",
           description: "Created by creator",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });

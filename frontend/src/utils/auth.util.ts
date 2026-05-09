@@ -9,15 +9,20 @@ export const isAuthenticated = (): boolean => {
 };
 
 /* =========================
-   GET USER
+   GET USER (FIXED SAFE ID)
 ========================= */
-export const getUser = (): { name?: string; email?: string } | null => {
+export const getUser = (): { _id: string; name?: string; email?: string } | null => {
   const user = localStorage.getItem(USER_KEY);
 
   if (!user) return null;
 
   try {
-    return JSON.parse(user);
+    const parsed = JSON.parse(user);
+
+    return {
+      ...parsed,
+      _id: parsed._id || parsed.id,
+    };
   } catch {
     return null;
   }
@@ -36,5 +41,12 @@ export const clearAuth = () => {
 ========================= */
 export const setAuth = (token: string, user: any) => {
   localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+
+  // normalize user BEFORE saving
+  const safeUser = {
+    ...user,
+    _id: user._id || user.id,
+  };
+
+  localStorage.setItem(USER_KEY, JSON.stringify(safeUser));
 };

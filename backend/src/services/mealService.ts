@@ -4,10 +4,30 @@ import { mealRepository } from "../repositories/mealRepository.js";
 const toObjectId = (id: string) => new mongoose.Types.ObjectId(id);
 
 export const createMeal = async (data: any, userId: string) => {
+  const mealTime = new Date(data.time);
+
+  if (mealTime < new Date()) {
+    throw new Error("INVALID_TIME");
+  }
+
   const uid = toObjectId(userId);
 
+  const existingMeal = await mealRepository.findMealByUser(userId);
+
+  if (existingMeal) {
+    throw new Error("ALREADY_IN_MEAL");
+  }
+
   return await mealRepository.createMeal({
-    ...data,
+    title: data.title,
+    description: data.description || "",
+    location: {
+      address: data.location.address,
+      lat: data.location.lat,
+      lng: data.location.lng,
+    },
+    time: mealTime,
+    slots: data.slots ?? data.maxParticipants,
     creator: uid,
     participants: [uid],
   });
@@ -28,6 +48,12 @@ export const joinMeal = async (mealId: string, userId: string) => {
   );
 
   if (alreadyJoined) throw new Error("ALREADY_JOINED");
+
+  const existingMeal = await mealRepository.findMealByUser(userId);
+
+  if (existingMeal) {
+    throw new Error("ALREADY_IN_MEAL");
+  }
 
   session.participants.push(userId as any);
 
@@ -50,6 +76,10 @@ export const leaveMeal = async (mealId: string, userId: string) => {
   session.participants.splice(index, 1);
 
   await mealRepository.saveMeal(session);
+
+  if (session.participants.length === 0) {
+    await mealRepository.deleteMeal(mealId);
+  }
 
   return session;
 };

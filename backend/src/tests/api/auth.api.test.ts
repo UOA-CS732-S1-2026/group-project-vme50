@@ -194,7 +194,11 @@ describe("Auth API", () => {
         .send({
           title: "Join Meal Test",
           description: "Meal to join.",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 5,
         });
@@ -248,7 +252,11 @@ describe("Auth API", () => {
         .send({
           title: "Leave Meal Test",
           description: "Meal to leave.",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 5,
         });
@@ -322,7 +330,11 @@ describe("Auth API", () => {
         .send({
           title: "New token works",
           description: "valid",
-          location: "Auckland",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
           time: new Date(Date.now() + 3600000).toISOString(),
           slots: 2,
         });
