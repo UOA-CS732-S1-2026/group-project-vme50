@@ -64,14 +64,10 @@ function InviteCard({
     <>
       <div className="w-full rounded-2xl bg-white p-4 pb-3 shadow-sm border border-gray-200 hover:shadow-md transition h-full flex flex-col">
         {/* TITLE */}
-        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 break-words">
-          {title}
-        </h3>
+        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 break-words">{title}</h3>
 
         {/* CREATOR 👤 */}
-        <p className="text-xs text-gray-500 mt-1">
-          👤 {creator || "Unknown host"}
-        </p>
+        <p className="text-xs text-gray-500 mt-1">👤 {creator || "Unknown host"}</p>
 
         {/* LOCATION */}
         <button
@@ -82,16 +78,11 @@ function InviteCard({
         </button>
 
         {/* DESCRIPTION */}
-        <p className="text-sm text-gray-600 mt-2 line-clamp-3">
-          {description}
-        </p>
+        <p className="text-sm text-gray-600 mt-2 line-clamp-3">{description}</p>
 
         {/* TIME + SLOTS */}
         <div className="flex justify-between text-xs mt-auto pt-4">
-
-          <span className="text-gray-500">
-            🕒 {new Date(time).toLocaleString()}
-          </span>
+          <span className="text-gray-500">🕒 {new Date(time).toLocaleString()}</span>
 
           <span
             className={`px-2 py-1 rounded-full flex items-center gap-1 ${
@@ -109,9 +100,7 @@ function InviteCard({
             disabled={loading !== null}
             className="relative w-full mt-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-60 cursor-pointer flex items-center justify-center"
           >
-            <span className={loading === "leave" ? "invisible" : ""}>
-              Leave Meal
-            </span>
+            <span className={loading === "leave" ? "invisible" : ""}>Leave Meal</span>
 
             {loading === "leave" && (
               <span className="absolute w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

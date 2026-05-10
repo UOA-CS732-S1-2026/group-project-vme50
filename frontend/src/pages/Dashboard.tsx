@@ -64,9 +64,7 @@ function Dashboard() {
 
   /* ================= FILTERED MEALS ================= */
   const filteredMeals =
-    view === "mine"
-      ? meals.filter((meal) => isUserInMeal(meal.participants))
-      : meals;
+    view === "mine" ? meals.filter((meal) => isUserInMeal(meal.participants)) : meals;
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-b from-gray-100 via-white to-gray-100 flex flex-col">
@@ -76,13 +74,9 @@ function Dashboard() {
         {/* HERO */}
         <div className="px-8 pt-6">
           <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl shadow-lg p-6 text-white">
-            <h2 className="text-4xl font-bold tracking-tight">
-              Welcome to Platemates
-            </h2>
+            <h2 className="text-4xl font-bold tracking-tight">Welcome to Platemates</h2>
 
-            <p className="mt-2 text-white/80 text-sm">
-              Share meals, make friends, save money.
-            </p>
+            <p className="mt-2 text-white/80 text-sm">Share meals, make friends, save money.</p>
 
             <button
               onClick={() => setShowModal(true)}
@@ -102,9 +96,7 @@ function Dashboard() {
             </h3>
 
             <p className="text-sm text-gray-500 mt-1">
-              {view === "all"
-                ? "Join sessions or leave your current ones"
-                : "Meals you’ve joined"}
+              {view === "all" ? "Join sessions or leave your current ones" : "Meals you’ve joined"}
             </p>
           </div>
 
@@ -146,9 +138,7 @@ function Dashboard() {
                 <div className="text-5xl">🍱</div>
 
                 <h3 className="mt-4 text-lg font-semibold text-gray-700">
-                  {view === "all"
-                    ? "No meals available yet"
-                    : "You haven’t joined any meals yet"}
+                  {view === "all" ? "No meals available yet" : "You haven’t joined any meals yet"}
                 </h3>
 
                 <p className="text-sm text-gray-500 mt-1 max-w-md">
@@ -198,10 +188,7 @@ function Dashboard() {
 
       {/* MODAL */}
       {showModal && (
-        <CreateMealModal
-          onClose={() => setShowModal(false)}
-          onCreate={handleCreateMeal}
-        />
+        <CreateMealModal onClose={() => setShowModal(false)} onCreate={handleCreateMeal} />
       )}
     </div>
   );

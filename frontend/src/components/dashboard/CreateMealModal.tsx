@@ -29,8 +29,7 @@ function CreateMealModal({ onClose, onCreate }: Props) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.name === "slots" ? Number(e.target.value) : e.target.value,
+      [e.target.name]: e.target.name === "slots" ? Number(e.target.value) : e.target.value,
     });
   };
 
@@ -89,12 +88,9 @@ function CreateMealModal({ onClose, onCreate }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
-
         {/* HEADER */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Create Meal Session
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">Create Meal Session</h2>
 
           <button
             onClick={onClose}
@@ -106,7 +102,6 @@ function CreateMealModal({ onClose, onCreate }: Props) {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-
           {/* TITLE */}
           <div>
             <input
@@ -149,12 +144,9 @@ function CreateMealModal({ onClose, onCreate }: Props) {
 
           {/* TIME + SLOTS */}
           <div className="grid grid-cols-2 gap-3">
-
             {/* TIME */}
             <div>
-              <label className="text-xs text-gray-500">
-                Meal Start Time
-              </label>
+              <label className="text-xs text-gray-500">Meal Start Time</label>
               <input
                 type="datetime-local"
                 name="time"
@@ -168,9 +160,7 @@ function CreateMealModal({ onClose, onCreate }: Props) {
 
             {/* SLOTS */}
             <div>
-              <label className="text-xs text-gray-500">
-                Max Slots
-              </label>
+              <label className="text-xs text-gray-500">Max Slots</label>
               <input
                 type="number"
                 name="slots"
@@ -182,7 +172,6 @@ function CreateMealModal({ onClose, onCreate }: Props) {
                 required
               />
             </div>
-
           </div>
 
           {/* BUTTONS */}
@@ -202,7 +191,6 @@ function CreateMealModal({ onClose, onCreate }: Props) {
               Create
             </button>
           </div>
-
         </form>
       </div>
     </div>

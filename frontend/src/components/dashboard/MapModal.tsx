@@ -31,7 +31,10 @@ function MapModal({ open, onClose, lat, lng, address }: Props) {
         <div className="flex items-center justify-between p-4">
           <h2 className="font-semibold text-gray-800">📍 Map Location</h2>
 
-          <button onClick={onClose} className="text-red-500 hover:text-red-600 text-2xl font-bold transition cursor-pointer">
+          <button
+            onClick={onClose}
+            className="text-red-500 hover:text-red-600 text-2xl font-bold transition cursor-pointer"
+          >
             ×
           </button>
         </div>
