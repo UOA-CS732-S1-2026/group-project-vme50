@@ -16,6 +16,9 @@ type Props = {
 };
 
 function CreateMealModal({ onClose, onCreate }: Props) {
+  const TITLE_LIMIT = 40;
+  const DESCRIPTION_LIMIT = 150;
+
   /* ================= FORM STATE ================= */
   const [formData, setFormData] = useState({
     title: "",
@@ -130,9 +133,14 @@ function CreateMealModal({ onClose, onCreate }: Props) {
             value={formData.title}
             onChange={handleChange}
             placeholder="Meal title"
+            maxLength={TITLE_LIMIT}
             className="w-full mb-4 rounded-xl border p-3"
             required
           />
+
+          <p className="text-xs text-gray-400 mb-4 text-right">
+            {formData.title.length}/{TITLE_LIMIT}
+          </p>
 
           {/* DESCRIPTION */}
           <input
@@ -140,9 +148,14 @@ function CreateMealModal({ onClose, onCreate }: Props) {
             value={formData.description}
             onChange={handleChange}
             placeholder="Description"
+            maxLength={DESCRIPTION_LIMIT}
             className="w-full mb-4 rounded-xl border p-3"
             required
           />
+
+          <p className="text-xs text-gray-400 mb-4 text-right">
+            {formData.description.length}/{DESCRIPTION_LIMIT}
+          </p>
 
           {/* ================= MAP PICKER ================= */}
           <MapPicker onSelect={handleMapSelect} value={{ lat: formData.lat, lng: formData.lng }} />

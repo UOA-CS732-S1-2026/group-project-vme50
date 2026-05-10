@@ -6,13 +6,13 @@ const mealSessionSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 30,
+      maxlength: 40,
     },
 
     description: {
       type: String,
       trim: true,
-      maxlength: 300,
+      maxlength: 150,
       default: "",
     },
 

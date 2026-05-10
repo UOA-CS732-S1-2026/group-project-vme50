@@ -40,23 +40,23 @@ function InviteCard({
 
   return (
     <>
-      <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-200 hover:shadow-md transition">
+      <div className="w-full rounded-2xl bg-white p-5 shadow-sm border border-gray-200 hover:shadow-md transition h-full flex flex-col">
         {/* TITLE */}
-        <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 break-words">{title}</h3>
 
         {/* LOCATION */}
         <button
           onClick={() => setOpenMap(true)}
-          className="text-sm text-blue-600 hover:text-blue-700 mt-1 flex items-center gap-1 transition cursor-pointer"
+          className="text-sm text-blue-600 hover:text-blue-700 mt-1 flex items-center gap-1 transition cursor-pointer line-clamp-1 break-all"
         >
           📍 {location?.address || "No location"}
         </button>
 
         {/* DESCRIPTION */}
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{description}</p>
+        <p className="text-sm text-gray-600 mt-2 line-clamp-3">{description}</p>
 
         {/* TIME + SLOTS */}
-        <div className="flex justify-between text-xs mt-4">
+        <div className="flex justify-between text-xs mt-auto pt-4">
           <span className="text-gray-500">🕒 {new Date(time).toLocaleString()}</span>
 
           <span
