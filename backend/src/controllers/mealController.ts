@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { createMeal, getMeals, joinMeal, leaveMeal } from "../services/mealService.js";
 
+import { io } from "../server.js";
+
 /* ================= CREATE MEAL ================= */
 export const createMealSession = async (req: any, res: Response) => {
   try {
@@ -41,6 +43,11 @@ export const joinMealSession = async (req: any, res: Response) => {
   try {
     const session = await joinMeal(req.params.id, req.user.userId);
 
+    io.emit("mealSlotsUpdated", {
+      mealId: session._id,
+      current: session.participants.length,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Joined session",
@@ -79,6 +86,11 @@ export const joinMealSession = async (req: any, res: Response) => {
 export const leaveMealSession = async (req: any, res: Response) => {
   try {
     const session = await leaveMeal(req.params.id, req.user.userId);
+
+    io.emit("mealSlotsUpdated", {
+      mealId: session._id,
+      current: session.participants.length,
+    });
 
     return res.status(200).json({
       success: true,

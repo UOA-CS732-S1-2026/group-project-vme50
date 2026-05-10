@@ -1,7 +1,9 @@
 import "./config/env.js";
 
+import http from "http";
 import express from "express";
 import cors from "cors";
+import { Server } from "socket.io";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
@@ -30,16 +32,42 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/meals", mealRoutes);
 
+/* ---------------- SOCKET SETUP ---------------- */
+const server = http.createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin: allowedOrigin,
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
 /* ---------------- Server ---------------- */
 const PORT = process.env.PORT || 5000;
 
-// Only start server if NOT testing
-if (process.env.NODE_ENV !== "test") {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  });
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+};
+
+if (process.env.NODE_ENV !== "test") {
+  startServer();
 }
 
 /* ---------------- Export for testing ---------------- */
