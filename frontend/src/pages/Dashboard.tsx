@@ -7,6 +7,8 @@ import CreateMealModal from "../components/dashboard/CreateMealModal";
 import { getMeals, createMeal, joinMeal, leaveMeal } from "../api/mealApi";
 import { getUser } from "../utils/auth.util";
 
+import { socket } from "../socket/socket";
+
 function Dashboard() {
   const [meals, setMeals] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -25,6 +27,26 @@ function Dashboard() {
     };
 
     fetchMeals();
+  }, []);
+
+  useEffect(() => {
+    socket.on("mealSlotsUpdated", (data) => {
+      setMeals((prev) =>
+        prev.map((meal) =>
+          meal._id === data.mealId
+            ? {
+                ...meal,
+                participants: meal.participants,
+                _realtimeCount: data.current,
+              }
+            : meal,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("mealSlotsUpdated");
+    };
   }, []);
 
   /* ================= CREATE ================= */
