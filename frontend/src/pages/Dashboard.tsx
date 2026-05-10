@@ -183,6 +183,7 @@ function Dashboard() {
                         current={meal.participants?.length || 0}
                         max={meal.slots}
                         joined={joined}
+                        creator={meal.creator.name}
                         onJoin={handleJoin}
                         onLeave={handleLeave}
                       />
