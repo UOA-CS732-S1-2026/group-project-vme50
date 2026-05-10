@@ -117,7 +117,6 @@ function Dashboard() {
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {meals.map((meal) => {
                 const joined = isUserInMeal(meal.participants);
-                const disabledJoin = meals.some((m) => isUserInMeal(m.participants)) && !joined;
 
                 return (
                   <div
@@ -133,7 +132,6 @@ function Dashboard() {
                       current={meal.participants?.length || 0}
                       max={meal.slots}
                       joined={joined}
-                      disabledJoin={disabledJoin}
                       onJoin={handleJoin}
                       onLeave={handleLeave}
                     />

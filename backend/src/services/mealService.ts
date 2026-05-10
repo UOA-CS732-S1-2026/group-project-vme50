@@ -12,12 +12,6 @@ export const createMeal = async (data: any, userId: string) => {
 
   const uid = toObjectId(userId);
 
-  const existingMeal = await mealRepository.findMealByUser(userId);
-
-  if (existingMeal) {
-    throw new Error("ALREADY_IN_MEAL");
-  }
-
   return await mealRepository.createMeal({
     title: data.title,
     description: data.description || "",
@@ -48,12 +42,6 @@ export const joinMeal = async (mealId: string, userId: string) => {
   );
 
   if (alreadyJoined) throw new Error("ALREADY_JOINED");
-
-  const existingMeal = await mealRepository.findMealByUser(userId);
-
-  if (existingMeal) {
-    throw new Error("ALREADY_IN_MEAL");
-  }
 
   session.participants.push(userId as any);
 

@@ -17,7 +17,6 @@ interface InviteCardProps {
   max: number;
 
   joined: boolean;
-  disabledJoin: boolean;
 
   onJoin: (id: string) => void;
   onLeave: (id: string) => void;
@@ -32,7 +31,6 @@ function InviteCard({
   current,
   max,
   joined,
-  disabledJoin,
   onJoin,
   onLeave,
 }: InviteCardProps) {
@@ -81,14 +79,14 @@ function InviteCard({
         ) : (
           <button
             onClick={() => onJoin(id)}
-            disabled={isFull || disabledJoin}
+            disabled={isFull}
             className={`w-full mt-4 py-2 rounded-lg transition font-medium ${
-              isFull || disabledJoin
+              isFull
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm cursor-pointer"
             }`}
           >
-            {isFull ? "Full" : disabledJoin ? "Already in a Meal" : "Join Meal"}
+            {isFull ? "Full" : "Join Meal"}
           </button>
         )}
       </div>
