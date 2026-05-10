@@ -29,14 +29,20 @@ function Dashboard() {
     fetchMeals();
   }, []);
 
+  /* ================= SOCKET REALTIME ================= */
   useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Socket connected:", socket.id);
+    });
+
     socket.on("mealSlotsUpdated", (data) => {
+      console.log("📡 SOCKET UPDATE:", data);
+
       setMeals((prev) =>
         prev.map((meal) =>
           meal._id === data.mealId
             ? {
                 ...meal,
-                participants: meal.participants,
                 _realtimeCount: data.current,
               }
             : meal,
@@ -46,6 +52,7 @@ function Dashboard() {
 
     return () => {
       socket.off("mealSlotsUpdated");
+      socket.off("connect");
     };
   }, []);
 
@@ -192,7 +199,7 @@ function Dashboard() {
                         description={meal.description}
                         location={meal.location}
                         time={meal.time}
-                        current={meal.participants?.length || 0}
+                        current={meal._realtimeCount ?? meal.participants?.length ?? 0}
                         max={meal.slots}
                         joined={joined}
                         creator={meal.creator.name}
