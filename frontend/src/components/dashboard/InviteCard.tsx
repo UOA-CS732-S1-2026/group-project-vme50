@@ -17,10 +17,11 @@ interface InviteCardProps {
   max: number;
 
   joined: boolean;
-  disabledJoin: boolean;
 
-  onJoin: (id: string) => void;
-  onLeave: (id: string) => void;
+  creator?: string;
+
+  onJoin: (id: string) => Promise<void>;
+  onLeave: (id: string) => Promise<void>;
 }
 
 function InviteCard({
@@ -32,63 +33,96 @@ function InviteCard({
   current,
   max,
   joined,
-  disabledJoin,
+  creator,
   onJoin,
   onLeave,
 }: InviteCardProps) {
   const [openMap, setOpenMap] = useState(false);
+  const [loading, setLoading] = useState<"join" | "leave" | null>(null);
 
   const isFull = current >= max;
 
+  const handleJoin = async () => {
+    setLoading("join");
+    try {
+      await onJoin(id);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleLeave = async () => {
+    setLoading("leave");
+    try {
+      await onLeave(id);
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <>
-      <div className="rounded-2xl bg-white p-5 shadow-sm border border-gray-200 hover:shadow-md transition">
+      <div className="w-full rounded-2xl bg-white p-4 pb-3 shadow-sm border border-gray-200 hover:shadow-md transition h-full flex flex-col">
         {/* TITLE */}
-        <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 break-words">{title}</h3>
+
+        {/* CREATOR 👤 */}
+        <p className="text-xs text-gray-500 mt-1">👤 {creator || "Unknown host"}</p>
 
         {/* LOCATION */}
         <button
           onClick={() => setOpenMap(true)}
-          className="text-sm text-blue-600 hover:text-blue-700 mt-1 flex items-center gap-1 transition cursor-pointer"
+          className="text-sm text-blue-600 hover:text-blue-700 mt-1 flex items-center gap-1 transition cursor-pointer line-clamp-1 break-all"
         >
           📍 {location?.address || "No location"}
         </button>
 
         {/* DESCRIPTION */}
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{description}</p>
+        <p className="text-sm text-gray-600 mt-2 line-clamp-3">{description}</p>
 
         {/* TIME + SLOTS */}
-        <div className="flex justify-between text-xs mt-4">
+        <div className="flex justify-between text-xs mt-auto pt-4">
           <span className="text-gray-500">🕒 {new Date(time).toLocaleString()}</span>
 
           <span
-            className={`px-2 py-1 rounded-full ${
+            className={`px-2 py-1 rounded-full flex items-center gap-1 ${
               isFull ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
             }`}
           >
-            {current}/{max}
+            👥 {current}/{max}
           </span>
         </div>
 
-        {/* BUTTON LOGIC (FINAL FIX) */}
+        {/* BUTTONS */}
         {joined ? (
           <button
-            onClick={() => onLeave(id)}
-            className="w-full mt-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+            onClick={handleLeave}
+            disabled={loading !== null}
+            className="relative w-full mt-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-60 cursor-pointer flex items-center justify-center"
           >
-            Leave Meal
+            <span className={loading === "leave" ? "invisible" : ""}>Leave Meal</span>
+
+            {loading === "leave" && (
+              <span className="absolute w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            )}
           </button>
         ) : (
           <button
-            onClick={() => onJoin(id)}
-            disabled={isFull || disabledJoin}
-            className={`w-full mt-4 py-2 rounded-lg transition font-medium ${
-              isFull || disabledJoin
+            onClick={handleJoin}
+            disabled={isFull || loading !== null}
+            className={`relative w-full mt-4 py-2 rounded-lg transition font-medium flex items-center justify-center ${
+              isFull
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm cursor-pointer"
             }`}
           >
-            {isFull ? "Full" : disabledJoin ? "Already in a Meal" : "Join Meal"}
+            <span className={loading === "join" ? "invisible" : ""}>
+              {isFull ? "Full" : "Join Meal"}
+            </span>
+
+            {loading === "join" && (
+              <span className="absolute w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            )}
           </button>
         )}
       </div>

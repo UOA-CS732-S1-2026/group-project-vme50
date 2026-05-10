@@ -29,7 +29,8 @@ export default function MapView({ lat, lng }: Props) {
         center: position,
         zoom: 15,
         style: { height: "300px", width: "100%" },
-        scrollWheelZoom: false,
+        scrollWheelZoom: true,
+        zoomControl: true,
       } as any)}
     >
       {/* ================= TILE LAYER ================= */}

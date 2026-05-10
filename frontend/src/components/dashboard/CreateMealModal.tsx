@@ -1,22 +1,16 @@
-/* ================= CREATE MEAL MODAL =================
-   Purpose:
-   - Create a meal/session
-   - Pick location on map
-   - Convert coordinates → address (on submit)
-===================================================== */
-
 import React, { useState } from "react";
 import MapPicker from "./MapPicker";
 import { getAddressFromCoords } from "../../utils/getAddressFromCoords.util.ts";
 
-/* ================= PROPS ================= */
 type Props = {
   onClose: () => void;
   onCreate: (mealData: any) => Promise<void>;
 };
 
 function CreateMealModal({ onClose, onCreate }: Props) {
-  /* ================= FORM STATE ================= */
+  const TITLE_LIMIT = 40;
+  const DESCRIPTION_LIMIT = 150;
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,16 +20,12 @@ function CreateMealModal({ onClose, onCreate }: Props) {
     lng: 0,
   });
 
-  /* ================= MIN DATETIME =================
-     Prevent selecting past time
-  ================================================= */
   const getMinDateTime = () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     return now.toISOString().slice(0, 16);
   };
 
-  /* ================= INPUT HANDLER ================= */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -43,9 +33,6 @@ function CreateMealModal({ onClose, onCreate }: Props) {
     });
   };
 
-  /* ================= MAP SELECT =================
-     Gets coordinates from MapPicker
-  ================================================= */
   const handleMapSelect = (loc: { lat: number; lng: number }) => {
     setFormData((prev) => ({
       ...prev,
@@ -54,31 +41,22 @@ function CreateMealModal({ onClose, onCreate }: Props) {
     }));
   };
 
-  /* ================= SUBMIT =================
-     - validates input
-     - reverse geocodes coordinates → address
-     - sends meal data to backend
-  ================================================= */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    /* validation: time cannot be in past */
     if (new Date(formData.time) < new Date()) {
       alert("Meal time cannot be in the past");
       return;
     }
 
-    /* validation: must pick location */
     if (!formData.lat || !formData.lng) {
       alert("Please select a location on the map");
       return;
     }
 
     try {
-      /* ================= REVERSE GEOCODING ================= */
       const address = await getAddressFromCoords(formData.lat, formData.lng);
 
-      /* ================= CREATE MEAL ================= */
       await onCreate({
         title: formData.title,
         description: formData.description,
@@ -91,7 +69,6 @@ function CreateMealModal({ onClose, onCreate }: Props) {
         slots: formData.slots,
       });
 
-      /* ================= RESET FORM ================= */
       setFormData({
         title: "",
         description: "",
@@ -109,75 +86,109 @@ function CreateMealModal({ onClose, onCreate }: Props) {
   };
 
   return (
-    /* ================= MODAL BACKDROP ================= */
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      {/* ================= MODAL CONTAINER ================= */}
-      <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
-        {/* ================= HEADER ================= */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">Create Meal Session</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+          <h2 className="text-lg font-semibold text-gray-800">Create Meal Session</h2>
 
-          <button onClick={onClose} className="text-2xl font-bold text-gray-400">
+          <button
+            onClick={onClose}
+            className="text-red-500 hover:text-red-600 text-2xl font-bold transition cursor-pointer"
+          >
             ×
           </button>
         </div>
 
-        {/* ================= FORM ================= */}
-        <form onSubmit={handleSubmit}>
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* TITLE */}
-          <input
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Meal title"
-            className="w-full mb-4 rounded-xl border p-3"
-            required
-          />
+          <div>
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Title"
+              maxLength={TITLE_LIMIT}
+              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+              required
+            />
+            <p className="text-xs text-gray-400 text-right mt-1">
+              {formData.title.length}/{TITLE_LIMIT}
+            </p>
+          </div>
 
           {/* DESCRIPTION */}
-          <input
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full mb-4 rounded-xl border p-3"
-            required
-          />
+          <div>
+            <input
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Description"
+              maxLength={DESCRIPTION_LIMIT}
+              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+              required
+            />
+            <p className="text-xs text-gray-400 text-right mt-1">
+              {formData.description.length}/{DESCRIPTION_LIMIT}
+            </p>
+          </div>
 
-          {/* ================= MAP PICKER ================= */}
-          <MapPicker onSelect={handleMapSelect} value={{ lat: formData.lat, lng: formData.lng }} />
+          {/* MAP */}
+          <div className="rounded-xl overflow-hidden border">
+            <MapPicker
+              onSelect={handleMapSelect}
+              value={{ lat: formData.lat, lng: formData.lng }}
+            />
+          </div>
 
-          {/* TIME */}
-          <input
-            type="datetime-local"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            min={getMinDateTime()}
-            className="w-full mt-4 mb-4 rounded-xl border p-3"
-            required
-          />
+          {/* TIME + SLOTS */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* TIME */}
+            <div>
+              <label className="text-xs text-gray-500">Meal Start Time</label>
+              <input
+                type="datetime-local"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                min={getMinDateTime()}
+                className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                required
+              />
+            </div>
 
-          {/* SLOTS */}
-          <input
-            type="number"
-            name="slots"
-            value={formData.slots}
-            onChange={handleChange}
-            min={2}
-            max={20}
-            className="w-full mb-4 rounded-xl border p-3"
-            required
-          />
+            {/* SLOTS */}
+            <div>
+              <label className="text-xs text-gray-500">Max Slots</label>
+              <input
+                type="number"
+                name="slots"
+                value={formData.slots}
+                onChange={handleChange}
+                min={2}
+                max={20}
+                className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                required
+              />
+            </div>
+          </div>
 
-          {/* ================= BUTTONS ================= */}
-          <div className="flex gap-4">
-            <button type="button" onClick={onClose} className="flex-1 border p-3 rounded-xl">
+          {/* BUTTONS */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border text-gray-600 hover:bg-gray-50 cursor-pointer"
+            >
               Cancel
             </button>
 
-            <button type="submit" className="flex-1 bg-teal-500 text-white p-3 rounded-xl">
-              Create Session
+            <button
+              type="submit"
+              className="flex-1 py-2.5 rounded-xl bg-teal-500 text-white font-medium hover:bg-teal-600 transition cursor-pointer"
+            >
+              Create
             </button>
           </div>
         </form>
