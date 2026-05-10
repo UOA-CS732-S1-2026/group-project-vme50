@@ -60,27 +60,28 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 via-white to-gray-100">
+    <div className="h-screen overflow-hidden bg-gradient-to-b from-gray-100 via-white to-gray-100 flex flex-col">
       <Topbar />
 
+      <div className="flex-1 flex flex-col overflow-hidden">
       {/* HERO */}
-      <div className="px-8 pt-8">
-        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl shadow-lg p-8 text-white">
+      <div className="px-8 pt-6">
+        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl shadow-lg p-6 text-white">
           <h2 className="text-4xl font-bold tracking-tight">Welcome to Platemates</h2>
 
           <p className="mt-2 text-white/80 text-sm">Share meals, make friends, save money.</p>
 
           <button
             onClick={() => setShowModal(true)}
-            className="mt-6 bg-white text-teal-600 font-semibold px-5 py-3 rounded-xl hover:bg-gray-100 transition shadow-sm cursor-pointer"
+            className="mt-6 bg-white text-teal-600 font-semibold px-5 py-2 rounded-xl hover:bg-gray-100 transition shadow-sm cursor-pointer"
           >
-            + Invite Meal
+            + Create Invite
           </button>
         </div>
       </div>
 
       {/* HEADER */}
-      <div className="px-8 mt-10">
+      <div className="px-8 mt-4">
         <div className="flex items-end justify-between">
           <div>
             <h3 className="text-xl font-bold text-gray-800">Available Meals</h3>
@@ -94,8 +95,8 @@ function Dashboard() {
       </div>
 
       {/* MEALS */}
-      <div className="px-8 py-6">
-        <div className="bg-white/70 backdrop-blur border border-gray-200 rounded-2xl shadow-sm p-6">
+      <div className="px-8 py-2">
+        <div className="bg-white/70 backdrop-blur border border-gray-200 rounded-2xl shadow-sm p-4 max-h-[calc(100vh-360px)] overflow-y-auto">
           {meals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="text-5xl">🍱</div>
@@ -114,14 +115,14 @@ function Dashboard() {
               </button>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {meals.map((meal) => {
                 const joined = isUserInMeal(meal.participants);
 
                 return (
                   <div
                     key={meal._id}
-                    className="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition"
+                    className="w-full bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition"
                   >
                     <InviteCard
                       id={meal._id}
@@ -142,7 +143,7 @@ function Dashboard() {
           )}
         </div>
       </div>
-
+      </div>
       {/* MODAL */}
       {showModal && (
         <CreateMealModal onClose={() => setShowModal(false)} onCreate={handleCreateMeal} />
