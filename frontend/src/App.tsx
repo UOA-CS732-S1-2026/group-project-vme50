@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -230,20 +230,6 @@ function App() {
   const currentUserId = useMemo(() => getUserIdFromToken(token), [token])
 
   useEffect(() => {
-    if (!token) {
-      setSessions([])
-      setProfile(null)
-      setProfileForm(emptyProfileForm)
-      setSessionError('')
-      setProfileError('')
-      return
-    }
-
-    void refreshSessions()
-    loadProfile()
-  }, [token])
-
-  useEffect(() => {
     if (!globalNotice) {
       return
     }
@@ -289,7 +275,7 @@ function App() {
     })
   }, [searchQuery, sessions, sortMode])
 
-  async function refreshSessions() {
+  const refreshSessions = useCallback(async () => {
     if (!token) {
       return
     }
@@ -305,9 +291,9 @@ function App() {
     } finally {
       setSessionLoading(false)
     }
-  }
+  }, [token])
 
-  function loadProfile() {
+  const loadProfile = useCallback(() => {
     if (!token) {
       return
     }
@@ -326,7 +312,21 @@ function App() {
     } finally {
       setProfileLoading(false)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (!token) {
+      setSessions([])
+      setProfile(null)
+      setProfileForm(emptyProfileForm)
+      setSessionError('')
+      setProfileError('')
+      return
+    }
+
+    void refreshSessions()
+    loadProfile()
+  }, [loadProfile, refreshSessions, token])
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>, mode: AuthMode) {
     event.preventDefault()
@@ -1488,20 +1488,6 @@ function DateTimeField({
     }
   }, [isOpen])
 
-  useEffect(() => {
-    const nextMonth = parseDateTimeLocalValue(value)
-
-    if (!nextMonth) {
-      return
-    }
-
-    setVisibleMonth((current) =>
-      current.getMonth() === nextMonth.getMonth() && current.getFullYear() === nextMonth.getFullYear()
-        ? current
-        : nextMonth,
-    )
-  }, [value])
-
   function handleDateSelect(day?: Date) {
     if (!day) {
       return
@@ -1550,7 +1536,7 @@ function DateTimeField({
                 }}
                 disabled={{ before: new Date(minimumDateTime.getFullYear(), minimumDateTime.getMonth(), minimumDateTime.getDate()) }}
                 mode="single"
-                month={visibleMonth}
+                month={selectedDateTime ?? visibleMonth}
                 onMonthChange={setVisibleMonth}
                 onSelect={handleDateSelect}
                 selected={selectedDateTime ?? undefined}
@@ -1939,7 +1925,7 @@ function SessionDetailsPage({
   sessions,
 }: SessionDetailsPageProps) {
   const { sessionId } = useParams()
-  const [session, setSession] = useState<MealSession | null>(() =>
+  const [fetchedSession, setFetchedSession] = useState<MealSession | null>(() =>
     sessions.find((item) => getSessionId(item) === sessionId) ?? null,
   )
   const [detailLoading, setDetailLoading] = useState(false)
@@ -1951,32 +1937,42 @@ function SessionDetailsPage({
       return
     }
 
-    setDetailLoading(true)
-    setDetailError('')
+    let cancelled = false
 
-    void fetchJson<{ data: MealSession[] }>(`${API_BASE_URL}/api/meals`)
-      .then((data) => {
+    async function loadSessionDetails() {
+      setDetailLoading(true)
+      setDetailError('')
+
+      try {
+        const data = await fetchJson<{ data: MealSession[] }>(`${API_BASE_URL}/api/meals`)
+        if (cancelled) {
+          return
+        }
+
         const matchedSession = data.data.map(normalizeMealSession).find((item) => getSessionId(item) === sessionId)
-        setSession(matchedSession ?? null)
-      })
-      .catch((error) => {
-        setDetailError(getErrorMessage(error))
-      })
-      .finally(() => {
-        setDetailLoading(false)
-      })
+        setFetchedSession(matchedSession ?? null)
+      } catch (error) {
+        if (!cancelled) {
+          setDetailError(getErrorMessage(error))
+        }
+      } finally {
+        if (!cancelled) {
+          setDetailLoading(false)
+        }
+      }
+    }
+
+    void loadSessionDetails()
+
+    return () => {
+      cancelled = true
+    }
   }, [sessionId])
 
-  useEffect(() => {
-    if (!sessionId) {
-      return
-    }
-
-    const fromStore = sessions.find((item) => getSessionId(item) === sessionId) ?? null
-    if (fromStore) {
-      setSession(fromStore)
-    }
-  }, [sessionId, sessions])
+  const session = useMemo(
+    () => sessions.find((item) => getSessionId(item) === sessionId) ?? fetchedSession,
+    [fetchedSession, sessionId, sessions],
+  )
 
   const coordinates = useSessionCoordinates(session?.location ?? '', session?.locationLat, session?.locationLng)
 
@@ -1990,7 +1986,7 @@ function SessionDetailsPage({
     try {
       const updatedSession = await onSessionAction(getSessionId(session), action)
       if (updatedSession) {
-        setSession(updatedSession)
+        setFetchedSession(updatedSession)
       }
       setDetailNotice(action === 'join' ? 'Joined session successfully.' : 'Left session successfully.')
       await onRefresh()
@@ -2429,26 +2425,22 @@ function ProfilePage({
 }
 
 function useSessionCoordinates(location: string, explicitLat?: number, explicitLng?: number) {
-  const [coordinates, setCoordinates] = useState<Coordinates>(() =>
-    Number.isFinite(explicitLat) && Number.isFinite(explicitLng)
-      ? { lat: explicitLat as number, lng: explicitLng as number, source: 'fallback' }
-      : getFallbackCoordinates(location),
+  const explicitCoordinates = useMemo(
+    () =>
+      Number.isFinite(explicitLat) && Number.isFinite(explicitLng)
+        ? { lat: explicitLat as number, lng: explicitLng as number, source: 'fallback' as const }
+        : null,
+    [explicitLat, explicitLng],
   )
+  const fallbackCoordinates = useMemo(() => getFallbackCoordinates(location), [location])
+  const [geocodedCoordinates, setGeocodedCoordinates] = useState<(Coordinates & { query: string }) | null>(null)
 
   useEffect(() => {
-    if (Number.isFinite(explicitLat) && Number.isFinite(explicitLng)) {
-      setCoordinates({ lat: explicitLat as number, lng: explicitLng as number, source: 'fallback' })
-      return
-    }
-
-    if (!location.trim()) {
-      setCoordinates(AUCKLAND_CENTER)
+    if (explicitCoordinates || !location.trim()) {
       return
     }
 
     const controller = new AbortController()
-    const fallback = getFallbackCoordinates(location)
-    setCoordinates(fallback)
 
     void fetch(
       `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`,
@@ -2468,22 +2460,23 @@ function useSessionCoordinates(location: string, explicitLat?: number, explicitL
           return
         }
 
-        setCoordinates({
+        setGeocodedCoordinates({
           lat: Number(first.lat),
           lng: Number(first.lon),
           source: 'geocoded',
+          query: location,
         })
       })
       .catch(() => {
-        setCoordinates(fallback)
+        setGeocodedCoordinates(null)
       })
 
     return () => {
       controller.abort()
     }
-  }, [explicitLat, explicitLng, location])
+  }, [explicitCoordinates, location])
 
-  return coordinates
+  return explicitCoordinates ?? (geocodedCoordinates?.query === location ? geocodedCoordinates : null) ?? fallbackCoordinates
 }
 
 function readStoredProfile() {
@@ -2521,10 +2514,10 @@ async function fetchJson<T>(
   })
 
   const text = await response.text()
-  const data = text ? (JSON.parse(text) as Record<string, any>) : {}
+  const data = text ? (JSON.parse(text) as Record<string, unknown>) : {}
 
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+    throw new Error(typeof data.message === 'string' ? data.message : 'Request failed')
   }
 
   return data as T
