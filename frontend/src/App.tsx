@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -291,6 +291,26 @@ function App() {
     image.src = authSceneUrl
   }, [])
 
+  const loadProfile = useCallback(async () => {
+    if (!token) {
+      return
+    }
+
+    setProfileLoading(true)
+    setProfileError('')
+
+    try {
+      const response = await fetchJson<ApiEnvelope<UserProfile>>(`${API_BASE_URL}/api/auth/me`, { token })
+      const nextProfile = normalizeUserProfile(response.data)
+      setProfile(nextProfile)
+      setProfileForm(toProfileForm(nextProfile))
+    } catch (error) {
+      setProfileError(getErrorMessage(error))
+    } finally {
+      setProfileLoading(false)
+    }
+  }, [token])
+
   useEffect(() => {
     if (!token) {
       setSessions([])
@@ -304,7 +324,7 @@ function App() {
 
     void refreshSessions()
     void loadProfile()
-  }, [token])
+  }, [loadProfile, token])
 
   useEffect(() => {
     if (!globalNotice) {
@@ -475,26 +495,6 @@ function App() {
       if (getErrorMessage(error) === 'Session not found') {
         setSessions((current) => current.filter((session) => getSessionId(session) !== sessionId))
       }
-    }
-  }
-
-  async function loadProfile() {
-    if (!token) {
-      return
-    }
-
-    setProfileLoading(true)
-    setProfileError('')
-
-    try {
-      const response = await fetchJson<ApiEnvelope<UserProfile>>(`${API_BASE_URL}/api/auth/me`, { token })
-      const nextProfile = normalizeUserProfile(response.data)
-      setProfile(nextProfile)
-      setProfileForm(toProfileForm(nextProfile))
-    } catch (error) {
-      setProfileError(getErrorMessage(error))
-    } finally {
-      setProfileLoading(false)
     }
   }
 
@@ -1874,7 +1874,7 @@ function DateTimeField({
   const [datePopoverStyle, setDatePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
   const [timePopoverStyle, setTimePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
   const selectedDateTime = parseDateTimeLocalValue(value)
-  const minimumDateTime = parseDateTimeLocalValue(minimum) ?? new Date()
+  const minimumDateTime = useMemo(() => parseDateTimeLocalValue(minimum) ?? new Date(), [minimum])
   const selectedTime = selectedDateTime ? formatTimeInputValue(selectedDateTime) : formatTimeInputValue(minimumDateTime)
   const [selectedHour, selectedMinute] = selectedTime.split(':').map(Number)
   const [visibleMonth, setVisibleMonth] = useState<Date>(selectedDateTime ?? minimumDateTime)
@@ -3564,10 +3564,11 @@ async function fetchJson<T>(
   })
 
   const text = await response.text()
-  const data = text ? (JSON.parse(text) as Record<string, any>) : {}
+  const data = text ? (JSON.parse(text) as Record<string, unknown>) : {}
+  const errorMessage = typeof data.message === 'string' ? data.message : 'Request failed'
 
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+    throw new Error(errorMessage)
   }
 
   return data as T
