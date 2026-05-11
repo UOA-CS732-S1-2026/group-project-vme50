@@ -1,7 +1,126 @@
-@import "tailwindcss";
+:root {
+  --bg: #f5efe6;
+  --bg-soft: #fdf7ef;
+  --surface: rgba(255, 255, 255, 0.74);
+  --surface-strong: rgba(255, 255, 255, 0.88);
+  --surface-solid: rgba(255, 249, 241, 0.95);
+  --surface-muted: rgba(245, 232, 214, 0.74);
+  --surface-deep: rgba(232, 210, 184, 0.46);
+  --line: rgba(255, 255, 255, 0.5);
+  --line-strong: rgba(61, 41, 22, 0.12);
+  --glass-shine: rgba(255, 255, 255, 0.62);
+  --glass-shadow: rgba(24, 30, 24, 0.06);
+  --ink: #25302a;
+  --ink-soft: #5f4738;
+  --ink-faint: #7a6d63;
+  --accent: #9a5a35;
+  --accent-dark: #6f3d22;
+  --accent-soft: #f1dfcf;
+  --accent-contrast: #fff8f1;
+  --danger: #984534;
+  --danger-soft: #f8ded5;
+  --success: #5b6a2f;
+  --success-soft: #ebf0df;
+  --shadow-soft:
+    0 12px 32px rgba(80, 54, 30, 0.08),
+    0 2px 0 rgba(255, 255, 255, 0.28) inset;
+  --shadow-card:
+    0 12px 32px rgba(80, 54, 30, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  --radius-shell: 32px;
+  --radius-panel: 28px;
+  --radius-session: 20px;
+  --radius-card: 28px;
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(255, 255, 255, 0.55);
+  --card-shadow: 0 12px 32px rgba(80, 54, 30, 0.08);
+  --blur-1: 18px;
+  --blur-2: 28px;
+  --radius-xl: 32px;
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
+  --space-1: 0.4rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.25rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.75rem;
+  font-family: "SF Pro Text", "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(223, 177, 109, 0.32), transparent 24%),
+    radial-gradient(circle at 80% 16%, rgba(143, 102, 53, 0.16), transparent 18%),
+    radial-gradient(circle at 18% 82%, rgba(255, 235, 206, 0.34), transparent 18%),
+    linear-gradient(180deg, #f6eee3 0%, #faf4ea 40%, #f4eadf 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f7fb;
+  min-width: 320px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(196, 144, 86, 0.28), transparent 22%),
+    radial-gradient(circle at 82% 18%, rgba(119, 82, 47, 0.12), transparent 18%),
+    radial-gradient(circle at 15% 82%, rgba(255, 238, 216, 0.28), transparent 22%),
+    linear-gradient(180deg, #f4ecdf 0%, #faf4ea 42%, #f2e7db 100%);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: "Iowan Old Style", "New York", "Times New Roman", Georgia, serif;
+  color: #1c241d;
+  letter-spacing: -0.03em;
+}
+
+h1 {
+  font-size: clamp(2.55rem, 5vw, 4.75rem);
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
+  line-height: 1;
+}
+
+h3 {
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
 }

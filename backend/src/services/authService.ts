@@ -14,6 +14,12 @@ const sanitizeUser = (user: any) => ({
   id: user._id?.toString?.() ?? user._id,
   name: user.name,
   email: user.email,
+  bio: user.bio || "",
+  favoriteCuisine: user.favoriteCuisine || "",
+  yearOfStudy: user.yearOfStudy || "",
+  avatarColor: user.avatarColor || "#2e7d61",
+  createdAt: user.createdAt,
+  updatedAt: user.updatedAt,
 });
 
 /* ================= REGISTER ================= */
@@ -90,5 +96,52 @@ export const logoutUser = async (token: string) => {
   return {
     success: true,
     message: "Logged out successfully",
+  };
+};
+
+export const getCurrentUser = async (userId: string) => {
+  const user = await userRepository.findById(userId);
+  if (!user) throw new Error("User not found");
+
+  return {
+    success: true,
+    data: sanitizeUser(user),
+  };
+};
+
+export const updateCurrentUser = async (
+  userId: string,
+  data: {
+    name?: string;
+    bio?: string;
+    favoriteCuisine?: string;
+    yearOfStudy?: string;
+    avatarColor?: string;
+  },
+) => {
+  const updates = Object.fromEntries(
+    Object.entries({
+      name: data.name?.trim(),
+      bio: data.bio?.trim(),
+      favoriteCuisine: data.favoriteCuisine?.trim(),
+      yearOfStudy: data.yearOfStudy?.trim(),
+      avatarColor: data.avatarColor?.trim(),
+    }).filter(([, value]) => value !== undefined),
+  ) as {
+    name?: string;
+    bio?: string;
+    favoriteCuisine?: string;
+    yearOfStudy?: string;
+    avatarColor?: string;
+  };
+
+  const user = await userRepository.updateUser(userId, updates);
+
+  if (!user) throw new Error("User not found");
+
+  return {
+    success: true,
+    message: "Profile updated successfully",
+    data: sanitizeUser(user),
   };
 };

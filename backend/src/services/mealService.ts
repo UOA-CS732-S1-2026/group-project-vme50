@@ -31,11 +31,23 @@ export const getMeals = async () => {
   return await mealRepository.findActiveMeals();
 };
 
+export const getMealById = async (mealId: string) => {
+  const session = await mealRepository.findMealDetailsById(mealId);
+  if (!session) throw new Error("NOT_FOUND");
+  return session;
+};
+
 export const joinMeal = async (mealId: string, userId: string) => {
   const session = await mealRepository.findMealById(mealId);
 
   if (!session) throw new Error("NOT_FOUND");
   if (!session.isActive) throw new Error("CLOSED");
+  if (session.participants.length >= session.slots) throw new Error("FULL");
+
+  const activeSession = await mealRepository.findMealByUser(userId);
+  if (activeSession && String(activeSession._id) !== String(mealId)) {
+    throw new Error("ALREADY_IN_OTHER_SESSION");
+  }
 
   const alreadyJoined = session.participants.some((p: any) =>
     typeof p.equals === "function" ? p.equals(userId) : String(p) === String(userId),
@@ -45,6 +57,19 @@ export const joinMeal = async (mealId: string, userId: string) => {
 
   session.participants.push(userId as any);
 
+  await mealRepository.saveMeal(session);
+
+  return session;
+};
+
+export const closeMeal = async (mealId: string, userId: string) => {
+  const session = await mealRepository.findMealById(mealId);
+
+  if (!session) throw new Error("NOT_FOUND");
+  if (String(session.creator) !== String(userId)) throw new Error("FORBIDDEN");
+  if (!session.isActive) throw new Error("ALREADY_CLOSED");
+
+  session.isActive = false;
   await mealRepository.saveMeal(session);
 
   return session;
@@ -70,4 +95,12 @@ export const leaveMeal = async (mealId: string, userId: string) => {
   }
 
   return session;
+};
+
+export const getHostingMeals = async (userId: string) => {
+  return await mealRepository.findMealsByCreator(userId);
+};
+
+export const getJoinedMeals = async (userId: string) => {
+  return await mealRepository.findMealsJoinedByUser(userId);
 };

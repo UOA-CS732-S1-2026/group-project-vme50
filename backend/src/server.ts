@@ -15,11 +15,18 @@ const app = express();
 /* ---------------- Middleware ---------------- */
 app.use(express.json());
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5174",
+    ];
 
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
@@ -37,7 +44,7 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin: allowedOrigin,
+    origin: allowedOrigins,
     credentials: true,
   },
 });
