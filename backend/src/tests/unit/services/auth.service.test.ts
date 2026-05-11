@@ -74,11 +74,19 @@ describe("Auth Service", () => {
     });
 
     expect(result.data.token).toBe("token");
-    expect(result.data.user).toEqual({
-      id: "1",
-      name: "John",
-      email: "john123@aucklanduni.ac.nz",
-    });
+    expect(result.data.user).toEqual(
+      expect.objectContaining({
+        id: "1",
+        name: "John",
+        email: "john123@aucklanduni.ac.nz",
+        bio: "",
+        favoriteCuisine: "",
+        yearOfStudy: "",
+        avatarColor: "#2e7d61",
+        createdAt: undefined,
+        updatedAt: undefined,
+      }),
+    );
   });
 
   it("registerUser → existing user", async () => {
@@ -112,11 +120,19 @@ describe("Auth Service", () => {
     });
 
     expect(result.data.token).toBe("token");
-    expect(result.data.user).toEqual({
-      id: "1",
-      name: "John",
-      email: "john@aucklanduni.ac.nz",
-    });
+    expect(result.data.user).toEqual(
+      expect.objectContaining({
+        id: "1",
+        name: "John",
+        email: "john@aucklanduni.ac.nz",
+        bio: "",
+        favoriteCuisine: "",
+        yearOfStudy: "",
+        avatarColor: "#2e7d61",
+        createdAt: undefined,
+        updatedAt: undefined,
+      }),
+    );
   });
 
   it("loginUser → invalid user", async () => {
