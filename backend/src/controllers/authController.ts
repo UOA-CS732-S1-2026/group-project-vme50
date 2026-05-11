@@ -1,5 +1,11 @@
 import type { Request, Response } from "express";
-import { registerUser, loginUser, logoutUser, getCurrentUser, updateCurrentUser } from "../services/authService.js";
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getCurrentUser,
+  updateCurrentUser,
+} from "../services/authService.js";
 
 /* ================= REGISTER ================= */
 export const register = async (req: Request, res: Response) => {

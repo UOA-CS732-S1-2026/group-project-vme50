@@ -10,52 +10,55 @@ export interface IUser extends Document {
   avatarColor?: string;
 }
 
-const userSchema = new mongoose.Schema<IUser>({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+const userSchema = new mongoose.Schema<IUser>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-  },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
 
-  password: {
-    type: String,
-    required: true,
-  },
+    password: {
+      type: String,
+      required: true,
+    },
 
-  bio: {
-    type: String,
-    trim: true,
-    default: "",
-    maxlength: 280,
-  },
+    bio: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 280,
+    },
 
-  favoriteCuisine: {
-    type: String,
-    trim: true,
-    default: "",
-    maxlength: 60,
-  },
+    favoriteCuisine: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 60,
+    },
 
-  yearOfStudy: {
-    type: String,
-    trim: true,
-    default: "",
-    maxlength: 40,
-  },
+    yearOfStudy: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 40,
+    },
 
-  avatarColor: {
-    type: String,
-    trim: true,
-    default: "#2e7d61",
+    avatarColor: {
+      type: String,
+      trim: true,
+      default: "#2e7d61",
+    },
   },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 export default mongoose.model<IUser>("User", userSchema);

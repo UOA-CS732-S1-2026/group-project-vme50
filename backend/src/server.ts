@@ -16,7 +16,9 @@ const app = express();
 app.use(express.json());
 
 const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim()).filter(Boolean)
+  ? process.env.CLIENT_URL.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
   : [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
