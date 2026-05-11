@@ -24,38 +24,10 @@ export const mealRepository = {
     return await MealSession.findById(mealId);
   },
 
-  async findMealDetailsById(mealId: string) {
-    return await MealSession.findById(mealId)
-      .populate("creator", "name email avatarColor")
-      .populate("participants", "name email avatarColor")
-      .lean();
-  },
-
   async findMealByUser(userId: string) {
     return MealSession.findOne({
-      isActive: true,
       participants: new mongoose.Types.ObjectId(userId),
     });
-  },
-
-  async findMealsByCreator(userId: string) {
-    return await MealSession.find({
-      creator: new mongoose.Types.ObjectId(userId),
-    })
-      .populate("creator", "name email avatarColor")
-      .populate("participants", "name email avatarColor")
-      .lean()
-      .sort({ createdAt: -1 });
-  },
-
-  async findMealsJoinedByUser(userId: string) {
-    return await MealSession.find({
-      participants: new mongoose.Types.ObjectId(userId),
-    })
-      .populate("creator", "name email avatarColor")
-      .populate("participants", "name email avatarColor")
-      .lean()
-      .sort({ createdAt: -1 });
   },
 
   async deleteMeal(id: string) {
