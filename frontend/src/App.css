@@ -1,5 +1,6 @@
 .app-shell {
   min-height: 100vh;
+<<<<<<< Updated upstream
   padding: 16px clamp(1rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.6rem);
   position: relative;
   overflow: hidden;
@@ -7,6 +8,15 @@
     radial-gradient(circle at 12% 14%, rgba(195, 148, 101, 0.14), transparent 22%),
     radial-gradient(circle at 84% 20%, rgba(124, 88, 55, 0.1), transparent 18%),
     linear-gradient(180deg, rgba(247, 238, 225, 0.92), rgba(245, 237, 228, 0.88));
+=======
+  padding: clamp(1rem, 2vw, 1.6rem);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(195, 110, 84, 0.14), transparent 22%),
+    radial-gradient(circle at 84% 20%, rgba(151, 89, 70, 0.09), transparent 18%),
+    linear-gradient(180deg, rgba(245, 238, 234, 0.95), rgba(239, 229, 223, 0.9));
+>>>>>>> Stashed changes
 }
 
 .background-ornaments {
@@ -14,11 +24,20 @@
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+<<<<<<< Updated upstream
   z-index: 0;
 }
 
 .ornament-blob,
 .ornament-particle {
+=======
+  z-index: 2;
+}
+
+.ornament-blob,
+.ornament-particle,
+.food-trail {
+>>>>>>> Stashed changes
   position: absolute;
   display: block;
 }
@@ -35,7 +54,11 @@
   height: 22rem;
   top: -4rem;
   right: 6%;
+<<<<<<< Updated upstream
   background: rgba(205, 143, 92, 0.18);
+=======
+  background: rgba(201, 118, 92, 0.2);
+>>>>>>> Stashed changes
 }
 
 .ornament-blob-b {
@@ -43,7 +66,11 @@
   height: 18rem;
   bottom: 10%;
   left: 4%;
+<<<<<<< Updated upstream
   background: rgba(244, 215, 173, 0.22);
+=======
+  background: rgba(244, 205, 188, 0.22);
+>>>>>>> Stashed changes
   animation-duration: 24s;
 }
 
@@ -52,7 +79,11 @@
   height: 14rem;
   top: 42%;
   left: 52%;
+<<<<<<< Updated upstream
   background: rgba(175, 147, 108, 0.12);
+=======
+  background: rgba(160, 93, 75, 0.12);
+>>>>>>> Stashed changes
   animation-duration: 18s;
 }
 
@@ -60,7 +91,11 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
+<<<<<<< Updated upstream
   background: rgba(138, 79, 47, 0.08);
+=======
+  background: rgba(142, 81, 63, 0.09);
+>>>>>>> Stashed changes
   box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.04);
   animation: floatParticle 14s ease-in-out infinite alternate;
 }
@@ -88,6 +123,70 @@
   animation-duration: 16s;
 }
 
+<<<<<<< Updated upstream
+=======
+.food-trail {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 12px 24px rgba(60, 40, 24, 0.18));
+  opacity: 0;
+  animation: foodMeteor 12s linear infinite;
+  z-index: 2;
+}
+
+.food-trail-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.food-trail-burger {
+  top: 14%;
+  left: -6%;
+  animation-delay: 0s;
+}
+
+.food-trail-fries {
+  top: 28%;
+  left: -10%;
+  width: 44px;
+  height: 44px;
+  animation-delay: 2.8s;
+}
+
+.food-trail-drumstick {
+  top: 56%;
+  left: -8%;
+  width: 58px;
+  height: 58px;
+  animation-delay: 5.6s;
+}
+
+.food-trail-soda {
+  top: 72%;
+  left: -9%;
+  width: 40px;
+  height: 40px;
+  animation-delay: 8.2s;
+}
+
+.food-trail-hotpot {
+  top: 22%;
+  left: -12%;
+  width: 62px;
+  height: 62px;
+  animation-delay: 1.4s;
+}
+
+.food-trail-skewer {
+  top: 66%;
+  left: -11%;
+  width: 60px;
+  height: 60px;
+  animation-delay: 6.9s;
+}
+
+>>>>>>> Stashed changes
 .app-shell-auth {
   padding: 0;
 }
@@ -112,7 +211,11 @@
   height: 26rem;
   top: -8rem;
   left: -7rem;
+<<<<<<< Updated upstream
   background: rgba(214, 184, 144, 0.38);
+=======
+  background: rgba(202, 194, 179, 0.28);
+>>>>>>> Stashed changes
 }
 
 .app-shell::after {
@@ -120,6 +223,7 @@
   height: 22rem;
   right: -5rem;
   bottom: 4rem;
+<<<<<<< Updated upstream
   background: rgba(183, 154, 123, 0.18);
 }
 
@@ -130,6 +234,16 @@
   padding: 18px 24px 40px;
   display: grid;
   gap: 24px;
+=======
+  background: rgba(153, 143, 128, 0.14);
+}
+
+.app-frame {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: var(--space-5);
+>>>>>>> Stashed changes
   position: relative;
   z-index: 1;
 }
@@ -137,7 +251,10 @@
 .app-frame-auth {
   width: 100%;
   margin: 0;
+<<<<<<< Updated upstream
   padding: 0;
+=======
+>>>>>>> Stashed changes
   gap: 0;
 }
 
@@ -148,13 +265,19 @@
 .create-page-shell,
 .auth-layout {
   display: grid;
+<<<<<<< Updated upstream
   gap: 24px;
+=======
+  gap: var(--space-5);
+  animation: pageEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+>>>>>>> Stashed changes
 }
 
 .app-content-auth {
   gap: 0;
 }
 
+<<<<<<< Updated upstream
 .route-content-shell {
   display: grid;
   gap: 24px;
@@ -170,6 +293,8 @@
   gap: 0;
 }
 
+=======
+>>>>>>> Stashed changes
 .auth-layout,
 .create-page-shell {
   place-items: center;
@@ -211,6 +336,7 @@
 .auth-layout::after {
   inset: 0;
   background:
+<<<<<<< Updated upstream
     linear-gradient(180deg, rgba(35, 25, 17, 0.44), rgba(35, 25, 17, 0.18)),
     radial-gradient(circle at 18% 22%, rgba(255, 234, 198, 0.12), transparent 24%),
     radial-gradient(circle at 82% 72%, rgba(101, 127, 67, 0.08), transparent 28%);
@@ -247,10 +373,26 @@
   border: 1px solid var(--card-border);
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
+=======
+    linear-gradient(180deg, rgba(35, 25, 17, 0.18), rgba(35, 25, 17, 0.06)),
+    radial-gradient(circle at 18% 22%, rgba(255, 234, 198, 0.08), transparent 24%),
+    radial-gradient(circle at 82% 72%, rgba(101, 127, 67, 0.04), transparent 28%);
+  filter: blur(6px);
+  opacity: 0.42;
+  animation: none;
+}
+
+.app-navbar,
+.card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(80, 45, 24, 0.16);
+>>>>>>> Stashed changes
   backdrop-filter: blur(var(--blur-1)) saturate(135%);
   -webkit-backdrop-filter: blur(var(--blur-1)) saturate(135%);
   position: relative;
   overflow: hidden;
+<<<<<<< Updated upstream
   isolation: isolate;
 }
 
@@ -283,12 +425,22 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
+=======
+}
+
+.app-navbar::before,
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+>>>>>>> Stashed changes
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 22%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 46%);
   pointer-events: none;
 }
 
+<<<<<<< Updated upstream
 :is(
   .app-navbar,
   .card,
@@ -314,6 +466,10 @@
   .map-modal-card,
   .auth-feature-item
 )::after {
+=======
+.app-navbar::after,
+.card::after {
+>>>>>>> Stashed changes
   content: "";
   position: absolute;
   inset: 1px;
@@ -322,6 +478,7 @@
   pointer-events: none;
 }
 
+<<<<<<< Updated upstream
 .app-navbar > *,
 .card > *,
 .glass-card > *,
@@ -351,11 +508,19 @@
 
 .card {
   border-radius: var(--radius-panel);
+=======
+.card {
+  border-radius: 28px;
+>>>>>>> Stashed changes
   padding: clamp(1.4rem, 2.8vw, 2rem);
 }
 
 .app-navbar {
+<<<<<<< Updated upstream
   border-radius: var(--radius-shell);
+=======
+  border-radius: var(--radius-xl);
+>>>>>>> Stashed changes
   padding: 1rem clamp(1.75rem, 3vw, 2.25rem);
   display: flex;
   align-items: center;
@@ -364,7 +529,11 @@
 }
 
 .app-content {
+<<<<<<< Updated upstream
   gap: 1.5rem;
+=======
+  gap: var(--space-5);
+>>>>>>> Stashed changes
 }
 
 .auth-brand-shell {
@@ -433,6 +602,7 @@
 }
 
 .inline-icon {
+<<<<<<< Updated upstream
   width: 20px;
   height: 20px;
   display: block;
@@ -522,6 +692,11 @@
 .slot-stepper-button .icon {
   width: 20px;
   height: 20px;
+=======
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+>>>>>>> Stashed changes
 }
 
 .section-kicker,
@@ -573,6 +748,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+<<<<<<< Updated upstream
   gap: 0.62rem;
   min-height: 46px;
   border-radius: 999px;
@@ -581,6 +757,13 @@
   background: transparent;
   color: rgba(80, 60, 45, 0.85);
   font-weight: 600;
+=======
+  gap: 0.55rem;
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0 1rem;
+  text-decoration: none;
+>>>>>>> Stashed changes
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -589,16 +772,27 @@
 }
 
 .top-nav-link {
+<<<<<<< Updated upstream
   box-shadow: none;
 }
 
 .top-nav-link:hover,
 .top-nav-logout:hover,
+=======
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--ink-soft);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.top-nav-link:hover,
+>>>>>>> Stashed changes
 .mini-session-card:hover,
 .session-card:hover {
   transform: translateY(-1px);
 }
 
+<<<<<<< Updated upstream
 .top-nav-link:hover,
 .top-nav-logout:hover {
   background: rgba(255, 255, 255, 0.45);
@@ -613,11 +807,26 @@
   color: #3f2b20;
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.05),
+=======
+.top-nav-logout:hover,
+.ghost-button:hover,
+.secondary-link:hover,
+.primary-button:hover {
+  transform: translateY(-1px) scale(1.025);
+}
+
+.top-nav-link.is-active {
+  background: rgba(255, 255, 255, 0.48);
+  color: var(--ink);
+  box-shadow:
+    0 14px 26px rgba(80, 45, 24, 0.12),
+>>>>>>> Stashed changes
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
   animation: navActivePulse 0.45s ease-out;
 }
 
 .top-nav-logout {
+<<<<<<< Updated upstream
   cursor: pointer;
   font-weight: 700;
   box-shadow: none;
@@ -633,6 +842,21 @@
 
 .dashboard-hero {
   border-radius: var(--radius-shell);
+=======
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-weight: 600;
+  border: 1px solid rgba(154, 118, 78, 0.1);
+}
+
+.dashboard-shell {
+  gap: var(--space-5);
+}
+
+.dashboard-hero {
+  border-radius: var(--radius-xl);
+>>>>>>> Stashed changes
   padding: 1.6rem clamp(1.75rem, 3vw, 2.25rem);
   min-height: 220px;
   display: grid;
@@ -644,7 +868,11 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120' fill='none'%3E%3Ccircle cx='78' cy='42' r='14' stroke='rgba(138,79,47,0.12)' stroke-width='2'/%3E%3Ccircle cx='164' cy='42' r='14' stroke='rgba(138,79,47,0.12)' stroke-width='2'/%3E%3Cpath d='M58 94c0-21 17-38 38-38' stroke='rgba(138,79,47,0.12)' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M182 94c0-21-17-38-38-38' stroke='rgba(138,79,47,0.12)' stroke-width='2' stroke-linecap='round'/%3E%3Cellipse cx='121' cy='78' rx='34' ry='18' stroke='rgba(138,79,47,0.12)' stroke-width='2'/%3E%3C/svg%3E") right 1rem bottom 1rem / 220px no-repeat,
     linear-gradient(135deg, rgba(255, 255, 255, 0.54), transparent 55%),
     linear-gradient(180deg, rgba(255, 250, 244, 0.72), rgba(243, 232, 219, 0.62));
+<<<<<<< Updated upstream
   border: 1px solid var(--card-border);
+=======
+  border: 1px solid rgba(255, 255, 255, 0.4);
+>>>>>>> Stashed changes
   box-shadow:
     0 24px 64px rgba(80, 45, 24, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.58);
@@ -673,7 +901,11 @@
 }
 
 .hero-summary-card {
+<<<<<<< Updated upstream
   border-radius: var(--radius-panel);
+=======
+  border-radius: var(--radius-lg);
+>>>>>>> Stashed changes
   border: 1px solid rgba(154, 118, 78, 0.1);
   background: rgba(255, 255, 255, 0.46);
   box-shadow: var(--shadow-card);
@@ -690,14 +922,23 @@
 
 .dashboard-main-grid {
   display: grid;
+<<<<<<< Updated upstream
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
   gap: 24px;
+=======
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.75fr);
+  gap: 1.5rem;
+>>>>>>> Stashed changes
   align-items: start;
 }
 
 .dashboard-sidebar {
   display: grid;
+<<<<<<< Updated upstream
   gap: 24px;
+=======
+  gap: 1rem;
+>>>>>>> Stashed changes
   align-content: start;
 }
 
@@ -724,10 +965,17 @@
 }
 
 .summary-card {
+<<<<<<< Updated upstream
   border-radius: var(--radius-panel);
   border: 1px solid var(--card-border);
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
+=======
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: var(--shadow-card);
+>>>>>>> Stashed changes
   padding: 1.25rem;
   display: grid;
   gap: 0.55rem;
@@ -837,6 +1085,7 @@
 
 .create-page-card {
   overflow: hidden;
+<<<<<<< Updated upstream
   isolation: isolate;
   background: rgba(255, 252, 247, 0.82);
   border: 1px solid var(--card-border);
@@ -850,6 +1099,10 @@
 .create-page-card > * {
   position: relative;
   z-index: 1;
+=======
+  position: relative;
+  border-radius: 32px;
+>>>>>>> Stashed changes
 }
 
 .auth-page-card {
@@ -872,7 +1125,11 @@
 
 .auth-showcase,
 .auth-form-shell {
+<<<<<<< Updated upstream
   border-radius: var(--radius-shell);
+=======
+  border-radius: 28px;
+>>>>>>> Stashed changes
 }
 
 .auth-showcase {
@@ -952,13 +1209,20 @@
 .auth-form-shell {
   padding: clamp(2.4rem, 3vw, 3.1rem);
   background:
+<<<<<<< Updated upstream
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 251, 245, 0.005)),
     rgba(255, 255, 255, 0.001);
   border: 1px solid rgba(255, 255, 255, 0.4);
+=======
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 251, 245, 0.006)),
+    rgba(255, 255, 255, 0.012);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+>>>>>>> Stashed changes
   display: grid;
   align-content: center;
   gap: 1.75rem;
   box-shadow:
+<<<<<<< Updated upstream
     0 20px 68px rgba(24, 18, 12, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(56px) saturate(180%);
@@ -990,6 +1254,12 @@
   gap: 1.75rem;
   animation: authPanelEnter 280ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: top center;
+=======
+    0 8px 24px rgba(24, 18, 12, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(115%) brightness(1.04);
+  -webkit-backdrop-filter: blur(12px) saturate(115%) brightness(1.04);
+>>>>>>> Stashed changes
 }
 
 .auth-form-header {
@@ -1093,9 +1363,16 @@
 .mini-session-list,
 .participant-list,
 .participant-panel,
+<<<<<<< Updated upstream
 .empty-state {
   display: grid;
   gap: 1.15rem;
+=======
+.empty-state,
+.activity-grid section {
+  display: grid;
+  gap: 1rem;
+>>>>>>> Stashed changes
 }
 
 .stack-form label,
@@ -1105,24 +1382,47 @@
   gap: 0.55rem;
 }
 
+<<<<<<< Updated upstream
+=======
+.field-hint {
+  margin: -0.25rem 0 0;
+  color: rgba(86, 72, 60, 0.78);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+>>>>>>> Stashed changes
 .stack-form input,
 .stack-form textarea,
 .stack-form select,
 .sort-field select,
 .search-field input {
   width: 100%;
+<<<<<<< Updated upstream
   border: 1px solid rgba(97, 69, 43, 0.12);
   background: rgba(255, 255, 255, 0.78);
+=======
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.16);
+>>>>>>> Stashed changes
   color: var(--ink);
   border-radius: 20px;
   padding: 1rem 1.1rem;
   outline: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+<<<<<<< Updated upstream
   backdrop-filter: blur(14px) saturate(128%);
   -webkit-backdrop-filter: blur(14px) saturate(128%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.52),
     0 10px 22px rgba(80, 45, 24, 0.05);
+=======
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 18px rgba(80, 45, 24, 0.03);
+>>>>>>> Stashed changes
 }
 
 .stack-form input::placeholder,
@@ -1131,6 +1431,36 @@
   color: rgba(122, 109, 99, 0.88);
 }
 
+<<<<<<< Updated upstream
+=======
+.auth-form-shell .stack-form input,
+.auth-form-shell .stack-form textarea,
+.auth-form-shell .stack-form select {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px) saturate(110%);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 6px 18px rgba(24, 18, 12, 0.03);
+}
+
+.auth-form-shell .stack-form input::placeholder,
+.auth-form-shell .stack-form textarea::placeholder {
+  color: rgba(79, 67, 59, 0.72);
+}
+
+.auth-form-shell .stack-form input:focus,
+.auth-form-shell .stack-form textarea:focus,
+.auth-form-shell .stack-form select:focus {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+>>>>>>> Stashed changes
 .profile-form label > span {
   color: rgba(86, 72, 60, 0.88);
   font-size: 0.92rem;
@@ -1141,6 +1471,7 @@
 .profile-form textarea,
 .profile-form select {
   border-radius: 18px;
+<<<<<<< Updated upstream
   border: 1px solid rgba(80, 60, 40, 0.08);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(122%);
@@ -1148,6 +1479,15 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     0 10px 20px rgba(65, 45, 25, 0.04);
+=======
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 18px rgba(65, 45, 25, 0.03);
+>>>>>>> Stashed changes
 }
 
 .profile-form input,
@@ -1157,26 +1497,43 @@
 }
 
 .profile-form textarea {
+<<<<<<< Updated upstream
   min-height: 150px;
   max-height: 360px;
   padding: 18px;
   line-height: 1.5;
+=======
+  min-height: 148px;
+  padding: 18px;
+>>>>>>> Stashed changes
 }
 
 .profile-form input:hover,
 .profile-form textarea:hover,
 .profile-form select:hover {
+<<<<<<< Updated upstream
   border-color: rgba(80, 60, 40, 0.14);
+=======
+  border-color: rgba(255, 255, 255, 0.3);
+>>>>>>> Stashed changes
 }
 
 .profile-form input:focus,
 .profile-form textarea:focus,
 .profile-form select:focus {
+<<<<<<< Updated upstream
   border-color: rgba(138, 79, 47, 0.85);
   box-shadow:
     0 0 0 3px rgba(138, 79, 47, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.84);
+=======
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.18);
+>>>>>>> Stashed changes
 }
 
 .profile-select {
@@ -1251,6 +1608,7 @@
   min-height: 48px;
   padding: 0.82rem 2.8rem 0.82rem 44px;
   border-radius: 18px;
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(8px) saturate(122%);
@@ -1363,12 +1721,29 @@
   color: #5c3421;
   border-radius: 0.35em;
   padding: 0 0.05em;
+=======
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 18px rgba(65, 45, 25, 0.03);
+}
+
+.search-field-enhanced input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+>>>>>>> Stashed changes
 }
 
 .sort-field-enhanced::after {
   content: "";
   position: absolute;
+<<<<<<< Updated upstream
   right: 18px;
+=======
+  right: 16px;
+>>>>>>> Stashed changes
   top: 50%;
   width: 14px;
   height: 14px;
@@ -1385,6 +1760,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   min-height: 48px;
+<<<<<<< Updated upstream
   min-width: 180px;
   padding: 0.82rem 44px 0.82rem 20px;
   border-radius: 999px;
@@ -1414,14 +1790,36 @@
 
 .sort-field-enhanced select:active {
   transform: translateY(0);
+=======
+  padding: 0.82rem 40px 0.82rem 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 6px 18px rgba(65, 45, 25, 0.03);
+}
+
+.sort-field-enhanced select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+>>>>>>> Stashed changes
 }
 
 .toolbar-button {
   min-height: 48px;
+<<<<<<< Updated upstream
   border-radius: 999px;
   padding: 0 0.92rem;
   background: rgba(255, 255, 255, 0.55);
   border: 0;
+=======
+  border-radius: 18px;
+  padding: 0 0.92rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+>>>>>>> Stashed changes
   backdrop-filter: blur(8px) saturate(122%);
   -webkit-backdrop-filter: blur(8px) saturate(122%);
   box-shadow:
@@ -1430,6 +1828,7 @@
 }
 
 .toolbar-button:hover {
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
   box-shadow:
@@ -1439,18 +1838,27 @@
 
 .toolbar-button:active {
   transform: translateY(0);
+=======
+  border-color: rgba(70, 60, 50, 0.12);
+>>>>>>> Stashed changes
 }
 
 .toolbar-refresh-button {
   color: rgba(70, 60, 50, 0.76);
+<<<<<<< Updated upstream
   font-weight: 600;
   gap: 0.55rem;
+=======
+  font-weight: 500;
+  gap: 0.45rem;
+>>>>>>> Stashed changes
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.42),
     0 6px 14px rgba(65, 45, 25, 0.035);
 }
 
 .toolbar-refresh-button .inline-icon {
+<<<<<<< Updated upstream
   color: currentColor;
 }
 
@@ -1460,6 +1868,15 @@
   min-height: 150px;
   max-height: 360px;
   line-height: 1.5;
+=======
+  align-self: center;
+  transform: none;
+}
+
+.stack-form textarea {
+  resize: vertical;
+  min-height: 124px;
+>>>>>>> Stashed changes
 }
 
 .stack-form input[type='color'] {
@@ -1518,12 +1935,18 @@
   gap: 24px;
 }
 
+<<<<<<< Updated upstream
 .create-field,
+=======
+>>>>>>> Stashed changes
 .create-flow-form label {
   gap: 8px;
 }
 
+<<<<<<< Updated upstream
 .create-field > span,
+=======
+>>>>>>> Stashed changes
 .create-flow-form label > span,
 .field-shell > span {
   display: inline-flex;
@@ -1534,7 +1957,10 @@
   font-weight: 600;
 }
 
+<<<<<<< Updated upstream
 .create-field > span em,
+=======
+>>>>>>> Stashed changes
 .create-flow-form label > span em {
   font-style: normal;
   color: var(--muted);
@@ -1547,6 +1973,7 @@
   min-width: 0;
 }
 
+<<<<<<< Updated upstream
 .create-control {
   width: 100%;
   border-radius: 28px;
@@ -1727,6 +2154,10 @@
 
 .create-location-preview-map .leaflet-map {
   height: 220px;
+=======
+.create-primary-field input {
+  font-size: 1.02rem;
+>>>>>>> Stashed changes
 }
 
 .create-section-group {
@@ -1755,6 +2186,7 @@
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr) 52px;
   align-items: center;
+<<<<<<< Updated upstream
   border-radius: 28px;
   border: 1px solid rgba(120, 95, 75, 0.12);
   background: rgba(255, 255, 255, 0.62);
@@ -1789,11 +2221,58 @@
   color: var(--accent);
   opacity: 0.96;
   box-shadow: none;
+=======
+  border-radius: 18px;
+  border: 1px solid rgba(80, 60, 40, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(122%);
+  -webkit-backdrop-filter: blur(8px) saturate(122%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 10px 20px rgba(65, 45, 25, 0.04);
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.slot-stepper:hover {
+  border-color: rgba(80, 60, 40, 0.14);
+}
+
+.slot-stepper:focus-within {
+  border-color: rgba(138, 79, 47, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(138, 79, 47, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.slot-stepper-button {
+  min-height: 52px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 1.45rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.slot-stepper-button:hover:not(:disabled) {
+  background: rgba(138, 79, 47, 0.08);
+}
+
+.slot-stepper-button:active:not(:disabled) {
+  transform: scale(0.96);
+>>>>>>> Stashed changes
 }
 
 .slot-stepper-button:disabled {
   color: rgba(117, 107, 98, 0.45);
+<<<<<<< Updated upstream
   opacity: 0.35;
+=======
+  cursor: not-allowed;
+>>>>>>> Stashed changes
 }
 
 .slot-stepper-value {
@@ -1802,12 +2281,16 @@
   gap: 0.1rem;
   padding: 0 0.5rem;
   text-align: center;
+<<<<<<< Updated upstream
   min-width: 72px;
+=======
+>>>>>>> Stashed changes
 }
 
 .slot-stepper-value strong {
   font-size: 1.05rem;
   line-height: 1;
+<<<<<<< Updated upstream
   font-variant-numeric: tabular-nums;
 }
 
@@ -1822,6 +2305,8 @@
 
 .slot-stepper-number-decrease {
   animation: slotStepperNumberInFromTop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+=======
+>>>>>>> Stashed changes
 }
 
 .slot-stepper-value span {
@@ -1841,6 +2326,7 @@
   position: relative;
 }
 
+<<<<<<< Updated upstream
 .datetime-picker-stack {
   display: grid;
   gap: 12px;
@@ -1872,16 +2358,47 @@
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 0.7),
     0 14px 32px rgba(80, 54, 30, 0.075);
+=======
+.datetime-trigger {
+  min-height: 52px;
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(80, 60, 40, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(122%);
+  -webkit-backdrop-filter: blur(8px) saturate(122%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 10px 20px rgba(65, 45, 25, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.datetime-trigger:hover {
+  border-color: rgba(80, 60, 40, 0.14);
+>>>>>>> Stashed changes
 }
 
 .datetime-trigger:focus-visible {
   outline: none;
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.84);
   border-color: rgba(180, 125, 80, 0.28);
   box-shadow:
     0 0 0 3px rgba(255, 255, 255, 0.36),
     0 0 0 6px rgba(184, 120, 74, 0.1),
     0 16px 38px rgba(80, 54, 30, 0.1);
+=======
+  border-color: rgba(138, 79, 47, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(138, 79, 47, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+>>>>>>> Stashed changes
 }
 
 .datetime-trigger-icon {
@@ -1905,6 +2422,7 @@
   color: rgba(90, 80, 70, 0.74);
 }
 
+<<<<<<< Updated upstream
 .datetime-trigger-endcap {
   margin-left: auto;
   width: 18px;
@@ -1933,6 +2451,19 @@
 
 .datepicker-popover {
   overflow: hidden;
+=======
+.datepicker-popover {
+  position: fixed;
+  z-index: 9998;
+  padding: 0.9rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 24px 60px rgba(65, 45, 25, 0.12);
+  animation: datepickerFadeIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
+>>>>>>> Stashed changes
 }
 
 .platemates-daypicker {
@@ -1967,9 +2498,26 @@
 
 .platemates-daypicker .rdp-button_previous,
 .platemates-daypicker .rdp-button_next {
+<<<<<<< Updated upstream
   border: 1px solid rgba(80, 60, 40, 0.08);
   color: var(--accent);
   box-shadow: 0 8px 18px rgba(65, 45, 25, 0.08);
+=======
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(80, 60, 40, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--accent);
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.platemates-daypicker .rdp-button_previous:hover,
+.platemates-daypicker .rdp-button_next:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(65, 45, 25, 0.08);
+  transform: translateY(-1px);
+>>>>>>> Stashed changes
 }
 
 .platemates-daypicker .rdp-weekday {
@@ -2009,6 +2557,7 @@
   opacity: 0.38;
 }
 
+<<<<<<< Updated upstream
 .timepicker-popover {
   display: grid;
   gap: 14px;
@@ -2016,10 +2565,14 @@
 }
 
 .timepicker-header {
+=======
+.datetime-time-field {
+>>>>>>> Stashed changes
   display: grid;
   gap: 8px;
 }
 
+<<<<<<< Updated upstream
 .timepicker-label {
   color: rgba(86, 72, 60, 0.88);
   font-size: 0.72rem;
@@ -2223,6 +2776,16 @@
 
 .create-textarea-count.is-limit {
   color: rgba(152, 69, 52, 0.88);
+=======
+.datetime-time-field > span {
+  color: rgba(86, 72, 60, 0.88);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.datetime-time-field input {
+  min-height: 52px;
+>>>>>>> Stashed changes
 }
 
 .primary-button,
@@ -2277,7 +2840,10 @@
   box-shadow:
     0 18px 40px rgba(95, 50, 27, 0.28),
     0 0 0 1px rgba(255, 255, 255, 0.12);
+<<<<<<< Updated upstream
   transform: translateY(-1px) scale(1.025);
+=======
+>>>>>>> Stashed changes
 }
 
 .primary-button:active,
@@ -2303,11 +2869,19 @@
 }
 
 .ghost-button:hover,
+<<<<<<< Updated upstream
 .secondary-link:hover {
   box-shadow:
     0 14px 30px rgba(42, 30, 18, 0.12),
     0 0 22px rgba(255, 244, 228, 0.48);
   transform: translateY(-1px) scale(1.025);
+=======
+.secondary-link:hover,
+.top-nav-logout:hover {
+  box-shadow:
+    0 14px 30px rgba(42, 30, 18, 0.12),
+    0 0 22px rgba(255, 244, 228, 0.48);
+>>>>>>> Stashed changes
 }
 
 .danger-button {
@@ -2352,6 +2926,7 @@
 }
 
 .feedback.error {
+<<<<<<< Updated upstream
   background: rgba(247, 226, 220, 0.72);
   color: var(--danger);
   backdrop-filter: blur(12px) saturate(120%);
@@ -2363,12 +2938,37 @@
   color: var(--success);
   backdrop-filter: blur(12px) saturate(120%);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
+=======
+  background: rgba(247, 226, 220, 0.18);
+  color: var(--danger);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 6px 18px rgba(65, 45, 25, 0.03);
+}
+
+.feedback.success {
+  background: rgba(226, 239, 231, 0.18);
+  color: var(--success);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 6px 18px rgba(65, 45, 25, 0.03);
+>>>>>>> Stashed changes
 }
 
 .session-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+<<<<<<< Updated upstream
   gap: 24px;
+=======
+  gap: 1.1rem;
+>>>>>>> Stashed changes
 }
 
 .session-card,
@@ -2378,18 +2978,25 @@
 .mini-session-card {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.44);
+<<<<<<< Updated upstream
   border-radius: var(--radius-panel);
+=======
+  border-radius: var(--radius-lg);
+>>>>>>> Stashed changes
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(var(--blur-1)) saturate(132%);
   -webkit-backdrop-filter: blur(var(--blur-1)) saturate(132%);
 }
 
+<<<<<<< Updated upstream
 .session-card,
 .mini-session-card,
 .activity-session-card {
   border-radius: var(--radius-session);
 }
 
+=======
+>>>>>>> Stashed changes
 .session-card {
   overflow: hidden;
   transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
@@ -2411,6 +3018,7 @@
 .session-card,
 .mini-session-card,
 .activity-session-card {
+<<<<<<< Updated upstream
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
@@ -2438,19 +3046,33 @@
   box-shadow:
     0 12px 32px rgba(80, 54, 30, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.45);
+=======
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 24px 80px rgba(80, 45, 24, 0.12);
+>>>>>>> Stashed changes
 }
 
 .summary-card:hover,
 .map-card:hover,
 .profile-summary:hover,
 .mini-session-card:hover {
+<<<<<<< Updated upstream
   transform: translateY(-2px);
   box-shadow: 0 16px 36px rgba(80, 54, 30, 0.1);
+=======
+  transform: translateY(-3px);
+  box-shadow: 0 22px 48px rgba(80, 55, 35, 0.12);
+>>>>>>> Stashed changes
 }
 
 .session-card:hover {
   border-color: rgba(37, 75, 59, 0.14);
+<<<<<<< Updated upstream
   box-shadow: 0 16px 36px rgba(80, 54, 30, 0.1);
+=======
+  box-shadow: 0 18px 40px rgba(24, 30, 24, 0.08);
+>>>>>>> Stashed changes
 }
 
 .session-card-body {
@@ -2564,13 +3186,22 @@
 .details-page-grid,
 .profile-layout {
   display: grid;
+<<<<<<< Updated upstream
   gap: 24px;
   grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+=======
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+>>>>>>> Stashed changes
 }
 
 .profile-layout {
   grid-template-columns: minmax(0, 0.58fr) minmax(320px, 0.42fr);
+<<<<<<< Updated upstream
   gap: 24px;
+=======
+  gap: 32px;
+>>>>>>> Stashed changes
   align-items: start;
 }
 
@@ -2716,7 +3347,11 @@
 .map-card {
   padding: 1.2rem;
   display: grid;
+<<<<<<< Updated upstream
   gap: 1.15rem;
+=======
+  gap: 1rem;
+>>>>>>> Stashed changes
 }
 
 .map-card-header h3 {
@@ -2742,10 +3377,20 @@
   width: 100%;
   overflow: hidden;
   border-radius: 24px;
+<<<<<<< Updated upstream
   border: 1px solid rgba(255, 255, 255, 0.58);
   box-shadow:
     0 20px 44px rgba(65, 45, 25, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
+=======
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+  box-shadow:
+    0 10px 24px rgba(65, 45, 25, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+>>>>>>> Stashed changes
   transition:
     transform 200ms ease,
     box-shadow 200ms ease;
@@ -2755,8 +3400,13 @@
 .map-card:hover .map-preview-fallback {
   transform: translateY(-3px) scale(1.01);
   box-shadow:
+<<<<<<< Updated upstream
     0 28px 58px rgba(65, 45, 25, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.42);
+=======
+    0 14px 30px rgba(65, 45, 25, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+>>>>>>> Stashed changes
 }
 
 .map-preview-button {
@@ -2767,10 +3417,13 @@
   text-align: left;
 }
 
+<<<<<<< Updated upstream
 .leaflet-container {
   touch-action: pan-x pan-y;
 }
 
+=======
+>>>>>>> Stashed changes
 .map-preview-hint {
   position: absolute;
   right: 14px;
@@ -2778,12 +3431,22 @@
   z-index: 3;
   border-radius: 999px;
   padding: 0.42rem 0.72rem;
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.44);
   color: rgba(70, 60, 50, 0.84);
   font-size: 0.78rem;
   font-weight: 600;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+=======
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(70, 60, 50, 0.84);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+>>>>>>> Stashed changes
   opacity: 0;
   transform: translateY(4px);
   transition:
@@ -2805,6 +3468,7 @@
   background: transparent;
 }
 
+<<<<<<< Updated upstream
 .leaflet-map-preview .leaflet-container,
 .leaflet-map-preview.leaflet-container {
   pointer-events: none;
@@ -2828,6 +3492,8 @@
   cursor: grabbing;
 }
 
+=======
+>>>>>>> Stashed changes
 .leaflet-map .leaflet-container,
 .leaflet-map.leaflet-container {
   width: 100%;
@@ -2952,6 +3618,7 @@
   display: grid;
   place-items: center;
   padding: 1.25rem;
+<<<<<<< Updated upstream
   background: rgba(30, 24, 18, 0.35);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2966,6 +3633,22 @@
   backdrop-filter: blur(22px) saturate(132%);
   -webkit-backdrop-filter: blur(22px) saturate(132%);
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+=======
+  background: rgba(30, 24, 18, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.map-modal-card {
+  width: min(92vw, 1000px);
+  height: min(80vh, 720px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px) saturate(118%);
+  -webkit-backdrop-filter: blur(16px) saturate(118%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.12);
+>>>>>>> Stashed changes
   padding: 1.1rem;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -2990,7 +3673,14 @@
 }
 
 .map-modal-close {
+<<<<<<< Updated upstream
   box-shadow: none;
+=======
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: 999px;
+>>>>>>> Stashed changes
 }
 
 .map-modal-frame {
@@ -2998,8 +3688,11 @@
   min-height: 0;
   overflow: hidden;
   border-radius: 24px;
+<<<<<<< Updated upstream
   touch-action: pan-x pan-y pinch-zoom;
   overscroll-behavior: contain;
+=======
+>>>>>>> Stashed changes
 }
 
 .leaflet-map-expanded {
@@ -3073,6 +3766,7 @@
   }
 }
 
+<<<<<<< Updated upstream
 @keyframes authPanelEnter {
   from {
     opacity: 0;
@@ -3144,12 +3838,18 @@
   }
 }
 
+=======
+>>>>>>> Stashed changes
 .empty-state {
   min-height: 280px;
   align-content: center;
   justify-items: center;
   text-align: center;
+<<<<<<< Updated upstream
   border-radius: var(--radius-panel);
+=======
+  border-radius: var(--radius-lg);
+>>>>>>> Stashed changes
   border: 1px dashed rgba(30, 38, 31, 0.08);
   background: rgba(255, 255, 255, 0.34);
   padding: 1.5rem;
@@ -3242,16 +3942,31 @@
   min-height: 40px;
   padding: 0 0.9rem;
   border-radius: 999px;
+<<<<<<< Updated upstream
   background: rgba(255, 248, 241, 0.82);
   color: var(--accent);
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+=======
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+>>>>>>> Stashed changes
   white-space: nowrap;
 }
 
 .profile-chip-badge.is-muted {
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.52);
+=======
+  background: rgba(255, 255, 255, 0.1);
+>>>>>>> Stashed changes
   color: var(--ink-faint);
 }
 
@@ -3387,6 +4102,7 @@
   justify-self: start;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
+<<<<<<< Updated upstream
   background: rgba(226, 239, 231, 0.9);
   color: var(--success);
   font-size: 0.82rem;
@@ -3394,6 +4110,18 @@
   box-shadow:
     0 8px 20px rgba(46, 125, 97, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
+=======
+  background: rgba(226, 239, 231, 0.18);
+  color: var(--success);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 6px 16px rgba(46, 125, 97, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+>>>>>>> Stashed changes
   animation: fadeNotice 1.6s ease forwards;
 }
 
@@ -3404,10 +4132,19 @@
   align-items: center;
   min-height: 104px;
   padding: 1.05rem 1.25rem;
+<<<<<<< Updated upstream
   border-radius: var(--radius-panel);
   border: 1px solid rgba(228, 214, 201, 0.74);
   background: rgba(255, 255, 255, 0.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+=======
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(112%);
+  -webkit-backdrop-filter: blur(10px) saturate(112%);
+>>>>>>> Stashed changes
 }
 
 .profile-preview-contact-icon {
@@ -3573,6 +4310,7 @@
   }
 }
 
+<<<<<<< Updated upstream
 @keyframes routeContentEnter {
   0% {
     opacity: 0;
@@ -3586,6 +4324,8 @@
   }
 }
 
+=======
+>>>>>>> Stashed changes
 @keyframes floatIcon {
   0%,
   100% {
@@ -3616,6 +4356,33 @@
   }
 }
 
+<<<<<<< Updated upstream
+=======
+@keyframes foodMeteor {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-16deg) scale(0.94);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.7;
+  }
+  22% {
+    transform: translate3d(28vw, -5vh, 0) rotate(-8deg) scale(1);
+  }
+  45% {
+    transform: translate3d(60vw, -12vh, 0) rotate(-15deg) scale(1.03);
+    opacity: 0.78;
+  }
+  72% {
+    transform: translate3d(92vw, -19vh, 0) rotate(-9deg) scale(0.98);
+  }
+  100% {
+    transform: translate3d(122vw, -24vh, 0) rotate(-14deg) scale(1.02);
+    opacity: 0;
+  }
+}
+
+>>>>>>> Stashed changes
 @keyframes navActivePulse {
   0% {
     transform: scale(0.96);
@@ -3625,6 +4392,7 @@
   }
 }
 
+<<<<<<< Updated upstream
 .activity-section {
   display: grid;
   gap: 24px;
@@ -3698,16 +4466,36 @@
 
 .activity-column-header {
   flex: 0 0 auto;
+=======
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  align-items: start;
+}
+
+.activity-column {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.activity-column-header {
+>>>>>>> Stashed changes
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+<<<<<<< Updated upstream
   margin-bottom: 24px;
   min-height: 32px;
+=======
+>>>>>>> Stashed changes
 }
 
 .activity-column-header h3 {
   margin: 0;
+<<<<<<< Updated upstream
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -3796,10 +4584,51 @@
   color: inherit;
   text-decoration: none;
   transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+=======
+  font-size: 1.08rem;
+}
+
+.activity-column-header span {
+  color: var(--ink-faint);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.activity-column-body {
+  max-height: 480px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.activity-session-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.activity-session-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(80, 60, 40, 0.06);
+  background: rgba(255, 255, 255, 0.72);
+  color: inherit;
+  text-decoration: none;
+  backdrop-filter: blur(10px) saturate(122%);
+  -webkit-backdrop-filter: blur(10px) saturate(122%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 12px 26px rgba(65, 45, 25, 0.05);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+>>>>>>> Stashed changes
 }
 
 .activity-session-card:hover {
   transform: translateY(-2px);
+<<<<<<< Updated upstream
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 18px 42px rgba(80, 54, 30, 0.1);
 }
@@ -3848,18 +4677,58 @@
   gap: 10px;
   color: rgba(80, 68, 58, 0.78);
   font-size: 16px;
+=======
+  border-color: rgba(80, 60, 40, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 18px 34px rgba(65, 45, 25, 0.09);
+}
+
+.activity-session-top,
+.activity-session-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.activity-session-top strong {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.activity-status-chip {
+  padding: 0.24rem 0.62rem;
+  min-height: 0;
+  font-size: 0.76rem;
+}
+
+.activity-session-meta,
+.activity-session-footer {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+>>>>>>> Stashed changes
 }
 
 .activity-meta-item {
   display: inline-flex;
   align-items: center;
+<<<<<<< Updated upstream
   gap: 8px;
+=======
+  gap: 0.42rem;
+>>>>>>> Stashed changes
   min-width: 0;
 }
 
 .activity-meta-item .inline-icon {
+<<<<<<< Updated upstream
   width: 16px;
   height: 16px;
+=======
+  width: 0.98rem;
+  height: 0.98rem;
+>>>>>>> Stashed changes
   color: var(--accent);
   flex: 0 0 auto;
 }
@@ -3869,6 +4738,7 @@
   display: grid;
   align-content: center;
   justify-items: center;
+<<<<<<< Updated upstream
   gap: 0.55rem;
   text-align: center;
   border-radius: 28px;
@@ -3877,6 +4747,14 @@
   padding: 1.5rem;
   backdrop-filter: blur(10px) saturate(124%);
   -webkit-backdrop-filter: blur(10px) saturate(124%);
+=======
+  gap: 0.45rem;
+  text-align: center;
+  border-radius: 22px;
+  border: 1px dashed rgba(80, 60, 40, 0.08);
+  background: rgba(255, 255, 255, 0.42);
+  padding: 1.4rem;
+>>>>>>> Stashed changes
 }
 
 .activity-column-empty strong {
@@ -3914,7 +4792,11 @@
   border: 0;
 }
 
+<<<<<<< Updated upstream
 @media (max-width: 900px) {
+=======
+@media (max-width: 1100px) {
+>>>>>>> Stashed changes
   .dashboard-hero,
   .dashboard-main-grid,
   .details-page-grid,
@@ -3931,10 +4813,13 @@
     grid-template-columns: 1fr;
   }
 
+<<<<<<< Updated upstream
   .activity-column {
     height: min(70vh, 640px);
   }
 
+=======
+>>>>>>> Stashed changes
   .profile-preview-avatar {
     width: 96px;
     height: 96px;
@@ -3951,12 +4836,20 @@
 
 @media (max-width: 820px) {
   .app-shell {
+<<<<<<< Updated upstream
     padding: 0.7rem 0.85rem 0.85rem;
+=======
+    padding: 0.85rem;
+>>>>>>> Stashed changes
   }
 
   .app-navbar,
   .dashboard-hero,
   .card {
+<<<<<<< Updated upstream
+=======
+    border-radius: 24px;
+>>>>>>> Stashed changes
     padding: 1.1rem;
   }
 
@@ -4014,6 +4907,14 @@
     height: 70vh;
   }
 
+<<<<<<< Updated upstream
+=======
+  .activity-column-body {
+    max-height: none;
+    overflow: visible;
+  }
+
+>>>>>>> Stashed changes
   .profile-preview-card {
     gap: 1.15rem;
     padding: 1.35rem;
@@ -4060,6 +4961,7 @@
   }
 }
 
+<<<<<<< Updated upstream
 @media (max-width: 768px) {
   .dashboard-list-controls {
     width: 100%;
@@ -4100,6 +5002,11 @@
 @media (max-width: 560px) {
   .app-shell {
     padding: 0.6rem 0.75rem 0.75rem;
+=======
+@media (max-width: 560px) {
+  .app-shell {
+    padding: 0.75rem;
+>>>>>>> Stashed changes
   }
 
   .app-shell-auth {
@@ -4138,6 +5045,15 @@
     align-items: center;
   }
 
+<<<<<<< Updated upstream
+=======
+  .food-trail {
+    width: 30px;
+    height: 30px;
+    opacity: 0.24;
+  }
+
+>>>>>>> Stashed changes
   .map-preview-frame,
   .map-preview-fallback {
     height: 260px;
@@ -4175,8 +5091,16 @@
     font-size: 0.9rem;
   }
 
+<<<<<<< Updated upstream
   .activity-session-card-top {
     align-items: flex-start;
+=======
+  .activity-session-top,
+  .activity-session-footer,
+  .activity-column-header {
+    align-items: flex-start;
+    flex-direction: column;
+>>>>>>> Stashed changes
   }
 
   .activity-session-meta {
@@ -4209,6 +5133,7 @@
 
   .map-preview-hint,
   .map-modal-overlay,
+<<<<<<< Updated upstream
   .map-modal-card,
   .auth-mode-panel,
   .route-content-shell {
@@ -4223,4 +5148,9 @@
     filter: none !important;
     transform: none !important;
   }
+=======
+  .map-modal-card {
+    animation: none !important;
+  }
+>>>>>>> Stashed changes
 }
