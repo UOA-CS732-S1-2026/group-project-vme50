@@ -85,7 +85,10 @@ function Profile() {
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
         }}
       >
-        <h2 style={{ color: "#009688", margin: 0 }}>Platemates</h2>
+        <div className="flex items-center gap-2">
+          <img src="/favicon.svg" alt="Platemates logo" className="h-6 w-6" />
+          <h1 className="text-2xl font-bold text-teal-600">Platemates</h1>
+        </div>
         <button
           onClick={() => navigate("/dashboard")}
           style={{
