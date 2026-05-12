@@ -35,7 +35,7 @@ export const logout = async (req: Request, res: Response) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message: "No token provided!",
       });
     }
 
@@ -45,7 +45,7 @@ export const logout = async (req: Request, res: Response) => {
   } catch (err: any) {
     return res.status(500).json({
       success: false,
-      message: "Logout failed",
+      message: "Logout failed!",
       error: err.message,
     });
   }
