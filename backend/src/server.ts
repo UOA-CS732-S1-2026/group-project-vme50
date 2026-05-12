@@ -15,11 +15,9 @@ const app = express();
 /* ---------------- Middleware ---------------- */
 app.use(express.json());
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: true,
     credentials: true,
   }),
 );
@@ -37,7 +35,7 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin: allowedOrigin,
+    origin: true,
     credentials: true,
   },
 });
