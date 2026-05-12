@@ -1,37 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-<<<<<<< Updated upstream
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
-=======
-import type { FormEvent, ReactNode } from 'react'
->>>>>>> Stashed changes
 import { createPortal } from 'react-dom'
 import {
   Link,
   NavLink,
   Navigate,
-<<<<<<< Updated upstream
   Outlet,
-=======
->>>>>>> Stashed changes
   Route,
   Routes,
   useLocation,
   useNavigate,
-<<<<<<< Updated upstream
   useOutletContext,
-=======
->>>>>>> Stashed changes
   useParams,
 } from 'react-router-dom'
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import { DayPicker } from 'react-day-picker'
+import { io as createSocket } from 'socket.io-client'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'react-day-picker/style.css'
-<<<<<<< Updated upstream
 import authSceneUrl from './assets/pexels-lumeon-labs-2154956182-33473442.jpg'
-=======
->>>>>>> Stashed changes
 import './App.css'
 
 type AuthMode = 'login' | 'register'
@@ -52,11 +40,6 @@ type MealSession = {
   title: string
   description: string
   location: string
-<<<<<<< Updated upstream
-=======
-  locationLat?: number
-  locationLng?: number
->>>>>>> Stashed changes
   time: string
   slots: number
   creator: SessionUser | string
@@ -105,7 +88,11 @@ type Coordinates = {
   source: 'geocoded' | 'fallback'
 }
 
-<<<<<<< Updated upstream
+type LatLng = {
+  lat: number
+  lng: number
+}
+
 type SearchSuggestion = {
   session: MealSession
   copy: ReturnType<typeof getSessionCopy>
@@ -116,10 +103,6 @@ type SearchSuggestion = {
 type DashboardPageProps = {
   actionSessionId: string | null
   allSessions: MealSession[]
-=======
-type DashboardPageProps = {
-  actionSessionId: string | null
->>>>>>> Stashed changes
   currentUserId: string | null
   globalNotice: string
   joinedSession: MealSession | null
@@ -136,13 +119,10 @@ type DashboardPageProps = {
 
 type SessionDetailsPageProps = {
   actionSessionId: string | null
-<<<<<<< Updated upstream
   closingSessionId: string | null
   currentUserId: string | null
+  isAuthenticated: boolean
   onCloseSession: (sessionId: string) => Promise<MealSession | null>
-=======
-  currentUserId: string | null
->>>>>>> Stashed changes
   joinedSession: MealSession | null
   onRefresh: () => Promise<void>
   onSessionAction: (sessionId: string, action: SessionAction) => Promise<MealSession | null>
@@ -151,23 +131,32 @@ type SessionDetailsPageProps = {
   sessions: MealSession[]
 }
 
+type SessionDetailsAction =
+  | {
+      className: string
+      disabled: boolean
+      label: string
+      onClick: () => void
+    }
+  | {
+      className: string
+      href: string
+      label: string
+    }
+
 type CreateSessionPageProps = {
-<<<<<<< Updated upstream
   allSessions: MealSession[]
-=======
->>>>>>> Stashed changes
   onCreateSession: (event: FormEvent<HTMLFormElement>) => Promise<void>
+  onSessionLocationCoordinatesChange: (coordinates: LatLng | null) => void
   sessionError: string
   sessionForm: SessionFormState
+  sessionLocationCoordinates: LatLng | null
   submittingSession: boolean
   onSessionFormChange: (field: keyof SessionFormState, value: string) => void
 }
 
 type ProfilePageProps = {
-<<<<<<< Updated upstream
-=======
   currentUserId: string | null
->>>>>>> Stashed changes
   globalNotice: string
   handleProfileSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>
   profile: UserProfile | null
@@ -175,11 +164,7 @@ type ProfilePageProps = {
   profileForm: ProfileFormState
   profileLoading: boolean
   profileSaving: boolean
-<<<<<<< Updated upstream
   token: string
-=======
-  sessions: MealSession[]
->>>>>>> Stashed changes
   onProfileFieldChange: (field: keyof ProfileFormState, value: string) => void
 }
 
@@ -187,31 +172,17 @@ type AuthPageProps = {
   authError: string
   authForm: AuthFormState
   authLoading: boolean
-<<<<<<< Updated upstream
-=======
-  mode: AuthMode
->>>>>>> Stashed changes
   onAuthFormChange: (field: keyof AuthFormState, value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>, mode: AuthMode) => Promise<void>
 }
 
-<<<<<<< Updated upstream
 type AuthOutletContext = AuthPageProps
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:5050'
+const MEAL_API_BASE_URL = `${API_BASE_URL}/api/meal`
 const TOKEN_STORAGE_KEY = 'platemates-token'
 const AUCKLAND_CENTER: Coordinates = { lat: -36.8485, lng: 174.7633, source: 'fallback' }
-=======
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() ||
-  import.meta.env.VITE_API_URL?.trim() ||
-  'http://localhost:5050'
-const TOKEN_STORAGE_KEY = 'platemates-token'
-const PROFILE_STORAGE_KEY = 'platemates-profile'
-const AUCKLAND_CENTER: Coordinates = { lat: -36.8485, lng: 174.7633, source: 'fallback' }
-const UPI_EMAIL_REGEX = /^[A-Za-z]{4}\d{3}@aucklanduni\.ac\.nz$/
->>>>>>> Stashed changes
 
 const locationFallbacks: Array<{ match: RegExp; coordinates: Coordinates }> = [
   { match: /dominion/i, coordinates: { lat: -36.8878, lng: 174.7468, source: 'fallback' } },
@@ -220,7 +191,6 @@ const locationFallbacks: Array<{ match: RegExp; coordinates: Coordinates }> = [
   { match: /mount eden|mt eden/i, coordinates: { lat: -36.8841, lng: 174.7464, source: 'fallback' } },
 ]
 
-<<<<<<< Updated upstream
 const titleSuggestionSeeds = [
   'Hotpot on Dominion Road',
   'Hotpot dinner',
@@ -241,8 +211,6 @@ const placeSuggestionSeeds = [
   { name: 'Parnell', address: 'Parnell Road, Auckland', lat: -36.8547, lng: 174.7846 },
 ]
 
-=======
->>>>>>> Stashed changes
 const emptySessionForm: SessionFormState = {
   title: '',
   description: '',
@@ -306,43 +274,58 @@ function App() {
   const [profileSaving, setProfileSaving] = useState(false)
   const [submittingSession, setSubmittingSession] = useState(false)
   const [actionSessionId, setActionSessionId] = useState<string | null>(null)
-<<<<<<< Updated upstream
   const [closingSessionId, setClosingSessionId] = useState<string | null>(null)
-=======
->>>>>>> Stashed changes
+  const [sessionLocationCoordinates, setSessionLocationCoordinates] = useState<LatLng | null>(null)
+  const [apiHealth, setApiHealth] = useState<'checking' | 'healthy' | 'degraded'>('checking')
+  const [apiHealthMessage, setApiHealthMessage] = useState('Checking API')
+  const [socketStatus, setSocketStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [authError, setAuthError] = useState('')
   const [sessionError, setSessionError] = useState('')
   const [profileError, setProfileError] = useState('')
   const [globalNotice, setGlobalNotice] = useState('')
 
   const currentUserId = useMemo(() => getUserIdFromToken(token), [token])
-<<<<<<< Updated upstream
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300)
 
   useEffect(() => {
     const image = new Image()
     image.src = authSceneUrl
   }, [])
-=======
->>>>>>> Stashed changes
+
+  const loadProfile = useCallback(async () => {
+    if (!token) {
+      return
+    }
+
+    setProfileLoading(true)
+    setProfileError('')
+
+    try {
+      const response = await fetchJson<AuthProfileResponse>(`${API_BASE_URL}/api/auth/me`, { token })
+      const nextProfile = normalizeUserProfile(getProfilePayload(response))
+      setProfile(nextProfile)
+      setProfileForm(toProfileForm(nextProfile))
+    } catch (error) {
+      setProfileError(getErrorMessage(error))
+    } finally {
+      setProfileLoading(false)
+    }
+  }, [token])
 
   useEffect(() => {
     if (!token) {
       setSessions([])
       setProfile(null)
       setProfileForm(emptyProfileForm)
+      setSessionLocationCoordinates(null)
       setSessionError('')
       setProfileError('')
       return
     }
 
     void refreshSessions()
-<<<<<<< Updated upstream
     void loadProfile()
-=======
-    loadProfile()
->>>>>>> Stashed changes
-  }, [token])
+  }, [loadProfile, token])
 
   useEffect(() => {
     if (!globalNotice) {
@@ -365,11 +348,7 @@ function App() {
   )
 
   const visibleSessions = useMemo(() => {
-<<<<<<< Updated upstream
     const normalizedQuery = debouncedSearchQuery.trim().toLowerCase()
-=======
-    const normalizedQuery = searchQuery.trim().toLowerCase()
->>>>>>> Stashed changes
 
     const filtered = sessions.filter((session) => {
       if (normalizedQuery.length === 0) {
@@ -377,11 +356,7 @@ function App() {
       }
 
       return [session.title, session.description, session.location].some((value) =>
-<<<<<<< Updated upstream
         fuzzyMatchScore(value, normalizedQuery) > -1,
-=======
-        value.toLowerCase().includes(normalizedQuery),
->>>>>>> Stashed changes
       )
     })
 
@@ -396,28 +371,105 @@ function App() {
 
       return Date.parse(left.time) - Date.parse(right.time)
     })
-<<<<<<< Updated upstream
   }, [debouncedSearchQuery, sessions, sortMode])
-=======
-  }, [searchQuery, sessions, sortMode])
->>>>>>> Stashed changes
 
-  async function refreshSessions() {
-    if (!token) {
-      return
+  useEffect(() => {
+    const socket = createSocket(API_BASE_URL)
+
+    const handleMealSlotsUpdated = (payload: { mealId?: string }) => {
+      if (!payload.mealId) {
+        return
+      }
+
+      void syncSessionFromServer(payload.mealId)
     }
 
+    const handleMealRemoved = (payload: { mealId?: string }) => {
+      if (!payload.mealId) {
+        return
+      }
+
+      setSessions((current) => current.filter((session) => getSessionId(session) !== payload.mealId))
+    }
+
+    const handleConnect = () => {
+      setSocketStatus('connected')
+    }
+
+    const handleConnecting = () => {
+      setSocketStatus('connecting')
+    }
+
+    const handleDisconnect = () => {
+      setSocketStatus('disconnected')
+    }
+
+    socket.on('mealSlotsUpdated', handleMealSlotsUpdated)
+    socket.on('mealRemoved', handleMealRemoved)
+    socket.on('connect', handleConnect)
+    socket.on('disconnect', handleDisconnect)
+    socket.io.on('reconnect_attempt', handleConnecting)
+    socket.io.on('error', handleDisconnect)
+    socket.on('connect_error', handleDisconnect)
+
+    return () => {
+      socket.off('mealSlotsUpdated', handleMealSlotsUpdated)
+      socket.off('mealRemoved', handleMealRemoved)
+      socket.off('connect', handleConnect)
+      socket.off('disconnect', handleDisconnect)
+      socket.off('connect_error', handleDisconnect)
+      socket.io.off('reconnect_attempt', handleConnecting)
+      socket.io.off('error', handleDisconnect)
+      socket.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const runHealthCheck = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/`)
+        const text = await response.text()
+
+        if (isCancelled) {
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error(text || 'API health check failed')
+        }
+
+        setApiHealth('healthy')
+        setApiHealthMessage(text || 'API healthy')
+      } catch {
+        if (isCancelled) {
+          return
+        }
+
+        setApiHealth('degraded')
+        setApiHealthMessage('API unavailable')
+      }
+    }
+
+    void runHealthCheck()
+    const interval = window.setInterval(() => {
+      void runHealthCheck()
+    }, 30000)
+
+    return () => {
+      isCancelled = true
+      window.clearInterval(interval)
+    }
+  }, [])
+
+  async function refreshSessions() {
     setSessionLoading(true)
     setSessionError('')
 
     try {
-<<<<<<< Updated upstream
-      const data = await fetchJson<MealSession[]>(`${API_BASE_URL}/api/meal`, { token })
-      setSessions(data.map(normalizeMealSession))
-=======
-      const data = await fetchJson<{ data: MealSession[] }>(`${API_BASE_URL}/api/meals`, { token })
-      setSessions(data.data.map(normalizeMealSession))
->>>>>>> Stashed changes
+      const response = await fetchJson<MealListResponse>(`${MEAL_API_BASE_URL}`)
+      setSessions(getMealListPayload(response).map(normalizeMealSession))
     } catch (error) {
       setSessionError(getErrorMessage(error))
     } finally {
@@ -425,34 +477,31 @@ function App() {
     }
   }
 
-<<<<<<< Updated upstream
-  async function loadProfile() {
-=======
-  function loadProfile() {
->>>>>>> Stashed changes
-    if (!token) {
-      return
-    }
-
-    setProfileLoading(true)
-    setProfileError('')
-
+  async function syncSessionFromServer(sessionId: string) {
     try {
-<<<<<<< Updated upstream
-      const data = await fetchJson<{ user: UserProfile }>(`${API_BASE_URL}/api/auth/me`, { token })
-      setProfile(data.user)
-      setProfileForm(toProfileForm(data.user))
-=======
-      const storedProfile = readStoredProfile()
-      if (storedProfile) {
-        setProfile(storedProfile)
-        setProfileForm(toProfileForm(storedProfile))
+      const response = await fetchJson<MealDetailResponse>(`${MEAL_API_BASE_URL}/${sessionId}`)
+      const sessionPayload = getMealDetailPayload(response)
+
+      if (!sessionPayload) {
+        return
       }
->>>>>>> Stashed changes
+
+      const normalizedSession = normalizeMealSession(sessionPayload)
+
+      setSessions((current) => {
+        const exists = current.some((session) => getSessionId(session) === sessionId)
+        const nextSessions = exists
+          ? current.map((session) =>
+              getSessionId(session) === sessionId ? normalizedSession : session,
+            )
+          : [normalizedSession, ...current]
+
+        return nextSessions.filter((session) => session.isActive)
+      })
     } catch (error) {
-      setProfileError(getErrorMessage(error))
-    } finally {
-      setProfileLoading(false)
+      if (getErrorMessage(error) === 'Session not found') {
+        setSessions((current) => current.filter((session) => getSessionId(session) !== sessionId))
+      }
     }
   }
 
@@ -461,54 +510,21 @@ function App() {
     setAuthLoading(true)
     setAuthError('')
 
-<<<<<<< Updated upstream
-=======
-    const trimmedEmail = authForm.email.trim().toLowerCase()
-    const trimmedName = authForm.name.trim()
-
-    if (mode === 'register') {
-      if (!trimmedName) {
-        setAuthError('Please enter your full name.')
-        setAuthLoading(false)
-        return
-      }
-
-      if (!UPI_EMAIL_REGEX.test(trimmedEmail)) {
-        setAuthError('Use your UPI email in the format abcd123@aucklanduni.ac.nz.')
-        setAuthLoading(false)
-        return
-      }
-    }
-
->>>>>>> Stashed changes
     const endpoint = mode === 'login' ? 'login' : 'register'
     const payload =
       mode === 'login'
         ? {
-<<<<<<< Updated upstream
             email: authForm.email.trim(),
             password: authForm.password,
           }
         : {
             name: authForm.name.trim(),
             email: authForm.email.trim(),
-=======
-            email: trimmedEmail,
-            password: authForm.password,
-          }
-        : {
-            name: trimmedName,
-            email: trimmedEmail,
->>>>>>> Stashed changes
             password: authForm.password,
           }
 
     try {
-<<<<<<< Updated upstream
-      const data = await fetchJson<{ token: string; user: UserProfile }>(
-=======
-      const data = await fetchJson<{ message?: string; data: { token: string; user: SessionUser } }>(
->>>>>>> Stashed changes
+      const response = await fetchJson<AuthSubmitResponse>(
         `${API_BASE_URL}/api/auth/${endpoint}`,
         {
           method: 'POST',
@@ -516,23 +532,15 @@ function App() {
         },
       )
 
-<<<<<<< Updated upstream
-      localStorage.setItem(TOKEN_STORAGE_KEY, data.token)
-      setToken(data.token)
-      setProfile(data.user)
-      setProfileForm(toProfileForm(data.user))
-      setAuthForm(emptyAuthForm)
-      setGlobalNotice(mode === 'login' ? 'Logged in successfully.' : 'Account created successfully.')
-=======
-      const nextProfile = normalizeUserProfile(data.data.user)
-      localStorage.setItem(TOKEN_STORAGE_KEY, data.data.token)
-      persistProfile(nextProfile)
-      setToken(data.data.token)
+      const authPayload = getAuthSubmitPayload(response)
+      const nextProfile = normalizeUserProfile(authPayload.user)
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, authPayload.token)
+      setToken(authPayload.token)
       setProfile(nextProfile)
       setProfileForm(toProfileForm(nextProfile))
       setAuthForm(emptyAuthForm)
-      setGlobalNotice(data.message || (mode === 'login' ? 'Logged in successfully.' : 'Account created successfully.'))
->>>>>>> Stashed changes
+      setGlobalNotice(mode === 'login' ? 'Logged in successfully.' : 'Account created successfully.')
       navigate('/dashboard', { replace: true })
     } catch (error) {
       setAuthError(getErrorMessage(error))
@@ -551,10 +559,6 @@ function App() {
       // Logout should still complete locally even if the backend request fails.
     } finally {
       localStorage.removeItem(TOKEN_STORAGE_KEY)
-<<<<<<< Updated upstream
-=======
-      localStorage.removeItem(PROFILE_STORAGE_KEY)
->>>>>>> Stashed changes
       setToken('')
       setAuthForm(emptyAuthForm)
       setProfile(null)
@@ -583,35 +587,20 @@ function App() {
       const payload = {
         title: sessionForm.title.trim(),
         description: sessionForm.description.trim(),
-<<<<<<< Updated upstream
         location: sessionForm.location.trim(),
-=======
-        location: {
-          address: sessionForm.location.trim(),
-          lat: getFallbackCoordinates(sessionForm.location.trim()).lat,
-          lng: getFallbackCoordinates(sessionForm.location.trim()).lng,
-        },
->>>>>>> Stashed changes
         time: new Date(sessionForm.time).toISOString(),
         slots: Number(sessionForm.slots),
       }
 
-<<<<<<< Updated upstream
-      await fetchJson<{ session: MealSession }>(`${API_BASE_URL}/api/meal/create`, {
-=======
-      const data = await fetchJson<{ message?: string; data: MealSession }>(`${API_BASE_URL}/api/meals/create`, {
->>>>>>> Stashed changes
+      await fetchJson<MealMutationResponse>(`${MEAL_API_BASE_URL}/create`, {
         method: 'POST',
         body: payload,
         token,
       })
 
       setSessionForm(emptySessionForm)
-<<<<<<< Updated upstream
+      setSessionLocationCoordinates(null)
       setGlobalNotice('Meal session created successfully.')
-=======
-      setGlobalNotice(data.message || 'Meal session created successfully.')
->>>>>>> Stashed changes
       await refreshSessions()
       navigate('/dashboard')
     } catch (error) {
@@ -631,24 +620,23 @@ function App() {
     setSessionError('')
 
     try {
-<<<<<<< Updated upstream
-      const data = await fetchJson<{ message: string; session: MealSession }>(
-        `${API_BASE_URL}/api/meal/${sessionId}/${action}`,
-=======
-      const data = await fetchJson<{ message: string; data: MealSession }>(
-        `${API_BASE_URL}/api/meals/${sessionId}/${action}`,
->>>>>>> Stashed changes
+      const response = await fetchJson<MealMutationResponse>(
+        `${MEAL_API_BASE_URL}/${sessionId}/${action}`,
         {
           method: 'POST',
           token,
         },
       )
 
-<<<<<<< Updated upstream
-      const normalizedSession = normalizeMealSession(data.session)
-=======
-      const normalizedSession = normalizeMealSession(data.data)
->>>>>>> Stashed changes
+      const sessionPayload = getMealDetailPayload(response)
+
+      if (!sessionPayload) {
+        setGlobalNotice(getResponseMessage(response) || 'Session updated.')
+        await refreshSessions()
+        return null
+      }
+
+      const normalizedSession = normalizeMealSession(sessionPayload)
 
       setSessions((current) => {
         const exists = current.some((session) => getSessionId(session) === sessionId)
@@ -661,7 +649,7 @@ function App() {
         return nextSessions.filter((session) => session.isActive)
       })
 
-      setGlobalNotice(data.message)
+      setGlobalNotice(getResponseMessage(response) || (action === 'join' ? 'Joined session.' : 'Left session.'))
       return normalizedSession
     } catch (error) {
       const message = getErrorMessage(error)
@@ -672,7 +660,6 @@ function App() {
     }
   }
 
-<<<<<<< Updated upstream
   async function handleCloseSession(sessionId: string) {
     if (!token) {
       setSessionError('Please log in before closing a session.')
@@ -683,17 +670,25 @@ function App() {
     setSessionError('')
 
     try {
-      const data = await fetchJson<{ message: string; session: MealSession }>(
-        `${API_BASE_URL}/api/meal/${sessionId}/close`,
+      const response = await fetchJson<MealMutationResponse>(
+        `${MEAL_API_BASE_URL}/${sessionId}/close`,
         {
           method: 'POST',
           token,
         },
       )
 
-      const normalizedSession = normalizeMealSession(data.session)
-      setSessions((current) => current.filter((session) => getSessionId(session) !== sessionId))
-      setGlobalNotice(data.message)
+      const sessionPayload = getMealDetailPayload(response)
+
+      if (!sessionPayload) {
+        throw new Error(getResponseMessage(response) || 'Unable to close session')
+      }
+
+      const normalizedSession = normalizeMealSession(sessionPayload)
+      setSessions((current) =>
+        current.map((session) => (getSessionId(session) === sessionId ? normalizedSession : session)),
+      )
+      setGlobalNotice(getResponseMessage(response) || 'Session closed.')
       return normalizedSession
     } catch (error) {
       const message = getErrorMessage(error)
@@ -704,8 +699,6 @@ function App() {
     }
   }
 
-=======
->>>>>>> Stashed changes
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -718,30 +711,15 @@ function App() {
     setProfileError('')
 
     try {
-<<<<<<< Updated upstream
-      const data = await fetchJson<{ message: string; user: UserProfile }>(
-        `${API_BASE_URL}/api/auth/profile`,
-        {
-          method: 'PATCH',
-          body: profileForm,
-          token,
-        },
-      )
-      setProfile(data.user)
-      setProfileForm(toProfileForm(data.user))
-      setGlobalNotice(data.message)
-=======
-      const nextProfile = normalizeUserProfile({
-        ...(profile ?? {}),
-        ...profileForm,
-        _id: profile?.id || currentUserId || '',
-        email: profile?.email || '',
+      const response = await fetchJson<AuthProfileResponse>(`${API_BASE_URL}/api/auth/profile`, {
+        method: 'PATCH',
+        body: profileForm,
+        token,
       })
-      persistProfile(nextProfile)
+      const nextProfile = normalizeUserProfile(getProfilePayload(response))
       setProfile(nextProfile)
       setProfileForm(toProfileForm(nextProfile))
-      setGlobalNotice('Profile saved locally.')
->>>>>>> Stashed changes
+      setGlobalNotice('Profile updated successfully.')
     } catch (error) {
       setProfileError(getErrorMessage(error))
     } finally {
@@ -750,13 +728,10 @@ function App() {
   }
 
   const isAuthenticated = Boolean(token)
-<<<<<<< Updated upstream
   const routeMotionKey =
     !isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')
       ? 'auth'
       : location.pathname
-=======
->>>>>>> Stashed changes
 
   return (
     <div className={`app-shell ${isAuthenticated ? '' : 'app-shell-auth'}`}>
@@ -776,8 +751,13 @@ function App() {
         ) : null}
 
         <div className={`app-content ${isAuthenticated ? '' : 'app-content-auth'}`}>
-<<<<<<< Updated upstream
           <div className="route-content-shell" key={routeMotionKey}>
+            <SystemStatusBar
+              apiHealth={apiHealth}
+              apiHealthMessage={apiHealthMessage}
+              isAuthenticated={isAuthenticated}
+              socketStatus={socketStatus}
+            />
             <Routes location={location}>
               <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="/" />
               <Route
@@ -823,20 +803,19 @@ function App() {
               />
               <Route
                 element={
-                  <ProtectedRoute isAuthenticated={isAuthenticated}>
-                    <SessionDetailsPage
-                      actionSessionId={actionSessionId}
-                      closingSessionId={closingSessionId}
-                      currentUserId={currentUserId}
-                      joinedSession={joinedSession}
-                      onCloseSession={handleCloseSession}
-                      onRefresh={refreshSessions}
-                      onSessionAction={handleSessionAction}
-                      sessionError={sessionError}
-                      sessionLoading={sessionLoading}
-                      sessions={sessions}
-                    />
-                  </ProtectedRoute>
+                  <SessionDetailsPage
+                    actionSessionId={actionSessionId}
+                    closingSessionId={closingSessionId}
+                    currentUserId={currentUserId}
+                    isAuthenticated={isAuthenticated}
+                    joinedSession={joinedSession}
+                    onCloseSession={handleCloseSession}
+                    onRefresh={refreshSessions}
+                    onSessionAction={handleSessionAction}
+                    sessionError={sessionError}
+                    sessionLoading={sessionLoading}
+                    sessions={sessions}
+                  />
                 }
                 path="/sessions/:sessionId"
               />
@@ -846,11 +825,13 @@ function App() {
                     <CreateSessionPage
                       allSessions={sessions}
                       onCreateSession={handleCreateSession}
+                      onSessionLocationCoordinatesChange={setSessionLocationCoordinates}
                       onSessionFormChange={(field, value) =>
                         setSessionForm((current) => ({ ...current, [field]: value }))
                       }
                       sessionError={sessionError}
                       sessionForm={sessionForm}
+                      sessionLocationCoordinates={sessionLocationCoordinates}
                       submittingSession={submittingSession}
                     />
                   </ProtectedRoute>
@@ -861,6 +842,7 @@ function App() {
                 element={
                   <ProtectedRoute isAuthenticated={isAuthenticated}>
                     <ProfilePage
+                      currentUserId={currentUserId}
                       globalNotice={globalNotice}
                       handleProfileSubmit={handleProfileSubmit}
                       onProfileFieldChange={(field, value) =>
@@ -880,124 +862,47 @@ function App() {
               <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
             </Routes>
           </div>
-=======
-          <Routes key={location.pathname} location={location}>
-            <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="/" />
-            <Route
-              element={
-                <PublicOnlyRoute isAuthenticated={isAuthenticated}>
-                  <AuthPage
-                    authError={authError}
-                    authForm={authForm}
-                    authLoading={authLoading}
-                    mode="login"
-                    onAuthFormChange={(field, value) =>
-                      setAuthForm((current) => ({ ...current, [field]: value }))
-                    }
-                    onSubmit={handleAuthSubmit}
-                  />
-                </PublicOnlyRoute>
-              }
-              path="/login"
-            />
-            <Route
-              element={
-                <PublicOnlyRoute isAuthenticated={isAuthenticated}>
-                  <AuthPage
-                    authError={authError}
-                    authForm={authForm}
-                    authLoading={authLoading}
-                    mode="register"
-                    onAuthFormChange={(field, value) =>
-                      setAuthForm((current) => ({ ...current, [field]: value }))
-                    }
-                    onSubmit={handleAuthSubmit}
-                  />
-                </PublicOnlyRoute>
-              }
-              path="/register"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <DashboardPage
-                    actionSessionId={actionSessionId}
-                    currentUserId={currentUserId}
-                    globalNotice={globalNotice}
-                    joinedSession={joinedSession}
-                    onRefresh={refreshSessions}
-                    onSearchChange={setSearchQuery}
-                    onSessionAction={handleSessionAction}
-                    onSortModeChange={setSortMode}
-                    searchQuery={searchQuery}
-                    sessionError={sessionError}
-                    sessionLoading={sessionLoading}
-                    sessions={visibleSessions}
-                    sortMode={sortMode}
-                  />
-                </ProtectedRoute>
-              }
-              path="/dashboard"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <SessionDetailsPage
-                    actionSessionId={actionSessionId}
-                    currentUserId={currentUserId}
-                    joinedSession={joinedSession}
-                    onRefresh={refreshSessions}
-                    onSessionAction={handleSessionAction}
-                    sessionError={sessionError}
-                    sessionLoading={sessionLoading}
-                    sessions={sessions}
-                  />
-                </ProtectedRoute>
-              }
-              path="/sessions/:sessionId"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <CreateSessionPage
-                    onCreateSession={handleCreateSession}
-                    onSessionFormChange={(field, value) =>
-                      setSessionForm((current) => ({ ...current, [field]: value }))
-                    }
-                    sessionError={sessionError}
-                    sessionForm={sessionForm}
-                    submittingSession={submittingSession}
-                  />
-                </ProtectedRoute>
-              }
-              path="/create-session"
-            />
-            <Route
-              element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <ProfilePage
-                    currentUserId={currentUserId}
-                    globalNotice={globalNotice}
-                    handleProfileSubmit={handleProfileSubmit}
-                    onProfileFieldChange={(field, value) =>
-                      setProfileForm((current) => ({ ...current, [field]: value }))
-                    }
-                    profile={profile}
-                    profileError={profileError}
-                    profileForm={profileForm}
-                    profileLoading={profileLoading}
-                    profileSaving={profileSaving}
-                    sessions={sessions}
-                  />
-                </ProtectedRoute>
-              }
-              path="/profile"
-            />
-            <Route element={<Navigate replace to={isAuthenticated ? '/dashboard' : '/login'} />} path="*" />
-          </Routes>
->>>>>>> Stashed changes
         </div>
       </div>
+    </div>
+  )
+}
+
+function SystemStatusBar({
+  apiHealth,
+  apiHealthMessage,
+  isAuthenticated,
+  socketStatus,
+}: {
+  apiHealth: 'checking' | 'healthy' | 'degraded'
+  apiHealthMessage: string
+  isAuthenticated: boolean
+  socketStatus: 'connecting' | 'connected' | 'disconnected'
+}) {
+  const apiLabel =
+    apiHealth === 'healthy'
+      ? 'API Healthy'
+      : apiHealth === 'degraded'
+        ? 'API Unavailable'
+        : 'Checking API'
+
+  const socketLabel =
+    socketStatus === 'connected'
+      ? 'Socket Connected'
+      : socketStatus === 'disconnected'
+        ? 'Socket Disconnected'
+        : 'Socket Connecting'
+
+  return (
+    <div className={`system-status-bar ${isAuthenticated ? '' : 'system-status-bar-auth'}`.trim()}>
+      <span className={`system-status-pill status-${apiHealth}`.trim()} title={apiHealthMessage}>
+        <span className="system-status-dot" />
+        {apiLabel}
+      </span>
+      <span className={`system-status-pill status-${socketStatus}`.trim()}>
+        <span className="system-status-dot" />
+        {socketLabel}
+      </span>
     </div>
   )
 }
@@ -1067,27 +972,6 @@ function BackgroundOrnaments() {
       <span className="ornament-particle ornament-particle-b" />
       <span className="ornament-particle ornament-particle-c" />
       <span className="ornament-particle ornament-particle-d" />
-<<<<<<< Updated upstream
-=======
-      <span className="food-trail food-trail-burger">
-        <FoodTrailIcon kind="burger" />
-      </span>
-      <span className="food-trail food-trail-fries">
-        <FoodTrailIcon kind="fries" />
-      </span>
-      <span className="food-trail food-trail-drumstick">
-        <FoodTrailIcon kind="drumstick" />
-      </span>
-      <span className="food-trail food-trail-soda">
-        <FoodTrailIcon kind="soda" />
-      </span>
-      <span className="food-trail food-trail-hotpot">
-        <FoodTrailIcon kind="hotpot" />
-      </span>
-      <span className="food-trail food-trail-skewer">
-        <FoodTrailIcon kind="skewer" />
-      </span>
->>>>>>> Stashed changes
     </div>
   )
 }
@@ -1183,71 +1067,6 @@ function BrandLogo() {
   )
 }
 
-<<<<<<< Updated upstream
-=======
-function FoodTrailIcon({
-  kind,
-}: {
-  kind: 'burger' | 'fries' | 'drumstick' | 'soda' | 'hotpot' | 'skewer'
-}) {
-  switch (kind) {
-    case 'burger':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 11.5c.7-2.6 3.3-4.5 7-4.5s6.3 1.9 7 4.5" fill="#f4b352" stroke="#9a5f1d" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M4.5 12.5h15" stroke="#7a4a17" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="M5.5 16.5h13l-1 2h-11z" fill="#8e5a2b" stroke="#6d441f" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M6.2 13.8h11.6" stroke="#5d8d3a" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="M8 9.5h.01M11 8.8h.01M14.2 9.4h.01" stroke="#fff3d8" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'fries':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 4.5v6M10.5 3.8v6.7M14 4.2v6.3M17 5v5.5" stroke="#f0c14d" strokeWidth="1.9" strokeLinecap="round" />
-          <path d="M6 10.5h12l-1.2 8h-9.6z" fill="#d85e3f" stroke="#98412a" strokeWidth="1.2" strokeLinejoin="round" />
-        </svg>
-      )
-    case 'drumstick':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9.5 9.5c2.3-2.3 6-2.5 8-.5s1.8 5.7-.5 8c-2 2-5 2.7-7.8 2.1l-2.7-2.7c-.6-2.8.1-5.8 3-6.9Z" fill="#c97b48" stroke="#8b512b" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="m5.8 16.2-1.6 1.6" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="m4.2 15.1 1.2-1.2" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="m6.8 17.7 1.1-1.1" stroke="#f6e8cf" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      )
-    case 'soda':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 3.5h4" stroke="#f5ead2" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M13 3.5v2l3 2" stroke="#f5ead2" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M8 7.5h8l-1 13h-6z" fill="#db5f5b" stroke="#973f3b" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M10 11.2c.8-.5 1.2-.5 2 0s1.2.5 2 0" stroke="#ffd8d8" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'hotpot':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 8h10v6a5 5 0 0 1-5 5 5 5 0 0 1-5-5z" fill="#cb6b4c" stroke="#8f4b2f" strokeWidth="1.2" strokeLinejoin="round" />
-          <path d="M5.5 9.5h1.8M16.7 9.5h1.8" stroke="#8f4b2f" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M9 5.5c0 1 .8 1.2.8 2.2M12 4.8c0 1 .8 1.3.8 2.4M15 5.5c0 .9.7 1.2.7 2.1" stroke="#f7dfb3" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="M9 11.6c1 .7 1.9.7 2.9 0 .9-.7 1.8-.7 2.8 0" stroke="#ffd8b0" strokeWidth="1.2" strokeLinecap="round" />
-        </svg>
-      )
-    case 'skewer':
-      return (
-        <svg className="food-trail-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 18.5 20 5.5" stroke="#6d441f" strokeWidth="1.4" strokeLinecap="round" />
-          <circle cx="8" cy="15.3" r="2" fill="#d96e4b" stroke="#94492b" strokeWidth="1.1" />
-          <circle cx="11.8" cy="12.3" r="2" fill="#f0c14d" stroke="#9d7021" strokeWidth="1.1" />
-          <circle cx="15.8" cy="9.2" r="2" fill="#6f8d49" stroke="#536936" strokeWidth="1.1" />
-        </svg>
-      )
-  }
-}
-
->>>>>>> Stashed changes
 function Icon({
   name,
 }: {
@@ -1264,10 +1083,7 @@ function Icon({
     | 'graduation-cap'
     | 'location'
     | 'logout'
-<<<<<<< Updated upstream
     | 'minus'
-=======
->>>>>>> Stashed changes
     | 'plus'
     | 'refresh'
     | 'search'
@@ -1277,20 +1093,12 @@ function Icon({
 }) {
   const commonProps = {
     'aria-hidden': true,
-<<<<<<< Updated upstream
     className: `inline-icon icon icon-${name}`,
-=======
-    className: 'inline-icon',
->>>>>>> Stashed changes
     fill: 'none',
     stroke: 'currentColor',
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
-<<<<<<< Updated upstream
     strokeWidth: 2.1,
-=======
-    strokeWidth: 1.8,
->>>>>>> Stashed changes
     viewBox: '0 0 24 24',
   }
 
@@ -1298,119 +1106,71 @@ function Icon({
     case 'arrow-left':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M19 12H6" />
           <path d="m11 17-5-5 5-5" />
-=======
-          <path d="M19 12H5" />
-          <path d="m10 17-5-5 5-5" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'chevron-left':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="m14 6.75-4.75 5.25L14 17.25" />
-=======
-          <path d="m14.5 6.5-5 5 5 5" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'chevron-right':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="m10 6.75 4.75 5.25L10 17.25" />
-=======
-          <path d="m9.5 6.5 5 5-5 5" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'calendar':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <rect x="4.5" y="5.5" width="15" height="14" rx="3.25" />
           <path d="M8 3.75v3.5" />
           <path d="M16 3.75v3.5" />
           <path d="M4.5 9.5h15" />
-=======
-          <rect x="4" y="6" width="16" height="14" rx="3" />
-          <path d="M8 4.5v3" />
-          <path d="M16 4.5v3" />
-          <path d="M4 10h16" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'search':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <circle cx="11" cy="11" r="6.25" />
           <path d="m16 16 3.75 3.75" />
-=======
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 4 4" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'close':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M7 7 17 17" />
           <path d="M17 7 7 17" />
-=======
-          <path d="M6 6 18 18" />
-          <path d="M18 6 6 18" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'email':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <rect x="4.5" y="6.25" width="15" height="11.5" rx="2.75" />
           <path d="m5.75 8.25 6.25 4.9 6.25-4.9" />
-=======
-          <rect x="4" y="6" width="16" height="12" rx="2.5" />
-          <path d="m5.5 8 6.5 5 6.5-5" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'graduation-cap':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="m3.75 10 8.25-4.25L20.25 10 12 14.25 3.75 10Z" />
           <path d="M7 12.35v3.8c1.2.95 3.05 1.6 5 1.6s3.8-.65 5-1.6v-3.8" />
-=======
-          <path d="m3.5 10 8.5-4.5 8.5 4.5-8.5 4.5-8.5-4.5Z" />
-          <path d="M7 12.1v4.2c1.2.9 3 1.5 5 1.5s3.8-.6 5-1.5v-4.2" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'cuisine':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M8.1 8.35a3.2 3.2 0 0 1 3.2-3.1c1.45 0 2.45.66 3.08 1.78" />
           <path d="M5.35 12.4h13.3c0 3.1-2.75 5.6-6.65 5.6s-6.65-2.5-6.65-5.6Z" />
           <path d="M12 12.4V9.2" />
           <path d="M16.9 8.2c.58-.86 1.32-1.48 2.08-1.84" />
-=======
-          <path d="M8 8.2c0-1.9 1.5-3.4 3.4-3.4 1.5 0 2.5.7 3.1 1.8" />
-          <path d="M5.2 12.3h13.6c0 3.2-2.8 5.7-6.8 5.7s-6.8-2.5-6.8-5.7Z" />
-          <path d="M12 12.3v-3.2" />
-          <path d="M16.8 8.1c.6-.9 1.4-1.5 2.2-1.9" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'spark':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M12 3.75v3.5" />
           <path d="M12 16.75v3.5" />
           <path d="M3.75 12h3.5" />
@@ -1419,22 +1179,11 @@ function Icon({
           <path d="m14.75 14.75 2.45 2.45" />
           <path d="m14.75 9.25 2.45-2.45" />
           <path d="m6.8 17.2 2.45-2.45" />
-=======
-          <path d="M12 3v4" />
-          <path d="M12 17v4" />
-          <path d="M3 12h4" />
-          <path d="M17 12h4" />
-          <path d="M6.4 6.4 9 9" />
-          <path d="m15 15 2.6 2.6" />
-          <path d="m15 9 2.6-2.6" />
-          <path d="M6.4 17.6 9 15" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'plus':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M12 6v12" />
           <path d="M6 12h12" />
         </svg>
@@ -1443,101 +1192,59 @@ function Icon({
       return (
         <svg {...commonProps}>
           <path d="M6 12h12" />
-=======
-          <path d="M12 5v14" />
-          <path d="M5 12h14" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'refresh':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M18.35 11.85a6.35 6.35 0 1 1-1.82-4.4" />
           <path d="M14.75 5.95h4.15v4.15" />
           <path d="m18.9 5.95-4.55 4.55" />
-=======
-          <path d="M19.5 11.75a7.75 7.75 0 1 1-2.06-5.27" />
-          <path d="M19.5 5.25v4.5H15" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'user':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M18.25 20.25a6.25 6.25 0 0 0-12.5 0" />
           <circle cx="12" cy="8" r="3.75" />
-=======
-          <path d="M18 21a6 6 0 0 0-12 0" />
-          <circle cx="12" cy="8" r="4" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'logout':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="m9.75 16.75-4.5-4.75 4.5-4.75" />
           <path d="M5.25 12h9.5" />
           <path d="M14.75 4.75h4v14.5h-4" />
-=======
-          <path d="M10 17l-5-5 5-5" />
-          <path d="M5 12h10" />
-          <path d="M14 5h4v14h-4" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'location':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M12 20.75s5.75-4.9 5.75-10.55a5.75 5.75 0 1 0-11.5 0c0 5.65 5.75 10.55 5.75 10.55Z" />
           <circle cx="12" cy="10" r="2.15" />
-=======
-          <path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z" />
-          <circle cx="12" cy="10" r="2.3" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'external-link':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M14.5 5.25h4.25V9.5" />
           <path d="M9.5 14.5 18.75 5.25" />
           <path d="M18.75 13.5v3a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 7.5 5.25h3" />
-=======
-          <path d="M14 5h5v5" />
-          <path d="M10 14 19 5" />
-          <path d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'clock':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <circle cx="12" cy="12" r="8.25" />
           <path d="M12 7.9v4.35l2.9 1.75" />
-=======
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M12 8v4.4l2.8 1.8" />
->>>>>>> Stashed changes
         </svg>
       )
     case 'seats':
       return (
         <svg {...commonProps}>
-<<<<<<< Updated upstream
           <path d="M6.25 18v-4.35a2.4 2.4 0 0 1 2.4-2.4h6.7a2.4 2.4 0 0 1 2.4 2.4V18" />
           <path d="M8 11.25V8.7a1.95 1.95 0 1 1 3.9 0v2.55" />
           <path d="M12.1 11.25V8.2a1.95 1.95 0 1 1 3.9 0v3.05" />
-=======
-          <path d="M6 18v-4.5A2.5 2.5 0 0 1 8.5 11h7A2.5 2.5 0 0 1 18 13.5V18" />
-          <path d="M8 11V8.5a2 2 0 1 1 4 0V11" />
-          <path d="M12 11V8a2 2 0 1 1 4 0v3" />
->>>>>>> Stashed changes
         </svg>
       )
   }
@@ -1663,15 +1370,9 @@ function ActivitySessionCard({ session }: { session: MealSession }) {
 
   return (
     <Link className="activity-session-card" key={getSessionId(session)} to={`/sessions/${getSessionId(session)}`}>
-<<<<<<< Updated upstream
       <div className="activity-session-card-top">
         <strong className="activity-session-title">{copy.title}</strong>
         <StatusChip className={`status-badge activity-status-chip ${statusLabel !== 'Open' ? 'closed' : 'open'}`} warn={statusLabel !== 'Open'}>
-=======
-      <div className="activity-session-top">
-        <strong>{copy.title}</strong>
-        <StatusChip className="activity-status-chip" warn={statusLabel !== 'Open'}>
->>>>>>> Stashed changes
           {statusLabel}
         </StatusChip>
       </div>
@@ -1686,11 +1387,7 @@ function ActivitySessionCard({ session }: { session: MealSession }) {
           <span>{formatDateTime(session.time)}</span>
         </span>
       </div>
-<<<<<<< Updated upstream
       <div className="activity-session-people">
-=======
-      <div className="activity-session-footer">
->>>>>>> Stashed changes
         <span className="activity-meta-item">
           <Icon name="seats" />
           <span>{session.participants.length} / {session.slots} people</span>
@@ -1717,11 +1414,7 @@ function ActivityColumn({
     <section className="activity-column">
       <div className="activity-column-header">
         <h3>{title}</h3>
-<<<<<<< Updated upstream
         <span className="activity-column-count">{sessions.length} {sessions.length === 1 ? 'session' : 'sessions'}</span>
-=======
-        <span>{sessions.length} {sessions.length === 1 ? 'session' : 'sessions'}</span>
->>>>>>> Stashed changes
       </div>
 
       {sessions.length === 0 ? (
@@ -1732,11 +1425,7 @@ function ActivityColumn({
         </div>
       ) : (
         <div className="activity-column-body">
-<<<<<<< Updated upstream
           <div className="activity-list">
-=======
-          <div className="activity-session-list">
->>>>>>> Stashed changes
             {sessions.map((session) => (
               <ActivitySessionCard key={getSessionId(session)} session={session} />
             ))}
@@ -1754,7 +1443,6 @@ function LeafletMapResizeWatcher() {
     const frame = window.requestAnimationFrame(() => {
       map.invalidateSize()
     })
-<<<<<<< Updated upstream
     const timeout = window.setTimeout(() => {
       map.invalidateSize()
     }, 260)
@@ -1763,16 +1451,11 @@ function LeafletMapResizeWatcher() {
       window.cancelAnimationFrame(frame)
       window.clearTimeout(timeout)
     }
-=======
-
-    return () => window.cancelAnimationFrame(frame)
->>>>>>> Stashed changes
   }, [map])
 
   return null
 }
 
-<<<<<<< Updated upstream
 function MapPreviewCard({
   location,
   latitude,
@@ -1952,8 +1635,6 @@ function MapModal({
   )
 }
 
-=======
->>>>>>> Stashed changes
 function MapPreview({
   location,
   latitude,
@@ -1963,19 +1644,8 @@ function MapPreview({
   latitude: number
   longitude: number
 }) {
-<<<<<<< Updated upstream
   const [isExpanded, setIsExpanded] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
-=======
-  const position: [number, number] = [latitude, longitude]
-  const openInMapsHref =
-    Number.isFinite(latitude) && Number.isFinite(longitude)
-      ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isClosing, setIsClosing] = useState(false)
-  const isModalVisible = isExpanded || isClosing
->>>>>>> Stashed changes
 
   function openModal() {
     setIsClosing(false)
@@ -1990,7 +1660,6 @@ function MapPreview({
     }, 180)
   }
 
-<<<<<<< Updated upstream
   return (
     <>
       <MapPreviewCard latitude={latitude} location={location} longitude={longitude} onOpen={openModal} />
@@ -2192,113 +1861,6 @@ function LoopingWheelPicker({
         <div aria-hidden="true" className="timepicker-wheel-spacer" />
       </div>
     </div>
-=======
-  useEffect(() => {
-    if (!isModalVisible) {
-      return
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        closeModal()
-      }
-    }
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isModalVisible])
-
-  return (
-    <>
-      <div className="map-preview-shell">
-        <button
-          aria-label="Open larger map"
-          className="map-preview-frame map-preview-button"
-          onClick={openModal}
-          type="button"
-        >
-          <MapContainer center={position} className="leaflet-map" scrollWheelZoom={false} zoom={14} zoomControl={false}>
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-              maxZoom={20}
-              subdomains="abcd"
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            />
-            <Marker icon={brandMapMarker} position={position} />
-          </MapContainer>
-          <div aria-hidden="true" className="map-preview-overlay" />
-          <span className="map-preview-hint">Click to enlarge</span>
-        </button>
-
-        <div className="map-heading">
-          <p className="muted-text">Pin is based on the session location.</p>
-          <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
-            <Icon name="external-link" />
-            Open in Maps
-          </a>
-        </div>
-      </div>
-
-      {isModalVisible
-        ? createPortal(
-            <div
-              className={`map-modal-overlay ${isClosing ? 'is-closing' : 'is-open'}`}
-              onClick={closeModal}
-              role="presentation"
-            >
-              <div
-                aria-modal="true"
-                className={`map-modal-card ${isClosing ? 'is-closing' : 'is-open'}`}
-                onClick={(event) => event.stopPropagation()}
-                role="dialog"
-              >
-                <div className="map-modal-header">
-                  <div>
-                    <h3>Session location</h3>
-                    <p>{location}</p>
-                  </div>
-                  <button
-                    aria-label="Close map"
-                    className="ghost-button map-modal-close"
-                    onClick={closeModal}
-                    type="button"
-                  >
-                    <Icon name="close" />
-                  </button>
-                </div>
-
-                <div className="map-modal-frame">
-                  <MapContainer center={position} className="leaflet-map leaflet-map-expanded" scrollWheelZoom zoom={15}>
-                    <LeafletMapResizeWatcher />
-                    <TileLayer
-                      attribution="&copy; OpenStreetMap contributors &copy; CARTO"
-                      maxZoom={20}
-                      subdomains="abcd"
-                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                    />
-                    <Marker icon={brandMapMarker} position={position} />
-                  </MapContainer>
-                  <div aria-hidden="true" className="map-preview-overlay" />
-                </div>
-
-                <div className="map-modal-footer">
-                  <a className="secondary-link map-open-button" href={openInMapsHref} rel="noreferrer" target="_blank">
-                    <Icon name="external-link" />
-                    Open in Maps
-                  </a>
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
-    </>
->>>>>>> Stashed changes
   )
 }
 
@@ -2311,7 +1873,6 @@ function DateTimeField({
   value: string
   onChange: (value: string) => void
 }) {
-<<<<<<< Updated upstream
   const [openPanel, setOpenPanel] = useState<'date' | 'time' | null>(null)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const dateTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -2321,7 +1882,7 @@ function DateTimeField({
   const [datePopoverStyle, setDatePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
   const [timePopoverStyle, setTimePopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
   const selectedDateTime = parseDateTimeLocalValue(value)
-  const minimumDateTime = parseDateTimeLocalValue(minimum) ?? new Date()
+  const minimumDateTime = useMemo(() => parseDateTimeLocalValue(minimum) ?? new Date(), [minimum])
   const selectedTime = selectedDateTime ? formatTimeInputValue(selectedDateTime) : formatTimeInputValue(minimumDateTime)
   const [selectedHour, selectedMinute] = selectedTime.split(':').map(Number)
   const [visibleMonth, setVisibleMonth] = useState<Date>(selectedDateTime ?? minimumDateTime)
@@ -2335,71 +1896,38 @@ function DateTimeField({
 
   useEffect(() => {
     if (!openPanel) {
-=======
-  const [isOpen, setIsOpen] = useState(false)
-  const wrapperRef = useRef<HTMLDivElement | null>(null)
-  const triggerRef = useRef<HTMLButtonElement | null>(null)
-  const popoverRef = useRef<HTMLDivElement | null>(null)
-  const [popoverStyle, setPopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null)
-  const selectedDateTime = parseDateTimeLocalValue(value)
-  const minimumDateTime = parseDateTimeLocalValue(minimum) ?? new Date()
-  const selectedTime = selectedDateTime ? formatTimeInputValue(selectedDateTime) : ''
-  const [visibleMonth, setVisibleMonth] = useState<Date>(selectedDateTime ?? minimumDateTime)
-
-  useEffect(() => {
-    if (!isOpen) {
->>>>>>> Stashed changes
       return
     }
 
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node
-<<<<<<< Updated upstream
       const clickedInsideTrigger = wrapperRef.current?.contains(target)
       const clickedInsideDatePopover = datePopoverRef.current?.contains(target)
       const clickedInsideTimePopover = timePopoverRef.current?.contains(target)
 
       if (!clickedInsideTrigger && !clickedInsideDatePopover && !clickedInsideTimePopover) {
         setOpenPanel(null)
-=======
-      if (!wrapperRef.current?.contains(target) && !popoverRef.current?.contains(target)) {
-        setIsOpen(false)
->>>>>>> Stashed changes
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-<<<<<<< Updated upstream
         setOpenPanel(null)
       }
     }
 
     function updatePopoverPosition(panel: 'date' | 'time') {
       const trigger = panel === 'date' ? dateTriggerRef.current : timeTriggerRef.current
-=======
-        setIsOpen(false)
-      }
-    }
-
-    function updatePopoverPosition() {
-      const trigger = triggerRef.current
->>>>>>> Stashed changes
       if (!trigger) {
         return
       }
 
       const rect = trigger.getBoundingClientRect()
-<<<<<<< Updated upstream
       const desiredWidth = Math.max(rect.width, panel === 'date' ? 332 : 364)
-=======
-      const desiredWidth = Math.max(rect.width, 332)
->>>>>>> Stashed changes
       const maxWidth = Math.min(desiredWidth, window.innerWidth - 24)
       const left = Math.min(Math.max(12, rect.left), window.innerWidth - maxWidth - 12)
       const top = rect.bottom + 8
 
-<<<<<<< Updated upstream
       const nextStyle = {
         top,
         left,
@@ -2419,35 +1947,14 @@ function DateTimeField({
     const handleViewportChange = () => updatePopoverPosition(openPanel)
     window.addEventListener('resize', handleViewportChange)
     window.addEventListener('scroll', handleViewportChange, true)
-=======
-      setPopoverStyle({
-        top,
-        left,
-        width: maxWidth,
-      })
-    }
-
-    updatePopoverPosition()
-    document.addEventListener('mousedown', handleClickOutside)
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('resize', updatePopoverPosition)
-    window.addEventListener('scroll', updatePopoverPosition, true)
->>>>>>> Stashed changes
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
       window.removeEventListener('keydown', handleKeyDown)
-<<<<<<< Updated upstream
       window.removeEventListener('resize', handleViewportChange)
       window.removeEventListener('scroll', handleViewportChange, true)
     }
   }, [openPanel])
-=======
-      window.removeEventListener('resize', updatePopoverPosition)
-      window.removeEventListener('scroll', updatePopoverPosition, true)
-    }
-  }, [isOpen])
->>>>>>> Stashed changes
 
   useEffect(() => {
     const nextMonth = parseDateTimeLocalValue(value)
@@ -2471,7 +1978,6 @@ function DateTimeField({
     const nextDate = mergeDateAndTime(day, selectedTime || formatTimeInputValue(minimumDateTime))
     onChange(nextDate)
     setVisibleMonth(day)
-<<<<<<< Updated upstream
     setOpenPanel(null)
   }
 
@@ -2562,37 +2068,6 @@ function DateTimeField({
       {openPanel === 'date' && datePopoverStyle
         ? createPortal(
             <div className="picker-popover datepicker-popover" ref={datePopoverRef} role="dialog" style={datePopoverStyle}>
-=======
-    setIsOpen(false)
-  }
-
-  function handleTimeChange(nextTime: string) {
-    const baseDate = selectedDateTime ?? minimumDateTime
-    onChange(mergeDateAndTime(baseDate, nextTime))
-  }
-
-  return (
-    <div className="datetime-field" ref={wrapperRef}>
-      <button
-        aria-expanded={isOpen}
-        aria-haspopup="dialog"
-        className="datetime-trigger"
-        onClick={() => setIsOpen((current) => !current)}
-        ref={triggerRef}
-        type="button"
-      >
-        <span className="datetime-trigger-icon" aria-hidden="true">
-          <Icon name="calendar" />
-        </span>
-        <span className={`datetime-trigger-copy ${selectedDateTime ? '' : 'is-placeholder'}`}>
-          {selectedDateTime ? formatDateForPicker(selectedDateTime) : 'Choose a date'}
-        </span>
-      </button>
-
-      {isOpen && popoverStyle
-        ? createPortal(
-            <div className="datepicker-popover" ref={popoverRef} role="dialog" style={popoverStyle}>
->>>>>>> Stashed changes
               <DayPicker
                 className="platemates-daypicker"
                 components={{
@@ -2618,7 +2093,6 @@ function DateTimeField({
           )
         : null}
 
-<<<<<<< Updated upstream
       {openPanel === 'time' && timePopoverStyle
         ? createPortal(
             <div className="picker-popover timepicker-popover" ref={timePopoverRef} role="dialog" style={timePopoverStyle}>
@@ -2652,17 +2126,10 @@ function DateTimeField({
             document.body,
           )
         : null}
-=======
-      <label className="datetime-time-field">
-        <span>Time</span>
-        <input min={selectedDateTime ? undefined : formatTimeInputValue(minimumDateTime)} onChange={(event) => handleTimeChange(event.target.value)} required type="time" value={selectedTime} />
-      </label>
->>>>>>> Stashed changes
     </div>
   )
 }
 
-<<<<<<< Updated upstream
 function autoResizeTextarea(element: HTMLTextAreaElement | null) {
   if (!element) {
     return
@@ -2748,16 +2215,6 @@ function AuthLayout({
   const location = useLocation()
   const mode: AuthMode = location.pathname === '/register' ? 'register' : 'login'
 
-=======
-function AuthPage({
-  authError,
-  authForm,
-  authLoading,
-  mode,
-  onAuthFormChange,
-  onSubmit,
-}: AuthPageProps) {
->>>>>>> Stashed changes
   return (
     <main className="auth-layout">
       <GlassCard className="auth-page-card">
@@ -2775,11 +2232,7 @@ function AuthPage({
 
             <div className="auth-showcase-copy">
               <p className="section-kicker">Private dining circle</p>
-<<<<<<< Updated upstream
               <h1>Return to your table.</h1>
-=======
-              <h1>{mode === 'login' ? 'Return to your table.' : 'Reserve your place.'}</h1>
->>>>>>> Stashed changes
               <p className="hero-copy">
                 A quieter way to organise shared meals, with thoughtful hosts, elegant scheduling, and
                 less friction between intent and arrival.
@@ -2817,7 +2270,6 @@ function AuthPage({
             </div>
           </aside>
 
-<<<<<<< Updated upstream
           <div className={`auth-form-shell ${mode === 'register' ? 'is-register' : 'is-login'}`}>
             <div className="auth-card-stage">
               <Outlet
@@ -2830,69 +2282,6 @@ function AuthPage({
                 } satisfies AuthOutletContext}
               />
             </div>
-=======
-          <div className="auth-form-shell">
-            <div className="auth-form-header">
-              <div>
-                <p className="section-kicker">{mode === 'login' ? 'Welcome back' : 'New member'}</p>
-                <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-              </div>
-              <span className="pill auth-pill">{mode === 'login' ? 'Member access' : 'Join now'}</span>
-            </div>
-
-            <form className="stack-form" onSubmit={(event) => void onSubmit(event, mode)}>
-              {mode === 'register' ? (
-                <label>
-                  <span>Name</span>
-                  <input
-                    onChange={(event) => onAuthFormChange('name', event.target.value)}
-                    placeholder="Your full name"
-                    required
-                    value={authForm.name}
-                  />
-                </label>
-              ) : null}
-
-              <label>
-                <span>University email</span>
-                <input
-                  onChange={(event) => onAuthFormChange('email', event.target.value)}
-                  placeholder="abcd123@aucklanduni.ac.nz"
-                  required
-                  type="email"
-                  value={authForm.email}
-                />
-              </label>
-
-              {mode === 'register' ? (
-                <p className="field-hint">Use your UPI email, for example abcd123@aucklanduni.ac.nz.</p>
-              ) : null}
-
-              <label>
-                <span>Password</span>
-                <input
-                  onChange={(event) => onAuthFormChange('password', event.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  type="password"
-                  value={authForm.password}
-                />
-              </label>
-
-              {authError ? <p className="feedback error">{authError}</p> : null}
-
-              <button className="primary-button" disabled={authLoading} type="submit">
-                {authLoading ? 'Working...' : mode === 'login' ? 'Continue' : 'Create account'}
-              </button>
-            </form>
-
-            <p className="auth-switch-text">
-              {mode === 'login' ? 'Need an account?' : 'Already have an account?'}{' '}
-              <Link className="inline-link" to={mode === 'login' ? '/register' : '/login'}>
-                {mode === 'login' ? 'Register' : 'Login'}
-              </Link>
-            </p>
->>>>>>> Stashed changes
           </div>
         </div>
       </GlassCard>
@@ -2900,7 +2289,6 @@ function AuthPage({
   )
 }
 
-<<<<<<< Updated upstream
 function AuthModePanel({ mode }: { mode: AuthMode }) {
   const { authError, authForm, authLoading, onAuthFormChange, onSubmit } =
     useOutletContext<AuthOutletContext>()
@@ -2970,10 +2358,6 @@ function AuthModePanel({ mode }: { mode: AuthMode }) {
 function DashboardPage({
   actionSessionId,
   allSessions,
-=======
-function DashboardPage({
-  actionSessionId,
->>>>>>> Stashed changes
   currentUserId,
   globalNotice,
   joinedSession,
@@ -2987,7 +2371,6 @@ function DashboardPage({
   sessions,
   sortMode,
 }: DashboardPageProps) {
-<<<<<<< Updated upstream
   const navigate = useNavigate()
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [didRequestLocation, setDidRequestLocation] = useState(false)
@@ -3065,10 +2448,6 @@ function DashboardPage({
   function handleSuggestionSelect(sessionId: string) {
     navigate(`/sessions/${sessionId}`)
   }
-=======
-  const activeSessionTitle = joinedSession ? getSessionCopy(joinedSession).title : null
-  const activeSessionId = joinedSession ? getSessionId(joinedSession) : null
->>>>>>> Stashed changes
 
   return (
     <main className="page-shell dashboard-shell">
@@ -3110,11 +2489,7 @@ function DashboardPage({
                 </select>
               </label>
               <button
-<<<<<<< Updated upstream
                 className={`ghost-button toolbar-button toolbar-refresh-button ${sessionLoading ? 'is-loading' : ''}`}
-=======
-                className="ghost-button toolbar-button toolbar-refresh-button"
->>>>>>> Stashed changes
                 disabled={sessionLoading}
                 onClick={() => void onRefresh()}
                 type="button"
@@ -3147,7 +2522,6 @@ function DashboardPage({
                 </button>
               ) : null}
             </label>
-<<<<<<< Updated upstream
             {searchSuggestions.length > 0 ? (
               <div className="search-suggestions-card" role="listbox" aria-label="Suggested sessions">
                 {searchSuggestions.map((suggestion) => {
@@ -3176,8 +2550,6 @@ function DashboardPage({
                 })}
               </div>
             ) : null}
-=======
->>>>>>> Stashed changes
           </div>
 
           {sessionError ? <p className="feedback error">{sessionError}</p> : null}
@@ -3293,11 +2665,7 @@ function DashboardPage({
               Create session
             </Link>
             <button
-<<<<<<< Updated upstream
               className={`secondary-link quick-actions-secondary ${sessionLoading ? 'is-loading' : ''}`}
-=======
-              className="secondary-link quick-actions-secondary"
->>>>>>> Stashed changes
               disabled={sessionLoading}
               onClick={() => void onRefresh()}
               type="button"
@@ -3318,15 +2686,11 @@ function DashboardPage({
 
 function SessionDetailsPage({
   actionSessionId,
-<<<<<<< Updated upstream
   closingSessionId,
   currentUserId,
+  isAuthenticated,
   joinedSession,
   onCloseSession,
-=======
-  currentUserId,
-  joinedSession,
->>>>>>> Stashed changes
   onRefresh,
   onSessionAction,
   sessionError,
@@ -3345,20 +2709,13 @@ function SessionDetailsPage({
     if (!sessionId) {
       return
     }
-
     setDetailLoading(true)
     setDetailError('')
 
-<<<<<<< Updated upstream
-    void fetchJson<{ session: MealSession }>(`${API_BASE_URL}/api/meal/${sessionId}`)
-      .then((data) => {
-        setSession(normalizeMealSession(data.session))
-=======
-    void fetchJson<{ data: MealSession[] }>(`${API_BASE_URL}/api/meals`)
-      .then((data) => {
-        const matchedSession = data.data.map(normalizeMealSession).find((item) => getSessionId(item) === sessionId)
-        setSession(matchedSession ?? null)
->>>>>>> Stashed changes
+    void fetchJson<MealDetailResponse>(`${MEAL_API_BASE_URL}/${sessionId}`)
+      .then((response) => {
+        const sessionPayload = getMealDetailPayload(response)
+        setSession(sessionPayload ? normalizeMealSession(sessionPayload) : null)
       })
       .catch((error) => {
         setDetailError(getErrorMessage(error))
@@ -3374,16 +2731,10 @@ function SessionDetailsPage({
     }
 
     const fromStore = sessions.find((item) => getSessionId(item) === sessionId) ?? null
-    if (fromStore) {
-      setSession(fromStore)
-    }
+    setSession(fromStore)
   }, [sessionId, sessions])
 
-<<<<<<< Updated upstream
   const coordinates = useSessionCoordinates(session?.location ?? '')
-=======
-  const coordinates = useSessionCoordinates(session?.location ?? '', session?.locationLat, session?.locationLng)
->>>>>>> Stashed changes
 
   async function handleDetailsAction(action: SessionAction) {
     if (!session) {
@@ -3396,6 +2747,8 @@ function SessionDetailsPage({
       const updatedSession = await onSessionAction(getSessionId(session), action)
       if (updatedSession) {
         setSession(updatedSession)
+      } else {
+        setSession(null)
       }
       setDetailNotice(action === 'join' ? 'Joined session successfully.' : 'Left session successfully.')
       await onRefresh()
@@ -3404,7 +2757,6 @@ function SessionDetailsPage({
     }
   }
 
-<<<<<<< Updated upstream
   async function handleClose() {
     if (!session) {
       return
@@ -3418,13 +2770,12 @@ function SessionDetailsPage({
         setSession(updatedSession)
       }
       setDetailNotice('Session closed successfully.')
+      await onRefresh()
     } catch (error) {
       setDetailError(getErrorMessage(error))
     }
   }
 
-=======
->>>>>>> Stashed changes
   if (sessionLoading || detailLoading) {
     return (
       <main className="details-layout">
@@ -3464,8 +2815,7 @@ function SessionDetailsPage({
     : isFull
       ? 'Full · 0 spots left'
       : `Open · ${remainingSpots} spot${remainingSpots === 1 ? '' : 's'} left`
-  const summaryAction = isHost
-<<<<<<< Updated upstream
+  const summaryAction: SessionDetailsAction | null = isHost
     ? session.isActive
       ? {
           className: 'primary-button danger-button',
@@ -3474,9 +2824,13 @@ function SessionDetailsPage({
           onClick: () => void handleClose(),
         }
       : null
-=======
-    ? null
->>>>>>> Stashed changes
+    : !isAuthenticated
+      ? {
+          className: 'primary-button',
+          disabled: false,
+          label: 'Log in to join',
+          href: '/login',
+        }
     : {
         className: `primary-button ${actionState.action === 'leave' ? 'danger-button' : ''}`,
         disabled: actionState.disabled || actionSessionId === getSessionId(session),
@@ -3519,14 +2873,20 @@ function SessionDetailsPage({
                 </div>
                 {summaryAction ? (
                   <div className="details-hero-actions">
-                    <button
-                      className={summaryAction.className}
-                      disabled={summaryAction.disabled}
-                      onClick={summaryAction.onClick}
-                      type="button"
-                    >
-                      {summaryAction.label}
-                    </button>
+                    {'href' in summaryAction ? (
+                      <Link className={summaryAction.className} to={summaryAction.href}>
+                        {summaryAction.label}
+                      </Link>
+                    ) : (
+                      <button
+                        className={summaryAction.className}
+                        disabled={summaryAction.disabled}
+                        onClick={summaryAction.onClick}
+                        type="button"
+                      >
+                        {summaryAction.label}
+                      </button>
+                    )}
                   </div>
                 ) : null}
               </div>
@@ -3605,28 +2965,34 @@ function SessionDetailsPage({
 }
 
 function CreateSessionPage({
-<<<<<<< Updated upstream
   allSessions,
-=======
->>>>>>> Stashed changes
   onCreateSession,
+  onSessionLocationCoordinatesChange,
   onSessionFormChange,
   sessionError,
   sessionForm,
+  sessionLocationCoordinates,
   submittingSession,
 }: CreateSessionPageProps) {
-<<<<<<< Updated upstream
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [didRequestLocation, setDidRequestLocation] = useState(false)
   const [titleFocused, setTitleFocused] = useState(false)
   const [locationFocused, setLocationFocused] = useState(false)
   const [activeTitleIndex, setActiveTitleIndex] = useState(-1)
   const [activeLocationIndex, setActiveLocationIndex] = useState(-1)
-  const [selectedLocationCoordinates, setSelectedLocationCoordinates] = useState<{ lat: number; lng: number } | null>(null)
-  const slotCount = Number(sessionForm.slots) || 2
+  const slotCount = Math.max(2, Number(sessionForm.slots) || 4)
   const debouncedTitleQuery = useDebouncedValue(sessionForm.title, 300)
   const debouncedLocationQuery = useDebouncedValue(sessionForm.location, 300)
   const [slotDirection, setSlotDirection] = useState<'increase' | 'decrease'>('increase')
+  const previewLocationCoordinates = useMemo(() => {
+    const location = sessionForm.location.trim()
+
+    if (!location) {
+      return null
+    }
+
+    return sessionLocationCoordinates ?? getFallbackCoordinates(location)
+  }, [sessionForm.location, sessionLocationCoordinates])
 
   useEffect(() => {
     if (didRequestLocation || !('geolocation' in navigator)) {
@@ -3695,21 +3061,6 @@ function CreateSessionPage({
     return matched.slice(0, 8)
   }, [allSessions, debouncedLocationQuery, userCoordinates])
 
-  useEffect(() => {
-    const fallback = sessionForm.location.trim()
-      ? getFallbackCoordinates(sessionForm.location.trim())
-      : null
-
-    setSelectedLocationCoordinates(
-      fallback
-        ? {
-            lat: fallback.lat,
-            lng: fallback.lng,
-          }
-        : null,
-    )
-  }, [sessionForm.location])
-
   const decreaseSlots = () => {
     if (slotCount <= 2) {
       return
@@ -3762,7 +3113,7 @@ function CreateSessionPage({
       event.preventDefault()
       const selected = locationSuggestions[activeLocationIndex]
       onSessionFormChange('location', selected.address)
-      setSelectedLocationCoordinates({ lat: selected.lat, lng: selected.lng })
+      onSessionLocationCoordinatesChange({ lat: selected.lat, lng: selected.lng })
       setLocationFocused(false)
       setActiveLocationIndex(-1)
     } else if (event.key === 'Escape') {
@@ -3770,11 +3121,6 @@ function CreateSessionPage({
       setActiveLocationIndex(-1)
     }
   }
-=======
-  const slotCount = Number(sessionForm.slots) || 2
-  const decreaseSlots = () => onSessionFormChange('slots', String(Math.max(2, slotCount - 1)))
-  const increaseSlots = () => onSessionFormChange('slots', String(Math.min(12, slotCount + 1)))
->>>>>>> Stashed changes
 
   return (
     <main className="page-shell create-page-shell">
@@ -3794,7 +3140,6 @@ function CreateSessionPage({
         {sessionError ? <p className="feedback error">{sessionError}</p> : null}
 
         <form className="stack-form create-flow-form" onSubmit={onCreateSession}>
-<<<<<<< Updated upstream
           <FormField className="create-primary-field" label="Title">
             <div className="create-autocomplete">
               <TextInput
@@ -3846,6 +3191,7 @@ function CreateSessionPage({
                 }}
                 onChange={(event) => {
                   onSessionFormChange('location', event.target.value)
+                  onSessionLocationCoordinatesChange(null)
                   setLocationFocused(true)
                   setActiveLocationIndex(-1)
                 }}
@@ -3864,7 +3210,7 @@ function CreateSessionPage({
                       onMouseDown={(event) => {
                         event.preventDefault()
                         onSessionFormChange('location', suggestion.address)
-                        setSelectedLocationCoordinates({ lat: suggestion.lat, lng: suggestion.lng })
+                        onSessionLocationCoordinatesChange({ lat: suggestion.lat, lng: suggestion.lng })
                         setLocationFocused(false)
                         setActiveLocationIndex(-1)
                       }}
@@ -3884,7 +3230,7 @@ function CreateSessionPage({
             </div>
           </FormField>
 
-          {selectedLocationCoordinates ? (
+          {previewLocationCoordinates ? (
             <div className="create-location-preview">
               <div className="create-location-preview-header">
                 <span>Location preview</span>
@@ -3893,7 +3239,7 @@ function CreateSessionPage({
               <div className="create-location-preview-map">
                 <MapContainer
                   attributionControl={false}
-                  center={[selectedLocationCoordinates.lat, selectedLocationCoordinates.lng]}
+                  center={[previewLocationCoordinates.lat, previewLocationCoordinates.lng]}
                   className="leaflet-map leaflet-map-preview"
                   doubleClickZoom={false}
                   dragging={false}
@@ -3912,32 +3258,11 @@ function CreateSessionPage({
                     subdomains="abcd"
                     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                   />
-                  <Marker icon={brandMapMarker} position={[selectedLocationCoordinates.lat, selectedLocationCoordinates.lng]} />
+                  <Marker icon={brandMapMarker} position={[previewLocationCoordinates.lat, previewLocationCoordinates.lng]} />
                 </MapContainer>
               </div>
             </div>
           ) : null}
-=======
-          <label className="create-primary-field">
-            <span>Title</span>
-            <input
-              onChange={(event) => onSessionFormChange('title', event.target.value)}
-              placeholder="Hotpot on Dominion Road"
-              required
-              value={sessionForm.title}
-            />
-          </label>
-
-          <label>
-            <span>Location</span>
-            <input
-              onChange={(event) => onSessionFormChange('location', event.target.value)}
-              placeholder="Dominion Road, Auckland"
-              required
-              value={sessionForm.location}
-            />
-          </label>
->>>>>>> Stashed changes
 
           <div className="create-section-group">
             <div className="create-section-heading">
@@ -3959,16 +3284,11 @@ function CreateSessionPage({
                 <div className="slot-stepper" role="group" aria-label="Group size">
                   <button
                     aria-label="Decrease group size"
-<<<<<<< Updated upstream
                     className="slot-stepper-button icon-button"
-=======
-                    className="slot-stepper-button"
->>>>>>> Stashed changes
-                    disabled={slotCount <= 2}
+                    disabled={slotCount <= 1}
                     onClick={decreaseSlots}
                     type="button"
                   >
-<<<<<<< Updated upstream
                     <Icon name="minus" />
                   </button>
                   <div className="slot-stepper-value" aria-live="polite">
@@ -3983,50 +3303,25 @@ function CreateSessionPage({
                   <button
                     aria-label="Increase group size"
                     className="slot-stepper-button icon-button"
-=======
-                    −
-                  </button>
-                  <div className="slot-stepper-value" aria-live="polite">
-                    <strong>{slotCount}</strong>
-                    <span>people</span>
-                  </div>
-                  <button
-                    aria-label="Increase group size"
-                    className="slot-stepper-button"
->>>>>>> Stashed changes
-                    disabled={slotCount >= 12}
+                    disabled={slotCount >= 20}
                     onClick={increaseSlots}
                     type="button"
                   >
-<<<<<<< Updated upstream
                     <Icon name="plus" />
-=======
-                    +
->>>>>>> Stashed changes
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-<<<<<<< Updated upstream
           <FormField label={<><span>Description</span> <em>(optional)</em></>}>
             <TextAreaField
-=======
-          <label>
-            <span>Description <em>(optional)</em></span>
-            <textarea
->>>>>>> Stashed changes
               onChange={(event) => onSessionFormChange('description', event.target.value)}
               placeholder="Looking for 3 people to share dishes after class."
               rows={4}
               value={sessionForm.description}
             />
-<<<<<<< Updated upstream
           </FormField>
-=======
-          </label>
->>>>>>> Stashed changes
 
           <input name="slots" type="hidden" value={sessionForm.slots} />
 
@@ -4040,10 +3335,7 @@ function CreateSessionPage({
 }
 
 function ProfilePage({
-<<<<<<< Updated upstream
-=======
   currentUserId,
->>>>>>> Stashed changes
   globalNotice,
   handleProfileSubmit,
   onProfileFieldChange,
@@ -4052,7 +3344,6 @@ function ProfilePage({
   profileForm,
   profileLoading,
   profileSaving,
-<<<<<<< Updated upstream
   token,
 }: ProfilePageProps) {
   const [hostingSessions, setHostingSessions] = useState<MealSession[]>([])
@@ -4069,12 +3360,12 @@ function ProfilePage({
     setActivityError('')
 
     Promise.all([
-      fetchJson<{ sessions: MealSession[] }>(`${API_BASE_URL}/api/meal/mine/hosting`, { token }),
-      fetchJson<{ sessions: MealSession[] }>(`${API_BASE_URL}/api/meal/mine/joined`, { token }),
+      fetchJson<MealListResponse>(`${MEAL_API_BASE_URL}/mine/hosting`, { token }),
+      fetchJson<MealListResponse>(`${MEAL_API_BASE_URL}/mine/joined`, { token }),
     ])
       .then(([hosting, joined]) => {
-        setHostingSessions(hosting.sessions.map(normalizeMealSession))
-        setJoinedSessions(joined.sessions.map(normalizeMealSession))
+        setHostingSessions(getMealListPayload(hosting).map(normalizeMealSession))
+        setJoinedSessions(getMealListPayload(joined).map(normalizeMealSession))
       })
       .catch((error) => {
         setActivityError(getErrorMessage(error))
@@ -4082,22 +3373,7 @@ function ProfilePage({
       .finally(() => {
         setActivityLoading(false)
       })
-  }, [token, profile?.updatedAt])
-=======
-  sessions,
-}: ProfilePageProps) {
-  const hostingSessions = useMemo(
-    () => sessions.filter((session) => getParticipantId(session.creator) === currentUserId),
-    [currentUserId, sessions],
-  )
-  const joinedSessions = useMemo(
-    () =>
-      sessions.filter((session) =>
-        session.participants.some((participant) => getParticipantId(participant) === currentUserId),
-      ),
-    [currentUserId, sessions],
-  )
->>>>>>> Stashed changes
+  }, [token, currentUserId, profile?.updatedAt])
 
   return (
     <main className="page-grid">
@@ -4120,11 +3396,7 @@ function ProfilePage({
 
             <label>
               <span>Bio</span>
-<<<<<<< Updated upstream
               <AutoResizeTextarea
-=======
-              <textarea
->>>>>>> Stashed changes
                 disabled={profileLoading || profileSaving}
                 onChange={(event) => onProfileFieldChange('bio', event.target.value)}
                 rows={4}
@@ -4199,7 +3471,6 @@ function ProfilePage({
         </div>
       </GlassCard>
 
-<<<<<<< Updated upstream
       <section className="activity-section">
         <div className="activity-heading">
           <p>My activity</p>
@@ -4231,54 +3502,14 @@ function ProfilePage({
           </div>
         )}
       </section>
-=======
-      <GlassCard className="page-card">
-        <PageHeader eyebrow="My activity" title="Hosted and joined sessions" />
-        <div className="activity-grid">
-          <ActivityColumn
-            emptyDescription="Hosted sessions will appear here once you create a plan."
-            emptyTitle="No hosted sessions yet"
-            sessions={hostingSessions}
-            title="Hosting"
-          />
-          <ActivityColumn
-            emptyAction={
-              <Link className="secondary-link activity-empty-action" to="/dashboard">
-                Browse sessions
-              </Link>
-            }
-            emptyDescription="Sessions you join will appear here."
-            emptyTitle="No joined sessions yet"
-            sessions={joinedSessions}
-            title="Joined"
-          />
-        </div>
-      </GlassCard>
->>>>>>> Stashed changes
     </main>
   )
 }
 
-<<<<<<< Updated upstream
 function useSessionCoordinates(location: string) {
   const [coordinates, setCoordinates] = useState<Coordinates>(() => getFallbackCoordinates(location))
 
   useEffect(() => {
-=======
-function useSessionCoordinates(location: string, explicitLat?: number, explicitLng?: number) {
-  const [coordinates, setCoordinates] = useState<Coordinates>(() =>
-    Number.isFinite(explicitLat) && Number.isFinite(explicitLng)
-      ? { lat: explicitLat as number, lng: explicitLng as number, source: 'fallback' }
-      : getFallbackCoordinates(location),
-  )
-
-  useEffect(() => {
-    if (Number.isFinite(explicitLat) && Number.isFinite(explicitLng)) {
-      setCoordinates({ lat: explicitLat as number, lng: explicitLng as number, source: 'fallback' })
-      return
-    }
-
->>>>>>> Stashed changes
     if (!location.trim()) {
       setCoordinates(AUCKLAND_CENTER)
       return
@@ -4319,35 +3550,11 @@ function useSessionCoordinates(location: string, explicitLat?: number, explicitL
     return () => {
       controller.abort()
     }
-<<<<<<< Updated upstream
   }, [location])
-=======
-  }, [explicitLat, explicitLng, location])
->>>>>>> Stashed changes
 
   return coordinates
 }
 
-<<<<<<< Updated upstream
-=======
-function readStoredProfile() {
-  const raw = localStorage.getItem(PROFILE_STORAGE_KEY)
-  if (!raw) {
-    return null
-  }
-
-  try {
-    return normalizeUserProfile(JSON.parse(raw) as Partial<UserProfile>)
-  } catch {
-    return null
-  }
-}
-
-function persistProfile(profile: UserProfile) {
-  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
-}
-
->>>>>>> Stashed changes
 async function fetchJson<T>(
   url: string,
   options?: {
@@ -4366,20 +3573,122 @@ async function fetchJson<T>(
   })
 
   const text = await response.text()
-  const data = text ? (JSON.parse(text) as Record<string, any>) : {}
+  let data: T | Record<string, unknown> = {} as Record<string, unknown>
+
+  if (text) {
+    try {
+      data = JSON.parse(text) as T
+    } catch {
+      throw new Error(text.startsWith('<') ? 'Unexpected HTML response from server' : 'Invalid JSON response')
+    }
+  }
+
+  const errorMessage =
+    typeof (data as { message?: unknown }).message === 'string'
+      ? ((data as { message?: string }).message ?? 'Request failed')
+      : 'Request failed'
 
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+    throw new Error(errorMessage)
   }
 
   return data as T
 }
 
-function normalizeMealSession(session: MealSession) {
-<<<<<<< Updated upstream
+type AuthSubmitResponse =
+  | {
+      token: string
+      user: SessionUser
+    }
+  | {
+      data: {
+        token: string
+        user: SessionUser
+      }
+    }
+
+type AuthProfileResponse =
+  | {
+      user: Partial<UserProfile> & SessionUser
+      message?: string
+    }
+  | {
+      data: Partial<UserProfile> & SessionUser
+      message?: string
+    }
+
+type MealListResponse =
+  | MealSession[]
+  | {
+      sessions?: MealSession[]
+    }
+
+type MealDetailResponse = {
+  session?: MealSession | null
+  data?: MealSession | null
+  message?: string
+}
+
+type MealMutationResponse = {
+  session?: MealSession | null
+  data?: MealSession | null
+  message?: string
+}
+
+function getAuthSubmitPayload(response: AuthSubmitResponse) {
+  if ('data' in response) {
+    return response.data
+  }
+
+  return response
+}
+
+function getProfilePayload(response: AuthProfileResponse) {
+  if ('data' in response) {
+    return response.data
+  }
+
+  return response.user
+}
+
+function getMealListPayload(response: MealListResponse) {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  return response.sessions || []
+}
+
+function getMealDetailPayload(response: MealDetailResponse | MealMutationResponse) {
+  return response.session || response.data || null
+}
+
+function getResponseMessage(response: unknown) {
+  if (response && typeof response === 'object' && 'message' in response) {
+    const value = response.message
+    return typeof value === 'string' ? value : ''
+  }
+
+  return ''
+}
+
+function normalizeMealSession(session: MealSession & {
+  location?: string | { address?: string; lat?: number; lng?: number }
+  creator?: SessionUser | string
+  participants?: Array<SessionUser | string>
+  createdAt?: string
+  isActive?: boolean
+}) {
+  const rawLocation = session.location as string | { address?: string; lat?: number; lng?: number } | undefined
+  const normalizedLocation = typeof rawLocation === 'string' ? rawLocation : rawLocation?.address || ''
+
   return {
     ...session,
+    location: normalizedLocation,
     id: session.id || session._id || '',
+    participants: session.participants || [],
+    isActive: session.isActive ?? true,
+    createdAt: session.createdAt || new Date().toISOString(),
   }
 }
 
@@ -4553,51 +3862,16 @@ function dedupeBy<T>(items: T[], getKey: (item: T) => string) {
   })
 }
 
-=======
-  const rawLocation = session.location as unknown
-  const normalizedLocation =
-    typeof rawLocation === 'string'
-      ? rawLocation
-      : typeof rawLocation === 'object' && rawLocation && 'address' in rawLocation
-        ? String((rawLocation as { address?: string }).address || '')
-        : ''
-  const locationLat =
-    typeof rawLocation === 'object' && rawLocation && 'lat' in rawLocation
-      ? Number((rawLocation as { lat?: number }).lat)
-      : undefined
-  const locationLng =
-    typeof rawLocation === 'object' && rawLocation && 'lng' in rawLocation
-      ? Number((rawLocation as { lng?: number }).lng)
-      : undefined
-
-  return {
-    ...session,
-    id: session.id || session._id || '',
-    location: normalizedLocation,
-    locationLat: Number.isFinite(locationLat) ? locationLat : undefined,
-    locationLng: Number.isFinite(locationLng) ? locationLng : undefined,
-  }
-}
-
->>>>>>> Stashed changes
 function getSessionCopy(session: MealSession) {
   const title = session.title.trim()
   const description = session.description.trim()
   const location = session.location.trim()
 
   const titleLooksLikeTest =
-<<<<<<< Updated upstream
     /^(debug dinner|verification dinner|integration test|test session)$/i.test(title)
 
   const descriptionLooksLikeTest =
     /integration test meal|re-test after proposal-aligned frontend changes/i.test(description) ||
-=======
-    /^(ass|dd|fffff+|发发发|test|debug dinner|verification dinner)$/i.test(title) ||
-    /^([a-zA-Z])\1{2,}$/.test(title)
-
-  const descriptionLooksLikeTest =
-    /integration test meal|re-test after proposal-aligned frontend changes|test/i.test(description) ||
->>>>>>> Stashed changes
     /^([a-zA-Z])\1{3,}$/.test(description)
 
   const locationLooksLikePlaceholder =
@@ -4628,33 +3902,25 @@ function getActivitySessionStatus(session: MealSession) {
 
 function toProfileForm(profile: UserProfile): ProfileFormState {
   return {
-<<<<<<< Updated upstream
     name: profile.name,
     bio: profile.bio,
     favoriteCuisine: profile.favoriteCuisine,
     yearOfStudy: profile.yearOfStudy,
     avatarColor: profile.avatarColor,
-=======
-    name: profile.name || '',
-    bio: profile.bio || '',
-    favoriteCuisine: profile.favoriteCuisine || '',
-    yearOfStudy: profile.yearOfStudy || '',
-    avatarColor: profile.avatarColor || '#2e7d61',
   }
 }
 
-function normalizeUserProfile(user: Partial<UserProfile> & Partial<SessionUser>) {
+function normalizeUserProfile(user: Partial<UserProfile> & SessionUser): UserProfile {
   return {
     id: user.id || user._id || '',
-    name: user.name || 'Auckland Student',
+    name: user.name || 'Student',
     email: user.email || '',
-    bio: 'Shared table enthusiast.',
-    favoriteCuisine: 'Hotpot',
-    yearOfStudy: 'Year 3',
+    bio: user.bio || '',
+    favoriteCuisine: user.favoriteCuisine || '',
+    yearOfStudy: user.yearOfStudy || '',
     avatarColor: user.avatarColor || '#2e7d61',
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
->>>>>>> Stashed changes
   }
 }
 
@@ -4743,15 +4009,12 @@ function getFallbackCoordinates(location: string) {
   return matched?.coordinates ?? AUCKLAND_CENTER
 }
 
-<<<<<<< Updated upstream
 function getMapsHref(location: string, latitude: number, longitude: number) {
   return Number.isFinite(latitude) && Number.isFinite(longitude)
     ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
 }
 
-=======
->>>>>>> Stashed changes
 function getUserIdFromToken(token: string) {
   if (!token) {
     return null
@@ -4821,7 +4084,6 @@ function formatTimeInputValue(value: Date) {
   return `${hours}:${minutes}`
 }
 
-<<<<<<< Updated upstream
 function formatTimeForPicker(value: string) {
   const [hours, minutes] = value.split(':').map(Number)
 
@@ -4835,8 +4097,6 @@ function formatTimeForPicker(value: string) {
   }).format(new Date(2026, 0, 1, hours, minutes))
 }
 
-=======
->>>>>>> Stashed changes
 function mergeDateAndTime(date: Date, timeValue: string) {
   const [hour, minute] = timeValue.split(':').map(Number)
   const nextDate = new Date(date)
