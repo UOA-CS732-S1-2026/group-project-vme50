@@ -84,7 +84,7 @@ export const getAllMeals = async (req: any, res: any) => {
   try {
     await MealSession.updateMany(
       { isActive: true, time: { $lte: new Date() } },
-      { isActive: false }
+      { isActive: false },
     );
 
     const meals = await buildSessionQuery()

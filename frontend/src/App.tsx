@@ -178,9 +178,10 @@ type AuthPageProps = {
 
 type AuthOutletContext = AuthPageProps
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:5050'
-const MEAL_API_BASE_URL = `${API_BASE_URL}/api/meal`
+const API_BASE_URL = resolveApiBaseUrl()
+const MEAL_API_BASE_URL = API_BASE_URL ? `${API_BASE_URL}/api/meal` : ''
+const REALTIME_ENABLED = Boolean(import.meta.env.VITE_SOCKET_URL?.trim())
+const SOCKET_BASE_URL = import.meta.env.VITE_SOCKET_URL?.trim() || API_BASE_URL
 const TOKEN_STORAGE_KEY = 'platemates-token'
 const AUCKLAND_CENTER: Coordinates = { lat: -36.8485, lng: 174.7633, source: 'fallback' }
 
@@ -278,7 +279,9 @@ function App() {
   const [sessionLocationCoordinates, setSessionLocationCoordinates] = useState<LatLng | null>(null)
   const [apiHealth, setApiHealth] = useState<'checking' | 'healthy' | 'degraded'>('checking')
   const [apiHealthMessage, setApiHealthMessage] = useState('Checking API')
-  const [socketStatus, setSocketStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
+  const [socketStatus, setSocketStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'disabled'>(
+    REALTIME_ENABLED ? 'connecting' : 'disabled',
+  )
   const [authError, setAuthError] = useState('')
   const [sessionError, setSessionError] = useState('')
   const [profileError, setProfileError] = useState('')
@@ -294,6 +297,11 @@ function App() {
 
   const loadProfile = useCallback(async () => {
     if (!token) {
+      return
+    }
+
+    if (!API_BASE_URL) {
+      setProfileError('Backend API is not configured for this deployment.')
       return
     }
 
@@ -374,7 +382,12 @@ function App() {
   }, [debouncedSearchQuery, sessions, sortMode])
 
   useEffect(() => {
-    const socket = createSocket(API_BASE_URL)
+    if (!SOCKET_BASE_URL || !REALTIME_ENABLED) {
+      setSocketStatus('disabled')
+      return
+    }
+
+    const socket = createSocket(SOCKET_BASE_URL)
 
     const handleMealSlotsUpdated = (payload: { mealId?: string }) => {
       if (!payload.mealId) {
@@ -428,6 +441,14 @@ function App() {
     let isCancelled = false
 
     const runHealthCheck = async () => {
+      if (!API_BASE_URL) {
+        if (!isCancelled) {
+          setApiHealth('degraded')
+          setApiHealthMessage('Backend API is not configured for this deployment.')
+        }
+        return
+      }
+
       try {
         const response = await fetch(`${API_BASE_URL}/`)
         const text = await response.text()
@@ -464,6 +485,12 @@ function App() {
   }, [])
 
   async function refreshSessions() {
+    if (!MEAL_API_BASE_URL) {
+      setSessions([])
+      setSessionError('Backend API is not configured for this deployment.')
+      return
+    }
+
     setSessionLoading(true)
     setSessionError('')
 
@@ -478,6 +505,10 @@ function App() {
   }
 
   async function syncSessionFromServer(sessionId: string) {
+    if (!MEAL_API_BASE_URL) {
+      return
+    }
+
     try {
       const response = await fetchJson<MealDetailResponse>(`${MEAL_API_BASE_URL}/${sessionId}`)
       const sessionPayload = getMealDetailPayload(response)
@@ -509,6 +540,12 @@ function App() {
     event.preventDefault()
     setAuthLoading(true)
     setAuthError('')
+
+    if (!API_BASE_URL) {
+      setAuthError('Backend API is not configured for this deployment.')
+      setAuthLoading(false)
+      return
+    }
 
     const endpoint = mode === 'login' ? 'login' : 'register'
     const payload =
@@ -576,6 +613,11 @@ function App() {
       return
     }
 
+    if (!MEAL_API_BASE_URL) {
+      setSessionError('Backend API is not configured for this deployment.')
+      return
+    }
+
     setSubmittingSession(true)
     setSessionError('')
 
@@ -613,6 +655,11 @@ function App() {
   async function handleSessionAction(sessionId: string, action: SessionAction) {
     if (!token) {
       setSessionError('Please log in before joining or leaving a session.')
+      return null
+    }
+
+    if (!MEAL_API_BASE_URL) {
+      setSessionError('Backend API is not configured for this deployment.')
       return null
     }
 
@@ -666,6 +713,11 @@ function App() {
       return null
     }
 
+    if (!MEAL_API_BASE_URL) {
+      setSessionError('Backend API is not configured for this deployment.')
+      return null
+    }
+
     setClosingSessionId(sessionId)
     setSessionError('')
 
@@ -704,6 +756,11 @@ function App() {
 
     if (!token) {
       setProfileError('Please log in before editing your profile.')
+      return
+    }
+
+    if (!API_BASE_URL) {
+      setProfileError('Backend API is not configured for this deployment.')
       return
     }
 
@@ -877,7 +934,7 @@ function SystemStatusBar({
   apiHealth: 'checking' | 'healthy' | 'degraded'
   apiHealthMessage: string
   isAuthenticated: boolean
-  socketStatus: 'connecting' | 'connected' | 'disconnected'
+  socketStatus: 'connecting' | 'connected' | 'disconnected' | 'disabled'
 }) {
   const apiLabel =
     apiHealth === 'healthy'
@@ -889,6 +946,8 @@ function SystemStatusBar({
   const socketLabel =
     socketStatus === 'connected'
       ? 'Socket Connected'
+      : socketStatus === 'disabled'
+        ? 'Realtime Disabled'
       : socketStatus === 'disconnected'
         ? 'Socket Disconnected'
         : 'Socket Connecting'
@@ -4115,6 +4174,20 @@ function getDateTimeLocalMinimum() {
   const now = new Date()
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
   return now.toISOString().slice(0, 16)
+}
+
+function resolveApiBaseUrl() {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim()
+
+  if (configured) {
+    return configured.replace(/\/$/, '')
+  }
+
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5050'
+  }
+
+  return ''
 }
 
 function getErrorMessage(error: unknown) {

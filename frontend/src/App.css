@@ -136,6 +136,7 @@
 
 .app-frame-auth {
   width: 100%;
+  max-width: none;
   margin: 0;
   padding: 0;
   gap: 0;
@@ -223,6 +224,7 @@
 
 .app-content-auth .route-content-shell {
   gap: 0;
+  width: 100%;
 }
 
 .auth-layout,
@@ -231,6 +233,7 @@
 }
 
 .auth-layout {
+  width: 100%;
   min-height: 100vh;
   position: relative;
   isolation: isolate;

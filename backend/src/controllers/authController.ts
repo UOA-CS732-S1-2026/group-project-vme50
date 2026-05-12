@@ -32,7 +32,9 @@ const sanitizeUser = (user: {
 export const register = async (req: any, res: any) => {
   try {
     const { name, email, password } = req.body;
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
     const normalizedName = String(name || "").trim();
 
     if (!normalizedName || normalizedName.length < 2) {
@@ -74,7 +76,9 @@ export const register = async (req: any, res: any) => {
 export const login = async (req: any, res: any) => {
   try {
     const { email, password } = req.body;
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
@@ -127,11 +131,10 @@ export const updateProfile = async (req: AuthenticatedRequest, res: any) => {
       return res.status(400).json({ message: "Name must be at least 2 characters" });
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.user?.userId,
-      updates,
-      { new: true, runValidators: true }
-    ).select("-password");
+    const user = await User.findByIdAndUpdate(req.user?.userId, updates, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
