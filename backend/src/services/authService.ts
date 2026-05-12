@@ -21,7 +21,7 @@ export const registerUser = async (data: { name: string; email: string; password
   const { name, email, password } = data;
 
   if (!email.endsWith("@aucklanduni.ac.nz")) {
-    throw new Error("Only University of Auckland students can register");
+    throw new Error("Only University of Auckland students can register!");
   }
 
   const upiRegex = /^[A-Za-z]{4}\d{3}@aucklanduni\.ac\.nz$/;
@@ -33,7 +33,7 @@ export const registerUser = async (data: { name: string; email: string; password
   const existingUser = await userRepository.findByEmail(email);
 
   if (existingUser) {
-    throw new Error("User already exists");
+    throw new Error("User already exists!");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -48,7 +48,7 @@ export const registerUser = async (data: { name: string; email: string; password
 
   return {
     success: true,
-    message: "User registered successfully",
+    message: "User registered successfully.",
     data: {
       token,
       user: sanitizeUser(user),
@@ -61,16 +61,16 @@ export const loginUser = async (data: { email: string; password: string }) => {
   const { email, password } = data;
 
   const user = await userRepository.findByEmail(email);
-  if (!user) throw new Error("Invalid credentials");
+  if (!user) throw new Error("User not found!");
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Invalid credentials");
+  if (!isMatch) throw new Error("Invalid credentials!");
 
   const token = generateToken(user._id.toString());
 
   return {
     success: true,
-    message: "Login successful",
+    message: "Login successful.",
     data: {
       token,
       user: sanitizeUser(user),
@@ -89,6 +89,6 @@ export const logoutUser = async (token: string) => {
 
   return {
     success: true,
-    message: "Logged out successfully",
+    message: "Logged out successfully.",
   };
 };

@@ -1,3 +1,34 @@
+/**
+ * =========================================================
+ * MEAL REPOSITORY TESTS
+ * =========================================================
+ *
+ * These tests validate the repository layer responsible for
+ * interacting directly with the MongoDB database through
+ * Mongoose models.
+ *
+ * This test suite is considered a hybrid between:
+ *
+ * - Unit Tests
+ *   -> Tests repository methods in isolation
+ *
+ * - Integration Tests
+ *   -> Uses a real MongoDB connection and real models
+ *
+ * Features Tested:
+ * - Meal creation
+ * - Fetching active meals
+ * - Finding meals by ID
+ * - Saving updated meal sessions
+ * - Database persistence
+ * - Participant updates
+ *
+ * Tools:
+ * - Vitest
+ * - MongoDB
+ * - Mongoose
+ * =========================================================
+ */
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import mongoose from "mongoose";
 import { connectDB } from "../../../config/db.js";
