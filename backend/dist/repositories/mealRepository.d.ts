@@ -3,16 +3,12 @@ export declare const mealRepository: {
     createMeal(data: any): Promise<mongoose.Document<unknown, {}, {
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps, {
         id: string;
     }, {
@@ -20,16 +16,12 @@ export declare const mealRepository: {
     }> & Omit<{
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -41,15 +33,11 @@ export declare const mealRepository: {
         participants: any[];
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
         createdAt: NativeDate;
         updatedAt: NativeDate;
         _id: mongoose.Types.ObjectId;
@@ -58,16 +46,12 @@ export declare const mealRepository: {
     findMealById(mealId: string): Promise<(mongoose.Document<unknown, {}, {
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps, {
         id: string;
     }, {
@@ -75,16 +59,12 @@ export declare const mealRepository: {
     }> & Omit<{
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -92,41 +72,15 @@ export declare const mealRepository: {
     }, "id"> & {
         id: string;
     }) | null>;
-    findMealDetailsById(mealId: string): Promise<({
-        description: string;
-        title: string;
-        time: NativeDate;
-        slots: number;
-        creator: mongoose.Types.ObjectId;
-        participants: mongoose.Types.ObjectId[];
-        isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
-        createdAt: NativeDate;
-        updatedAt: NativeDate;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: mongoose.Types.ObjectId;
-    }>) | null>;
     findMealByUser(userId: string): Promise<(mongoose.Document<unknown, {}, {
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps, {
         id: string;
     }, {
@@ -134,16 +88,12 @@ export declare const mealRepository: {
     }> & Omit<{
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps & {
         _id: mongoose.Types.ObjectId;
     } & {
@@ -151,63 +101,15 @@ export declare const mealRepository: {
     }, "id"> & {
         id: string;
     }) | null>;
-    findMealsByCreator(userId: string): Promise<({
-        description: string;
-        title: string;
-        time: NativeDate;
-        slots: number;
-        creator: mongoose.Types.ObjectId;
-        participants: mongoose.Types.ObjectId[];
-        isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
-        createdAt: NativeDate;
-        updatedAt: NativeDate;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: mongoose.Types.ObjectId;
-    }>)[]>;
-    findMealsJoinedByUser(userId: string): Promise<({
-        description: string;
-        title: string;
-        time: NativeDate;
-        slots: number;
-        creator: mongoose.Types.ObjectId;
-        participants: mongoose.Types.ObjectId[];
-        isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
-        createdAt: NativeDate;
-        updatedAt: NativeDate;
-    } & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    } & Required<{
-        _id: mongoose.Types.ObjectId;
-    }>)[]>;
     deleteMeal(id: string): Promise<(mongoose.Document<unknown, {}, {
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps, {
         id: string;
     }, {
@@ -215,16 +117,12 @@ export declare const mealRepository: {
     }> & Omit<{
         description: string;
         title: string;
+        location: any;
         time: NativeDate;
         slots: number;
         creator: mongoose.Types.ObjectId;
         participants: mongoose.Types.ObjectId[];
         isActive: boolean;
-        location?: {
-            address: string;
-            lat: number;
-            lng: number;
-        } | null;
     } & mongoose.DefaultTimestampProps & {
         _id: mongoose.Types.ObjectId;
     } & {

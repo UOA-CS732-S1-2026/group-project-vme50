@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 declare const _default: mongoose.Model<{
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -13,7 +13,7 @@ declare const _default: mongoose.Model<{
 }, mongoose.Document<unknown, {}, {
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -26,7 +26,7 @@ declare const _default: mongoose.Model<{
 }> & Omit<{
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -43,7 +43,7 @@ declare const _default: mongoose.Model<{
 }, {
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -52,7 +52,7 @@ declare const _default: mongoose.Model<{
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -65,7 +65,7 @@ declare const _default: mongoose.Model<{
 }> & Omit<{
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -80,7 +80,7 @@ declare const _default: mongoose.Model<{
 }, unknown, {
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;
@@ -95,7 +95,7 @@ declare const _default: mongoose.Model<{
 }>, {
     description: string;
     title: string;
-    location: string;
+    location: any;
     time: NativeDate;
     slots: number;
     creator: mongoose.Types.ObjectId;

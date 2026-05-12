@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import Blacklist from "../models/Blacklist.js";
 
 type Request = express.Request;
 type Response = express.Response;
@@ -13,7 +14,7 @@ interface AuthRequest extends Request {
   user?: JwtUserPayload;
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -27,6 +28,12 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   }
 
   try {
+    const blacklistedToken = await Blacklist.findOne({ token }).lean();
+
+    if (blacklistedToken) {
+      return res.status(401).json({ message: "Token has been invalidated" });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtUserPayload;
 
     if (!decoded?.userId) {

@@ -12,12 +12,6 @@ const sanitizeUser = (user) => ({
     id: user._id?.toString?.() ?? user._id,
     name: user.name,
     email: user.email,
-    bio: user.bio || "",
-    favoriteCuisine: user.favoriteCuisine || "",
-    yearOfStudy: user.yearOfStudy || "",
-    avatarColor: user.avatarColor || "#2e7d61",
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
 });
 /* ================= REGISTER ================= */
 export const registerUser = async (data) => {
@@ -78,32 +72,6 @@ export const logoutUser = async (token) => {
     return {
         success: true,
         message: "Logged out successfully",
-    };
-};
-export const getCurrentUser = async (userId) => {
-    const user = await userRepository.findById(userId);
-    if (!user)
-        throw new Error("User not found");
-    return {
-        success: true,
-        data: sanitizeUser(user),
-    };
-};
-export const updateCurrentUser = async (userId, data) => {
-    const updates = Object.fromEntries(Object.entries({
-        name: data.name?.trim(),
-        bio: data.bio?.trim(),
-        favoriteCuisine: data.favoriteCuisine?.trim(),
-        yearOfStudy: data.yearOfStudy?.trim(),
-        avatarColor: data.avatarColor?.trim(),
-    }).filter(([, value]) => value !== undefined));
-    const user = await userRepository.updateUser(userId, updates);
-    if (!user)
-        throw new Error("User not found");
-    return {
-        success: true,
-        message: "Profile updated successfully",
-        data: sanitizeUser(user),
     };
 };
 //# sourceMappingURL=authService.js.map

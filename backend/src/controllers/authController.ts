@@ -1,10 +1,12 @@
+import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Blacklist from "../models/Blacklist.js";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
 const buildToken = (userId: string) =>
-  jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+  jwt.sign({ userId, tokenId: randomUUID() }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
 const sanitizeUser = (user: {
   _id: unknown;
@@ -107,9 +109,31 @@ export const login = async (req: any, res: any) => {
   }
 };
 
-// LOGOUT (frontend handles it)
-export const logout = (req: any, res: any) => {
-  res.json({ message: "Logged out successfully" });
+// LOGOUT
+export const logout = async (req: any, res: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Invalid token format" });
+    }
+
+    const decoded = jwt.decode(token) as jwt.JwtPayload | null;
+    const expiresAt = decoded?.exp
+      ? new Date(decoded.exp * 1000)
+      : new Date(Date.now() + 7 * 86400000);
+
+    await Blacklist.findOneAndUpdate(
+      { token },
+      { token, expiresAt },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err });
+  }
 };
 
 export const getCurrentUser = async (req: AuthenticatedRequest, res: any) => {

@@ -1,5 +1,6 @@
 import MealSession from "../models/MealSession.js";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
+import { emitMealRemoved, emitMealSlotsUpdated } from "../socket.js";
 
 const buildSessionQuery = () =>
   MealSession.find()
@@ -55,8 +56,8 @@ export const createMealSession = async (req: AuthenticatedRequest, res: any) => 
       return res.status(400).json({ message: "Title must be at least 3 characters" });
     }
 
-    if (!normalizedDescription || normalizedDescription.length < 10) {
-      return res.status(400).json({ message: "Description must be at least 10 characters" });
+    if (!normalizedDescription || normalizedDescription.length < 5) {
+      return res.status(400).json({ message: "Description must be at least 5 characters" });
     }
 
     if (!normalizedLocation) {
@@ -108,6 +109,8 @@ export const createMealSession = async (req: AuthenticatedRequest, res: any) => 
       session: payload,
       data: payload,
     });
+
+    emitMealSlotsUpdated(String(session._id));
   } catch (err) {
     res.status(500).json({ message: "Error", err });
   }
@@ -126,7 +129,7 @@ export const getAllMeals = async (req: any, res: any) => {
 
     const payload = meals.map(normalizeSession);
 
-    res.json(payload);
+    res.json({ sessions: payload, data: payload });
   } catch (err) {
     res.status(500).json({ message: "Error fetching meals", err });
   }
@@ -246,6 +249,8 @@ export const joinMealSession = async (req: AuthenticatedRequest, res: any) => {
       session: payload,
       data: payload,
     });
+
+    emitMealSlotsUpdated(String(session._id));
   } catch (err) {
     res.status(500).json({ message: "Error joining session", err });
   }
@@ -295,6 +300,12 @@ export const leaveMealSession = async (req: AuthenticatedRequest, res: any) => {
       session: payload,
       data: payload,
     });
+
+    if (session.isActive) {
+      emitMealSlotsUpdated(String(session._id));
+    } else {
+      emitMealRemoved(String(session._id));
+    }
   } catch (err) {
     res.status(500).json({ message: "Error leaving session", err });
   }
@@ -326,6 +337,8 @@ export const closeMealSession = async (req: AuthenticatedRequest, res: any) => {
       session: payload,
       data: payload,
     });
+
+    emitMealRemoved(String(session._id));
   } catch (err) {
     res.status(500).json({ message: "Error closing session", err });
   }

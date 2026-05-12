@@ -13,11 +13,17 @@ const sanitizeUser = (user) => ({
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
 });
+const buildAuthPayload = (token, user) => ({
+    token,
+    user,
+});
 // REGISTER
 export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        const normalizedEmail = String(email || "").trim().toLowerCase();
+        const normalizedEmail = String(email || "")
+            .trim()
+            .toLowerCase();
         const normalizedName = String(name || "").trim();
         if (!normalizedName || normalizedName.length < 2) {
             return res.status(400).json({ message: "Name must be at least 2 characters" });
@@ -41,7 +47,8 @@ export const register = async (req, res) => {
             password: hashedPassword,
         });
         const token = buildToken(String(user._id));
-        res.status(201).json({ token, user: sanitizeUser(user) });
+        const payload = buildAuthPayload(token, sanitizeUser(user));
+        res.status(201).json({ ...payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Server error", err });
@@ -51,7 +58,9 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const normalizedEmail = String(email || "").trim().toLowerCase();
+        const normalizedEmail = String(email || "")
+            .trim()
+            .toLowerCase();
         const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials" });
@@ -61,7 +70,8 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
         const token = buildToken(String(user._id));
-        res.json({ token, user: sanitizeUser(user) });
+        const payload = buildAuthPayload(token, sanitizeUser(user));
+        res.json({ ...payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Server error", err });
@@ -77,7 +87,8 @@ export const getCurrentUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.json({ user: sanitizeUser(user) });
+        const payload = sanitizeUser(user);
+        res.json({ user: payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Unable to fetch profile", err });
@@ -95,13 +106,18 @@ export const updateProfile = async (req, res) => {
         if (!updates.name || updates.name.length < 2) {
             return res.status(400).json({ message: "Name must be at least 2 characters" });
         }
-        const user = await User.findByIdAndUpdate(req.user?.userId, updates, { new: true, runValidators: true }).select("-password");
+        const user = await User.findByIdAndUpdate(req.user?.userId, updates, {
+            new: true,
+            runValidators: true,
+        }).select("-password");
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+        const payload = sanitizeUser(user);
         res.json({
             message: "Profile updated successfully",
-            user: sanitizeUser(user),
+            user: payload,
+            data: payload,
         });
     }
     catch (err) {

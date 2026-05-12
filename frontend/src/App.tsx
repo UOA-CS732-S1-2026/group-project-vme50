@@ -180,7 +180,7 @@ type AuthOutletContext = AuthPageProps
 
 const API_BASE_URL = resolveApiBaseUrl()
 const MEAL_API_BASE_URL = API_BASE_URL ? `${API_BASE_URL}/api/meal` : ''
-const REALTIME_ENABLED = Boolean(import.meta.env.VITE_SOCKET_URL?.trim())
+const REALTIME_ENABLED = Boolean(import.meta.env.VITE_SOCKET_URL?.trim() || API_BASE_URL)
 const SOCKET_BASE_URL = import.meta.env.VITE_SOCKET_URL?.trim() || API_BASE_URL
 const TOKEN_STORAGE_KEY = 'platemates-token'
 const AUCKLAND_CENTER: Coordinates = { lat: -36.8485, lng: 174.7633, source: 'fallback' }

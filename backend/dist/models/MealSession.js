@@ -10,8 +10,21 @@ const mealSessionSchema = new mongoose.Schema({
         required: true,
     },
     location: {
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         required: true,
+        validate: {
+            validator: (value) => {
+                if (typeof value === "string") {
+                    return value.trim().length > 0;
+                }
+                if (value && typeof value === "object") {
+                    const address = value.address;
+                    return typeof address === "string" && address.trim().length > 0;
+                }
+                return false;
+            },
+            message: "Location is required",
+        },
     },
     time: {
         type: Date,

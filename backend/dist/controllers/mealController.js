@@ -1,4 +1,5 @@
 import MealSession from "../models/MealSession.js";
+import { emitMealRemoved, emitMealSlotsUpdated } from "../socket.js";
 const buildSessionQuery = () => MealSession.find()
     .populate("creator", "name email favoriteCuisine avatarColor")
     .populate("participants", "name email avatarColor");
@@ -6,6 +7,24 @@ const normalizeSession = (session) => ({
     ...session.toObject(),
     id: String(session._id),
 });
+const normalizeLocationInput = (location) => {
+    if (typeof location === "string") {
+        return location.trim();
+    }
+    if (location && typeof location === "object") {
+        const { address, lat, lng } = location;
+        const normalizedAddress = typeof address === "string" ? address.trim() : "";
+        if (!normalizedAddress) {
+            return "";
+        }
+        return {
+            address: normalizedAddress,
+            ...(typeof lat === "number" ? { lat } : {}),
+            ...(typeof lng === "number" ? { lng } : {}),
+        };
+    }
+    return "";
+};
 const isFutureSession = (time) => new Date(time).getTime() > Date.now();
 export const createMealSession = async (req, res) => {
     try {
@@ -13,7 +32,7 @@ export const createMealSession = async (req, res) => {
         const { title, description, location, time, slots } = req.body;
         const normalizedTitle = String(title || "").trim();
         const normalizedDescription = String(description || "").trim();
-        const normalizedLocation = String(location || "").trim();
+        const normalizedLocation = normalizeLocationInput(location);
         const normalizedSlots = Number(slots);
         const sessionTime = new Date(time);
         if (!normalizedTitle || normalizedTitle.length < 3) {
@@ -54,10 +73,15 @@ export const createMealSession = async (req, res) => {
             participants: [userId],
         });
         const populatedSession = await buildSessionQuery().findById(session._id);
+        const payload = populatedSession
+            ? normalizeSession(populatedSession)
+            : normalizeSession(session);
         res.status(201).json({
             message: "Meal session created",
-            session: populatedSession ? normalizeSession(populatedSession) : session,
+            session: payload,
+            data: payload,
         });
+        emitMealSlotsUpdated(String(session._id));
     }
     catch (err) {
         res.status(500).json({ message: "Error", err });
@@ -69,7 +93,8 @@ export const getAllMeals = async (req, res) => {
         const meals = await buildSessionQuery()
             .find({ isActive: true, time: { $gt: new Date() } })
             .sort({ time: 1 });
-        res.json(meals.map(normalizeSession));
+        const payload = meals.map(normalizeSession);
+        res.json(payload);
     }
     catch (err) {
         res.status(500).json({ message: "Error fetching meals", err });
@@ -81,7 +106,8 @@ export const getMealById = async (req, res) => {
         if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
-        res.json({ session: normalizeSession(session) });
+        const payload = normalizeSession(session);
+        res.json({ session: payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Error fetching session details", err });
@@ -96,7 +122,8 @@ export const getMyHostedMeals = async (req, res) => {
         const sessions = await buildSessionQuery()
             .find({ creator: userId })
             .sort({ createdAt: -1 });
-        res.json({ sessions: sessions.map(normalizeSession) });
+        const payload = sessions.map(normalizeSession);
+        res.json({ sessions: payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Error fetching hosted sessions", err });
@@ -111,7 +138,8 @@ export const getMyJoinedMeals = async (req, res) => {
         const sessions = await buildSessionQuery()
             .find({ participants: userId })
             .sort({ time: -1 });
-        res.json({ sessions: sessions.map(normalizeSession) });
+        const payload = sessions.map(normalizeSession);
+        res.json({ sessions: payload, data: payload });
     }
     catch (err) {
         res.status(500).json({ message: "Error fetching joined sessions", err });
@@ -154,10 +182,15 @@ export const joinMealSession = async (req, res) => {
         session.participants.push(userId);
         await session.save();
         const populatedSession = await buildSessionQuery().findById(session._id);
+        const payload = populatedSession
+            ? normalizeSession(populatedSession)
+            : normalizeSession(session);
         res.json({
             message: "Joined session",
-            session: populatedSession ? normalizeSession(populatedSession) : session,
+            session: payload,
+            data: payload,
         });
+        emitMealSlotsUpdated(String(session._id));
     }
     catch (err) {
         res.status(500).json({ message: "Error joining session", err });
@@ -187,10 +220,20 @@ export const leaveMealSession = async (req, res) => {
         }
         await session.save();
         const populatedSession = await buildSessionQuery().findById(session._id);
+        const payload = populatedSession
+            ? normalizeSession(populatedSession)
+            : normalizeSession(session);
         res.json({
             message: session.isActive ? "Left session" : "Session closed after everyone left",
-            session: populatedSession ? normalizeSession(populatedSession) : session,
+            session: payload,
+            data: payload,
         });
+        if (session.isActive) {
+            emitMealSlotsUpdated(String(session._id));
+        }
+        else {
+            emitMealRemoved(String(session._id));
+        }
     }
     catch (err) {
         res.status(500).json({ message: "Error leaving session", err });
@@ -208,10 +251,15 @@ export const closeMealSession = async (req, res) => {
         session.isActive = false;
         await session.save();
         const populatedSession = await buildSessionQuery().findById(session._id);
+        const payload = populatedSession
+            ? normalizeSession(populatedSession)
+            : normalizeSession(session);
         res.json({
             message: "Session closed successfully",
-            session: populatedSession ? normalizeSession(populatedSession) : session,
+            session: payload,
+            data: payload,
         });
+        emitMealRemoved(String(session._id));
     }
     catch (err) {
         res.status(500).json({ message: "Error closing session", err });

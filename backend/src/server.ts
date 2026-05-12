@@ -1,23 +1,44 @@
-import express from "express";
-import dotenv from "dotenv";
+import http from "http";
+import { fileURLToPath } from "url";
 import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import { Server as SocketIOServer } from "socket.io";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
 import metaRoutes from "./routes/meta.js";
 import platformRoutes from "./routes/platform.js";
 import { connectDB } from "./config/db.js";
+import { setSocketServer } from "./socket.js";
 
 dotenv.config();
 
 const app = express();
+const httpServer = http.createServer(app);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+].filter(Boolean);
+
+const io = new SocketIOServer(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+setSocketServer(io);
 
 /* ---------------- Middleware ---------------- */
 app.use(express.json());
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: allowedOrigins,
   }),
 );
 
@@ -51,11 +72,17 @@ export const startServer = async () => {
 
   const PORT = process.env.PORT || 5000;
 
-  return app.listen(PORT, () => {
+  io.on("connection", (socket) => {
+    socket.emit("connected", { ok: true });
+  });
+
+  return httpServer.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 };
 
-if (process.env.NODE_ENV !== "test") {
+const isExecutedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
+if (process.env.NODE_ENV !== "test" && isExecutedDirectly) {
   void startServer();
 }
