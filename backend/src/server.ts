@@ -1,12 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
 import metaRoutes from "./routes/meta.js";
 import platformRoutes from "./routes/platform.js";
+import { connectDB } from "./config/db.js";
 
 dotenv.config();
 
@@ -40,22 +40,22 @@ app.get("/api", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/meal", mealRoutes);
+app.use("/api/meals", mealRoutes);
 app.use("/api/meta", metaRoutes);
 app.use("/api/platform", platformRoutes);
 
-/* ---------------- Database ---------------- */
-mongoose
-  .connect(process.env.MONGO_URI!)
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
+export default app;
+
+export const startServer = async () => {
+  await connectDB();
+
+  const PORT = process.env.PORT || 5000;
+
+  return app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+};
 
-/* ---------------- Server ---------------- */
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  void startServer();
+}

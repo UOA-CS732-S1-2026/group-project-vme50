@@ -28,6 +28,11 @@ const sanitizeUser = (user: {
   updatedAt: user.updatedAt,
 });
 
+const buildAuthPayload = (token: string, user: ReturnType<typeof sanitizeUser>) => ({
+  token,
+  user,
+});
+
 // REGISTER
 export const register = async (req: any, res: any) => {
   try {
@@ -66,7 +71,9 @@ export const register = async (req: any, res: any) => {
 
     const token = buildToken(String(user._id));
 
-    res.status(201).json({ token, user: sanitizeUser(user) });
+    const payload = buildAuthPayload(token, sanitizeUser(user));
+
+    res.status(201).json({ ...payload, data: payload });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
@@ -92,7 +99,9 @@ export const login = async (req: any, res: any) => {
 
     const token = buildToken(String(user._id));
 
-    res.json({ token, user: sanitizeUser(user) });
+    const payload = buildAuthPayload(token, sanitizeUser(user));
+
+    res.json({ ...payload, data: payload });
   } catch (err) {
     res.status(500).json({ message: "Server error", err });
   }
@@ -111,7 +120,9 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: any) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ user: sanitizeUser(user as any) });
+    const payload = sanitizeUser(user as any);
+
+    res.json({ user: payload, data: payload });
   } catch (err) {
     res.status(500).json({ message: "Unable to fetch profile", err });
   }
@@ -140,9 +151,12 @@ export const updateProfile = async (req: AuthenticatedRequest, res: any) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const payload = sanitizeUser(user as any);
+
     res.json({
       message: "Profile updated successfully",
-      user: sanitizeUser(user as any),
+      user: payload,
+      data: payload,
     });
   } catch (err) {
     res.status(500).json({ message: "Unable to update profile", err });
