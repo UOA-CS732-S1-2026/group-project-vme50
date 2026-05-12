@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import authRoutes from "./routes/auth.js";
 import mealRoutes from "./routes/meal.js";
 import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/user.js";
 
 /* ---------------- APP ---------------- */
 const app = express();
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/meals", mealRoutes);
+app.use("/api/users", userRoutes);
 
 /* ---------------- SOCKET SETUP ---------------- */
 const server = http.createServer(app);

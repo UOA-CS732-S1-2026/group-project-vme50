@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/redirect/ProtectedRoute";
 import PageTitle from "./hooks/usePageTitle";
 
 import "./utils/fixLeafletIcon.util";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -26,6 +27,14 @@ function App() {
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+               </ProtectedRoute>
             }
           />
 
