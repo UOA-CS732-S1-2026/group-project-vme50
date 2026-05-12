@@ -1,12 +1,136 @@
+/**
+ * =========================================================
+ * AUTHENTICATION API INTEGRATION TESTS
+ * =========================================================
+ *
+ * These tests validate the complete authentication flow:
+ *
+ * Client Request
+ * -> Express Routes
+ * -> Middleware
+ * -> Controllers
+ * -> Services
+ * -> MongoDB
+ *
+ * Includes:
+ * - Register
+ * - Login
+ * - Logout
+ * - JWT validation
+ * - Token blacklist invalidation
+ * - Protected route authorization
+ *
+ * Tools:
+ * - Vitest
+ * - Supertest
+ * - MongoDB
+ * =========================================================
+ */
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+
 import app from "../../server.js";
 import { connectDB } from "../../config/db.js";
 
 import User from "../../models/User.js";
 import MealSession from "../../models/MealSession.js";
 
+/* =========================================================
+   HELPERS
+========================================================= */
+const register = async (user: any) => {
+  const res = await request(app).post("/api/auth/register").send(user);
+
+  expect(res.statusCode).toBe(201);
+
+  expect(res.body).toBeDefined();
+  expect(res.body.success).toBe(true);
+  expect(res.body.message).toBe("User registered successfully.");
+
+  expect(res.body.data).toBeDefined();
+  expect(res.body.data.token).toBeDefined();
+  expect(res.body.data.user).toMatchObject({
+    name: user.name,
+    email: user.email,
+  });
+
+  expect(res.body.data.user.id).toBeDefined();
+  expect(res.body.data.user.password).toBeUndefined();
+
+  return res;
+};
+
+const login = async (user: any) => {
+  const res = await request(app).post("/api/auth/login").send({
+    email: user.email,
+    password: user.password,
+  });
+
+  expect(res.statusCode).toBe(200);
+
+  expect(res.body).toBeDefined();
+  expect(res.body.success).toBe(true);
+  expect(res.body.message).toBe("Login successful.");
+
+  expect(res.body.data).toBeDefined();
+  expect(res.body.data.token).toBeDefined();
+  expect(res.body.data.user).toMatchObject({
+    name: user.name,
+    email: user.email,
+  });
+
+  expect(res.body.data.user.id).toBeDefined();
+  expect(res.body.data.user.password).toBeUndefined();
+
+  return res;
+};
+
+const logout = async (token: any) => {
+  const res = await request(app)
+    .post("/api/auth/logout")
+    .set("Authorization", `Bearer ${token}`);
+  
+  expect(res.statusCode).toBe(200);
+  
+  expect(res.body).toBeDefined();
+  expect(res.body.success).toBe(true);
+  expect(res.body.message).toBe("Logged out successfully.");
+
+  return res;
+};
+
+const createMeal = async (token: any) => {
+  const mealRes = await request(app)
+    .post("/api/meals/create")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      title: "Test Meal",
+      description: "Meal description",
+      location: {
+        address: "Auckland",
+        lat: -36.8485,
+        lng: 174.7633,
+      },
+      time: new Date(Date.now() + 3600000).toISOString(),
+      slots: 5,
+    });
+
+    expect(mealRes.statusCode).toBe(201);
+
+    expect(mealRes.body).toBeDefined();
+    expect(mealRes.body.success).toBe(true);
+    expect(mealRes.body.message).toBe("Meal session created.");
+
+    expect(mealRes.body.data).toBeDefined();
+
+  return mealRes;
+};
+
+/* =========================================================
+   TEST SUITE
+========================================================= */
 describe("Auth API", () => {
   /* =========================================================
      TEST DATA
@@ -44,31 +168,90 @@ describe("Auth API", () => {
   ========================================================= */
   describe("POST /api/auth/register", () => {
     it("should register a user successfully", async () => {
+      await register(testUser);
+    });
+
+    it("should reject duplicate registration", async () => {
+      await register(testUser);
+
       const res = await request(app).post("/api/auth/register").send(testUser);
 
-      expect(res.statusCode).toBe(201);
-      expect(res.body.data).toBeDefined();
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("User already exists!");
     });
 
     it("should reject invalid email domain", async () => {
       const res = await request(app).post("/api/auth/register").send({
-        name: "Invalid User",
-        email: "invalid@gmail.com",
+        name: "InvalidDomain User",
+        email: "abcd123@gmail.com",
+        password: "123456",
+      });
+
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Only University of Auckland students can register!");
+    });
+
+    it("should reject invalid UPI format", async () => {
+      const res = await request(app).post("/api/auth/register").send({
+        name: "InvalidUPI User",
+        email: "abc123@aucklanduni.ac.nz",
+        password: "123456",
+      });
+
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Invalid UPI format!");
+    });
+
+    it("should reject missing name", async () => {
+      const res = await request(app).post("/api/auth/register").send({
+        email: "test123@aucklanduni.ac.nz",
         password: "123456",
       });
 
       expect(res.statusCode).toBe(400);
     });
 
-    it("should reject duplicate registration", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
+    it("should reject missing email", async () => {
+      const res = await request(app).post("/api/auth/register").send({
+        name: "MissingEmail User",
+        password: "123456",
+      });
 
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
+      expect(res.statusCode).toBe(400);
 
-      const res2 = await request(app).post("/api/auth/register").send(testUser);
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+    });
 
-      expect(res2.statusCode).toBe(400);
+    it("should reject missing password", async () => {
+      const res = await request(app).post("/api/auth/register").send({
+        name: "MissingPassword User",
+        email: "test123@aucklanduni.ac.nz",
+      });
+
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should generate valid JWT token", async () => {
+      const res = await register(testUser);
+
+      const token = res.body.data.token;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
+
+      expect(decoded.userId).toBeDefined();
+      expect(decoded.jti).toBeDefined();
     });
   });
 
@@ -76,270 +259,209 @@ describe("Auth API", () => {
      LOGIN TESTS
   ========================================================= */
   describe("POST /api/auth/login", () => {
-    it("should login successfully", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
-
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
-
-      const res2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(res2.statusCode).toBe(200);
-      expect(res2.body.data).toBeDefined();
+    it("should login a user successfully", async () => {
+      await register(testUser);
+      await login(testUser);
     });
 
     it("should fail wrong password", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
+      await register(testUser);
 
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
-
-      const res2 = await request(app).post("/api/auth/login").send({
+      const res = await request(app).post("/api/auth/login").send({
         email: testUser.email,
         password: "wrongpass",
       });
 
-      expect(res2.statusCode).toBe(400);
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Invalid credentials!");
     });
 
     it("should fail non-existent user", async () => {
       const res = await request(app).post("/api/auth/login").send({
-        email: "nonexistent@aucklanduni.ac.nz",
+        email: "none123@aucklanduni.ac.nz",
         password: "123456",
       });
 
       expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("User not found!");
+    });
+
+    it("should reject missing email", async () => {
+      const res = await request(app).post("/api/auth/login").send({
+        password: "123456",
+      });
+
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should reject missing password", async () => {
+      const res = await request(app).post("/api/auth/login").send({
+        email: testUser.email,
+      });
+
+      expect(res.statusCode).toBe(400);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should generate unique tokens for each login", async () => {
+      await register(testUser);
+
+      const res1 = await login(testUser);
+      const res2 = await login(testUser);
+
+      expect(res1.body.data.token).not.toBe(res2.body.data.token);
     });
   });
 
   /* =========================================================
-     LOGOUT TEST
+     LOGOUT TESTS
   ========================================================= */
   describe("POST /api/auth/logout", () => {
     it("should logout successfully", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
+      await register(testUser);
+      const res = await login(testUser);
+      await logout(res.body.data.token)
+    });
 
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
+    it("should reject logout without token", async () => {
+      const res = await request(app).post("/api/auth/logout");
 
-      const res2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      expect(res.statusCode).toBe(401);
 
-      expect(res2.statusCode).toBe(200);
-      expect(res2.body.data).toBeDefined();
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("No token provided!");
+    });
 
-      const res3 = await request(app)
+    it("should reject logout with invalid token", async () => {
+      const res = await request(app)
         .post("/api/auth/logout")
-        .set("Authorization", `Bearer ${res2.body.data.token}`);
+        .set("Authorization", "Bearer invalidToken");
 
-      expect(res3.statusCode).toBe(200);
+      expect(res.statusCode).toBe(401);
+
+      expect(res.body).toBeDefined();
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Invalid or expired token!");
+    });
+
+    it("should reject already blacklisted token", async () => {
+      await register(testUser);
+      const res1 = await login(testUser);
+
+      await logout(res1.body.data.token);
+      const res2 = await request(app)
+        .post("/api/auth/logout")
+        .set("Authorization", `Bearer ${res1.body.data.token}`);
+
+      expect(res2.statusCode).toBe(401);
+
+      expect(res2.body).toBeDefined();
+      expect(res2.body.success).toBe(false);
+      expect(res2.body.message).toBe("Token is invalid (logged out)!");
     });
 
     it("should reject create meal session request after logout", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
-
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
-
-      const res2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(res2.statusCode).toBe(200);
-      expect(res2.body.data).toBeDefined();
-
-      const res3 = await request(app)
-        .post("/api/auth/logout")
-        .set("Authorization", `Bearer ${res2.body.data.token}`);
-
-      expect(res3.statusCode).toBe(200);
+      await register(testUser);
+      const res1 = await login(testUser);
+      await logout(res1.body.data.token);
 
       const mealRes = await request(app)
-        .post("/api/meals/create")
-        .set("Authorization", `Bearer ${res2.body.data.token}`)
-        .send({
-          title: "Create Meal Test",
-          description: "Create meal after logout",
-          location: "Auckland",
-          time: new Date(Date.now() + 3600000).toISOString(),
-          slots: 5,
-        });
+      .post("/api/meals/create")
+      .set("Authorization", `Bearer ${res1.body.data.token}`)
+      .send({
+        title: "Test Meal",
+        description: "Meal description",
+        location: {
+          address: "Auckland",
+          lat: -36.8485,
+          lng: 174.7633,
+        },
+        time: new Date(Date.now() + 3600000).toISOString(),
+        slots: 5,
+      });
 
       expect(mealRes.statusCode).toBe(401);
+
+      expect(mealRes.body).toBeDefined();
+      expect(mealRes.body.success).toBe(false);
+      expect(mealRes.body.message).toBe("Token is invalid (logged out)!");
     });
 
     it("should reject join meal session request after logout", async () => {
-      const creatorRes1 = await request(app).post("/api/auth/register").send(testCreator);
+      await register(testCreator);
+      const creatorRes = await login(testCreator);
 
-      expect(creatorRes1.statusCode).toBe(201);
-      expect(creatorRes1.body.data).toBeDefined();
+      await register(testUser);
+      const joinerRes1 = await login(testUser);
 
-      const creatorRes2 = await request(app).post("/api/auth/login").send({
-        email: testCreator.email,
-        password: testCreator.password,
-      });
+      const mealRes = await createMeal(creatorRes.body.data.token);
 
-      expect(creatorRes2.statusCode).toBe(200);
-      expect(creatorRes2.body.data).toBeDefined();
+      await logout(joinerRes1.body.data.token);
 
-      const mealRes = await request(app)
-        .post("/api/meals/create")
-        .set("Authorization", `Bearer ${creatorRes2.body.data.token}`)
-        .send({
-          title: "Join Meal Test",
-          description: "Meal to join.",
-          location: {
-            address: "Auckland",
-            lat: -36.8485,
-            lng: 174.7633,
-          },
-          time: new Date(Date.now() + 3600000).toISOString(),
-          slots: 5,
-        });
-
-      expect(mealRes.statusCode).toBe(201);
-      expect(mealRes.body.data).toBeDefined();
-
-      const joinerRes1 = await request(app).post("/api/auth/register").send(testUser);
-
-      expect(joinerRes1.statusCode).toBe(201);
-      expect(joinerRes1.body.data).toBeDefined();
-
-      const joinerRes2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(joinerRes2.statusCode).toBe(200);
-      expect(joinerRes2.body.data).toBeDefined();
-
-      const joinerRes3 = await request(app)
-        .post("/api/auth/logout")
-        .set("Authorization", `Bearer ${joinerRes2.body.data.token}`);
-
-      expect(joinerRes3.statusCode).toBe(200);
-
-      const joinerRes4 = await request(app)
+      const joinerRes2 = await request(app)
         .post(`/api/meals/${mealRes.body.data._id}/join`)
-        .set("Authorization", `Bearer ${joinerRes2.body.data.token}`);
+        .set("Authorization", `Bearer ${joinerRes1.body.data.token}`);
 
-      expect(joinerRes4.statusCode).toBe(401);
+      expect(joinerRes2.statusCode).toBe(401);
+
+      expect(joinerRes2.body).toBeDefined();
+      expect(joinerRes2.body.success).toBe(false);
+      expect(joinerRes2.body.message).toBe("Token is invalid (logged out)!");
     });
 
     it("should reject leave meal session request after logout", async () => {
-      const creatorRes1 = await request(app).post("/api/auth/register").send(testCreator);
+      await register(testCreator);
+      const creatorRes = await login(testCreator);
 
-      expect(creatorRes1.statusCode).toBe(201);
-      expect(creatorRes1.body.data).toBeDefined();
+      await register(testUser);
+      const leaverRes1 = await login(testUser);
 
-      const creatorRes2 = await request(app).post("/api/auth/login").send({
-        email: testCreator.email,
-        password: testCreator.password,
-      });
+      const mealRes = await createMeal(creatorRes.body.data.token);
 
-      expect(creatorRes2.statusCode).toBe(200);
-      expect(creatorRes2.body.data).toBeDefined();
-
-      const mealRes = await request(app)
-        .post("/api/meals/create")
-        .set("Authorization", `Bearer ${creatorRes2.body.data.token}`)
-        .send({
-          title: "Leave Meal Test",
-          description: "Meal to leave.",
-          location: {
-            address: "Auckland",
-            lat: -36.8485,
-            lng: 174.7633,
-          },
-          time: new Date(Date.now() + 3600000).toISOString(),
-          slots: 5,
-        });
-
-      expect(mealRes.statusCode).toBe(201);
-      expect(mealRes.body.data).toBeDefined();
-
-      const leaverRes1 = await request(app).post("/api/auth/register").send(testUser);
-
-      expect(leaverRes1.statusCode).toBe(201);
-      expect(leaverRes1.body.data).toBeDefined();
-
-      const leaverRes2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      const leaverRes2 = await request(app)
+        .post(`/api/meals/${mealRes.body.data._id}/join`)
+        .set("Authorization", `Bearer ${leaverRes1.body.data.token}`);
 
       expect(leaverRes2.statusCode).toBe(200);
+
+      expect(leaverRes2.body).toBeDefined();
+      expect(leaverRes2.body.success).toBe(true);
+      expect(leaverRes2.body.message).toBe("Joined session.");
+
       expect(leaverRes2.body.data).toBeDefined();
 
+      await logout(leaverRes1.body.data.token);
+
       const leaverRes3 = await request(app)
-        .post(`/api/meals/${mealRes.body.data._id}/join`)
-        .set("Authorization", `Bearer ${leaverRes2.body.data.token}`);
-
-      expect(leaverRes3.statusCode).toBe(200);
-
-      const leaverRes4 = await request(app)
-        .post("/api/auth/logout")
-        .set("Authorization", `Bearer ${leaverRes2.body.data.token}`);
-
-      expect(leaverRes4.statusCode).toBe(200);
-
-      const leaverRes5 = await request(app)
         .post(`/api/meals/${mealRes.body.data._id}/leave`)
-        .set("Authorization", `Bearer ${leaverRes2.body.data.token}`);
+        .set("Authorization", `Bearer ${leaverRes1.body.data.token}`);
 
-      expect(leaverRes5.statusCode).toBe(401);
+      expect(leaverRes3.statusCode).toBe(401);
+
+      expect(leaverRes3.body).toBeDefined();
+      expect(leaverRes3.body.success).toBe(false);
+      expect(leaverRes3.body.message).toBe("Token is invalid (logged out)!");
     });
 
     it("should allow new token after logout", async () => {
-      const res1 = await request(app).post("/api/auth/register").send(testUser);
+      await register(testUser);
+      const res1 = await login(testUser);
+      await logout(res1.body.data.token);
 
-      expect(res1.statusCode).toBe(201);
-      expect(res1.body.data).toBeDefined();
-
-      const res2 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(res2.statusCode).toBe(200);
-      expect(res2.body.data).toBeDefined();
-
-      const res3 = await request(app)
-        .post("/api/auth/logout")
-        .set("Authorization", `Bearer ${res2.body.data.token}`);
-
-      expect(res3.statusCode).toBe(200);
-
-      const res4 = await request(app).post("/api/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(res4.statusCode).toBe(200);
-      expect(res4.body.data).toBeDefined();
-
-      const mealRes = await request(app)
-        .post("/api/meals/create")
-        .set("Authorization", `Bearer ${res4.body.data.token}`)
-        .send({
-          title: "New token works",
-          description: "valid",
-          location: {
-            address: "Auckland",
-            lat: -36.8485,
-            lng: 174.7633,
-          },
-          time: new Date(Date.now() + 3600000).toISOString(),
-          slots: 2,
-        });
-
-      expect(mealRes.statusCode).toBe(201);
+      const res3 = await login(testUser);
+      await createMeal(res3.body.data.token);
     });
   });
 });
