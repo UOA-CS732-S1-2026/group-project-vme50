@@ -11,7 +11,7 @@ function Topbar() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {

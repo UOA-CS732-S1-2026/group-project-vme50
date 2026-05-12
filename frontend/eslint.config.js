@@ -65,7 +65,15 @@ export default defineConfig([
     rules: {
       ...reactHooks.configs.recommended.rules,
 
-      "@typescript-eslint/no-unused-vars": "warn",
+      // ONLY TS rule (fully controlled)
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
 

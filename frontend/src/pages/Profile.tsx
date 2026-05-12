@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyProfile, updateMyProfile } from "../api/userApi";
 
@@ -18,49 +18,50 @@ function Profile() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadProfile();
+    const fetchProfile = async () => {
+      try {
+        const response = await getMyProfile();
+        const user = response.data;
+
+        setProfile({
+          name: user.name || "",
+          email: user.email || "",
+          bio: user.bio || "",
+          course: user.course || "",
+          interests: user.interests?.join(", ") || "",
+          avatarColor: user.avatarColor || "#10b981",
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, []);
-
-  const loadProfile = async () => {
-    try {
-      const response = await getMyProfile();
-      const user = response.data;
-
-      setProfile({
-        name: user.name || "",
-        email: user.email || "",
-        bio: user.bio || "",
-        course: user.course || "",
-        interests: user.interests?.join(", ") || "",
-        avatarColor: user.avatarColor || "#10b981",
-      });
-    } catch (error) {
-      alert("Failed to load profile");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     try {
       setSaving(true);
 
       const response = await updateMyProfile({
-  name: profile.name,
-  bio: profile.bio,
-  course: profile.course,
-  interests: profile.interests
-    .split(",")
-    .map((interest) => interest.trim())
-    .filter(Boolean),
-  avatarColor: profile.avatarColor,
-});
+        name: profile.name,
+        bio: profile.bio,
+        course: profile.course,
+        interests: profile.interests
+          .split(",")
+          .map((interest) => interest.trim())
+          .filter(Boolean),
+        avatarColor: profile.avatarColor,
+      });
 
-localStorage.setItem("user", JSON.stringify(response.data));
-
+      localStorage.setItem("user", JSON.stringify(response.data));
 
       alert("Profile updated successfully");
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       alert("Failed to update profile");
     } finally {
       setSaving(false);
@@ -182,9 +183,7 @@ localStorage.setItem("user", JSON.stringify(response.data));
               onChange={(e) => setProfile({ ...profile, interests: e.target.value })}
               style={inputStyle}
             />
-            <p style={{ color: "#64748b", marginTop: "6px" }}>
-              Separate interests with commas.
-            </p>
+            <p style={{ color: "#64748b", marginTop: "6px" }}>Separate interests with commas.</p>
           </label>
 
           <label>
