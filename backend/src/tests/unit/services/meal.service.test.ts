@@ -50,12 +50,7 @@ vi.mock("../../../repositories/mealRepository.js", () => ({
 
 import { mealRepository } from "../../../repositories/mealRepository.js";
 
-import {
-  createMeal,
-  joinMeal,
-  leaveMeal,
-  getMeals,
-} from "../../../services/mealService.js";
+import { createMeal, joinMeal, leaveMeal, getMeals } from "../../../services/mealService.js";
 
 /* =========================================================
    MOCK REFERENCES
@@ -190,17 +185,13 @@ describe("Meal Service", () => {
         isActive: true,
       });
 
-      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow(
-        "ALREADY_JOINED",
-      );
+      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow("ALREADY_JOINED");
     });
 
     it("should reject join for non-existent meal", async () => {
       repo.findMealById.mockResolvedValue(null);
 
-      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow(
-        "NOT_FOUND",
-      );
+      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow("NOT_FOUND");
     });
 
     it("should reject join for inactive session", async () => {
@@ -209,9 +200,7 @@ describe("Meal Service", () => {
         isActive: false,
       });
 
-      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow(
-        "CLOSED",
-      );
+      await expect(joinMeal(MEAL_ID, USER_ID)).rejects.toThrow("CLOSED");
     });
   });
 
@@ -230,9 +219,7 @@ describe("Meal Service", () => {
 
       const result = await leaveMeal(MEAL_ID, USER_ID);
 
-      const hasUser = result.participants
-        .map((p: any) => String(p))
-        .includes(USER_ID);
+      const hasUser = result.participants.map((p: any) => String(p)).includes(USER_ID);
 
       expect(repo.saveMeal).toHaveBeenCalledTimes(1);
 
@@ -246,17 +233,13 @@ describe("Meal Service", () => {
         isActive: true,
       });
 
-      await expect(leaveMeal(MEAL_ID, USER_ID)).rejects.toThrow(
-        "NOT_IN_SESSION",
-      );
+      await expect(leaveMeal(MEAL_ID, USER_ID)).rejects.toThrow("NOT_IN_SESSION");
     });
 
     it("should reject leaving non-existent meal", async () => {
       repo.findMealById.mockResolvedValue(null);
 
-      await expect(leaveMeal(MEAL_ID, USER_ID)).rejects.toThrow(
-        "NOT_FOUND",
-      );
+      await expect(leaveMeal(MEAL_ID, USER_ID)).rejects.toThrow("NOT_FOUND");
     });
 
     it("should delete meal when last participant leaves", async () => {

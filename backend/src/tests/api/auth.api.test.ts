@@ -88,12 +88,10 @@ const login = async (user: any) => {
 };
 
 const logout = async (token: any) => {
-  const res = await request(app)
-    .post("/api/auth/logout")
-    .set("Authorization", `Bearer ${token}`);
-  
+  const res = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`);
+
   expect(res.statusCode).toBe(200);
-  
+
   expect(res.body).toBeDefined();
   expect(res.body.success).toBe(true);
   expect(res.body.message).toBe("Logged out successfully.");
@@ -117,13 +115,13 @@ const createMeal = async (token: any) => {
       slots: 5,
     });
 
-    expect(mealRes.statusCode).toBe(201);
+  expect(mealRes.statusCode).toBe(201);
 
-    expect(mealRes.body).toBeDefined();
-    expect(mealRes.body.success).toBe(true);
-    expect(mealRes.body.message).toBe("Meal session created.");
+  expect(mealRes.body).toBeDefined();
+  expect(mealRes.body.success).toBe(true);
+  expect(mealRes.body.message).toBe("Meal session created.");
 
-    expect(mealRes.body.data).toBeDefined();
+  expect(mealRes.body.data).toBeDefined();
 
   return mealRes;
 };
@@ -331,7 +329,7 @@ describe("Auth API", () => {
     it("should logout successfully", async () => {
       await register(testUser);
       const res = await login(testUser);
-      await logout(res.body.data.token)
+      await logout(res.body.data.token);
     });
 
     it("should reject logout without token", async () => {
@@ -378,19 +376,19 @@ describe("Auth API", () => {
       await logout(res1.body.data.token);
 
       const mealRes = await request(app)
-      .post("/api/meals/create")
-      .set("Authorization", `Bearer ${res1.body.data.token}`)
-      .send({
-        title: "Test Meal",
-        description: "Meal description",
-        location: {
-          address: "Auckland",
-          lat: -36.8485,
-          lng: 174.7633,
-        },
-        time: new Date(Date.now() + 3600000).toISOString(),
-        slots: 5,
-      });
+        .post("/api/meals/create")
+        .set("Authorization", `Bearer ${res1.body.data.token}`)
+        .send({
+          title: "Test Meal",
+          description: "Meal description",
+          location: {
+            address: "Auckland",
+            lat: -36.8485,
+            lng: 174.7633,
+          },
+          time: new Date(Date.now() + 3600000).toISOString(),
+          slots: 5,
+        });
 
       expect(mealRes.statusCode).toBe(401);
 

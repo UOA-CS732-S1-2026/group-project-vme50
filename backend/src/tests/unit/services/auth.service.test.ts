@@ -73,11 +73,7 @@ import jwt from "jsonwebtoken";
 import { userRepository } from "../../../repositories/userRepository.js";
 import Blacklist from "../../../models/Blacklist.js";
 
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-} from "../../../services/authService.js";
+import { registerUser, loginUser, logoutUser } from "../../../services/authService.js";
 
 /* =========================================================
    MOCK REFERENCES
@@ -162,9 +158,7 @@ describe("Auth Service", () => {
           email: "john123@gmail.com",
           password: "123456",
         }),
-      ).rejects.toThrow(
-        "Only University of Auckland students can register",
-      );
+      ).rejects.toThrow("Only University of Auckland students can register");
     });
 
     it("should reject invalid UPI format", async () => {
@@ -202,10 +196,7 @@ describe("Auth Service", () => {
 
       expect(repo.findByEmail).toHaveBeenCalledTimes(1);
 
-      expect(mockBcrypt.compare).toHaveBeenCalledWith(
-        "123456",
-        "hashedPassword",
-      );
+      expect(mockBcrypt.compare).toHaveBeenCalledWith("123456", "hashedPassword");
 
       expect(mockJwt.sign).toHaveBeenCalledTimes(1);
 
@@ -274,9 +265,7 @@ describe("Auth Service", () => {
         throw new Error("Invalid token");
       });
 
-      await expect(logoutUser("invalidToken")).rejects.toThrow(
-        "Invalid token",
-      );
+      await expect(logoutUser("invalidToken")).rejects.toThrow("Invalid token");
     });
   });
 });
