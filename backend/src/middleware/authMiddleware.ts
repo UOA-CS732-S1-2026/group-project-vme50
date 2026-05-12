@@ -10,20 +10,29 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ message: "No token provided" });
+    return res.status(401).json({
+      success: false,
+      message: "No token provided!",
+    });
   }
 
   const token = authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Invalid token format" });
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token format!",
+    });
   }
 
   try {
     const blacklisted = await Blacklist.findOne({ token });
 
     if (blacklisted) {
-      return res.status(401).json({ message: "Token is invalid (logged out)" });
+      return res.status(401).json({
+        success: false,
+        message: "Token is invalid (logged out)!",
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
@@ -31,6 +40,9 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     req.user = decoded;
     next();
   } catch (_err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token!",
+    });
   }
 };

@@ -10,13 +10,13 @@ export const createMealSession = async (req: any, res: Response) => {
 
     return res.status(201).json({
       success: true,
-      message: "Meal session created",
+      message: "Meal session created.",
       data: session,
     });
   } catch (_err: any) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: "Error creating meal",
+      message: "Error creating meal!",
     });
   }
 };
@@ -50,21 +50,21 @@ export const joinMealSession = async (req: any, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Joined session",
+      message: "Joined session.",
       data: session,
     });
   } catch (_err: any) {
     if (_err.message === "NOT_FOUND") {
       return res.status(404).json({
         success: false,
-        message: "Session not found",
+        message: "Session not found!",
       });
     }
 
     if (_err.message === "ALREADY_JOINED") {
       return res.status(400).json({
         success: false,
-        message: "Already joined",
+        message: "Already joined!",
       });
     }
 
@@ -77,7 +77,7 @@ export const joinMealSession = async (req: any, res: Response) => {
 
     return res.status(400).json({
       success: false,
-      message: "Cannot join session",
+      message: "Cannot join session!",
     });
   }
 };
@@ -94,20 +94,27 @@ export const leaveMealSession = async (req: any, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Left session",
+      message: "Left session.",
       data: session,
     });
   } catch (_err: any) {
     if (_err.message === "NOT_IN_SESSION") {
       return res.status(400).json({
         success: false,
-        message: "Not in session",
+        message: "Not in session!",
+      });
+    }
+
+    if (_err.message === "NOT_FOUND") {
+      return res.status(400).json({
+        success: false,
+        message: "Meal session not found!",
       });
     }
 
     return res.status(400).json({
       success: false,
-      message: "Cannot leave session",
+      message: "Error leaving session!",
     });
   }
 };
