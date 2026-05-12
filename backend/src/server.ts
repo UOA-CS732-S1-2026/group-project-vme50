@@ -16,7 +16,7 @@ const app = express();
 /* ---------------- Middleware ---------------- */
 app.use(express.json());
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigin = /https:\/\/.*\.vercel\.app$|http:\/\/localhost:5173/;;
 
 app.use(
   cors({
