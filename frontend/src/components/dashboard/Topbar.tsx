@@ -1,16 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { logoutUser } from "../../api/authApi";
-import { getUser, clearAuth } from "../../utils/auth.util";
+import { getMyProfile } from "../../api/userApi";
+
+import { clearAuth } from "../../utils/auth.util";
 import { getInitials } from "../../utils/avatar.util";
 
 function Topbar() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  
   const navigate = useNavigate();
 
-  const user = getUser();
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getMyProfile();
+        setUser(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
     setLoading(true);
