@@ -10,7 +10,7 @@ export const mealRepository = {
     const meals = await MealSession.find({ isActive: true })
       .populate("creator", "name email")
       .lean()
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1, _id: -1 });
 
     return meals.map((meal) => ({
       ...meal,

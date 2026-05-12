@@ -42,6 +42,18 @@ const normalizeLocationInput = (location: unknown) => {
 
 const isFutureSession = (time: Date | string) => new Date(time).getTime() > Date.now();
 
+const failure = (res: any, status: number, message: string) =>
+  res.status(status).json({ success: false, message });
+
+const success = (res: any, status: number, message: string, data?: unknown) =>
+  res.status(status).json({
+    success: true,
+    message,
+    ...(data !== undefined ? { data } : {}),
+    ...(data && typeof data === "object" && !Array.isArray(data) ? { session: data } : {}),
+    ...(Array.isArray(data) ? { sessions: data } : {}),
+  });
+
 export const createMealSession = async (req: AuthenticatedRequest, res: any) => {
   try {
     const userId = req.user?.userId;
@@ -53,27 +65,27 @@ export const createMealSession = async (req: AuthenticatedRequest, res: any) => 
     const sessionTime = new Date(time);
 
     if (!normalizedTitle || normalizedTitle.length < 3) {
-      return res.status(400).json({ message: "Title must be at least 3 characters" });
+      return failure(res, 400, "Error creating meal!");
     }
 
     if (!normalizedDescription || normalizedDescription.length < 5) {
-      return res.status(400).json({ message: "Description must be at least 5 characters" });
+      return failure(res, 400, "Error creating meal!");
     }
 
     if (!normalizedLocation) {
-      return res.status(400).json({ message: "Location is required" });
+      return failure(res, 400, "Error creating meal!");
     }
 
     if (Number.isNaN(sessionTime.getTime()) || !isFutureSession(sessionTime)) {
-      return res.status(400).json({ message: "Session time must be in the future" });
+      return failure(res, 400, "Error creating meal!");
     }
 
     if (!Number.isInteger(normalizedSlots) || normalizedSlots < 2 || normalizedSlots > 12) {
-      return res.status(400).json({ message: "Slots must be between 2 and 12" });
+      return failure(res, 400, "Error creating meal!");
     }
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return failure(res, 401, "Unauthorized!");
     }
 
     const existing = await MealSession.findOne({
@@ -83,9 +95,7 @@ export const createMealSession = async (req: AuthenticatedRequest, res: any) => 
     } as any);
 
     if (existing) {
-      return res.status(400).json({
-        message: "You are already in an active session",
-      });
+      return failure(res, 400, "Error creating meal!");
     }
 
     const session = await MealSession.create({
@@ -104,15 +114,11 @@ export const createMealSession = async (req: AuthenticatedRequest, res: any) => 
       ? normalizeSession(populatedSession)
       : normalizeSession(session);
 
-    res.status(201).json({
-      message: "Meal session created",
-      session: payload,
-      data: payload,
-    });
+    success(res, 201, "Meal session created.", payload);
 
     emitMealSlotsUpdated(String(session._id));
-  } catch (err) {
-    res.status(500).json({ message: "Error", err });
+  } catch (_err) {
+    failure(res, 500, "Error creating meal!");
   }
 };
 
@@ -129,9 +135,9 @@ export const getAllMeals = async (req: any, res: any) => {
 
     const payload = meals.map(normalizeSession);
 
-    res.json({ sessions: payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching meals", err });
+    return success(res, 200, "Meals fetched successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Error fetching meals!");
   }
 };
 
@@ -140,14 +146,14 @@ export const getMealById = async (req: any, res: any) => {
     const session = await buildSessionQuery().findById(req.params.id);
 
     if (!session) {
-      return res.status(404).json({ message: "Session not found" });
+      return failure(res, 404, "Session not found!");
     }
 
     const payload = normalizeSession(session);
 
-    res.json({ session: payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching session details", err });
+    return success(res, 200, "Session fetched successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Error fetching session details!");
   }
 };
 
@@ -156,7 +162,7 @@ export const getMyHostedMeals = async (req: AuthenticatedRequest, res: any) => {
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return failure(res, 401, "Unauthorized!");
     }
 
     const sessions = await buildSessionQuery()
@@ -165,9 +171,9 @@ export const getMyHostedMeals = async (req: AuthenticatedRequest, res: any) => {
 
     const payload = sessions.map(normalizeSession);
 
-    res.json({ sessions: payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching hosted sessions", err });
+    return success(res, 200, "Hosted sessions fetched successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Error fetching hosted sessions!");
   }
 };
 
@@ -176,7 +182,7 @@ export const getMyJoinedMeals = async (req: AuthenticatedRequest, res: any) => {
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return failure(res, 401, "Unauthorized!");
     }
 
     const sessions = await buildSessionQuery()
@@ -185,9 +191,9 @@ export const getMyJoinedMeals = async (req: AuthenticatedRequest, res: any) => {
 
     const payload = sessions.map(normalizeSession);
 
-    res.json({ sessions: payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching joined sessions", err });
+    return success(res, 200, "Joined sessions fetched successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Error fetching joined sessions!");
   }
 };
 
@@ -197,31 +203,35 @@ export const joinMealSession = async (req: AuthenticatedRequest, res: any) => {
     const sessionId = req.params.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return failure(res, 401, "Unauthorized!");
+    }
+
+    if (!sessionId || !sessionId.match(/^[0-9a-fA-F]{24}$/)) {
+      return failure(res, 400, "Cannot join session!");
     }
 
     const session = await MealSession.findById(sessionId);
 
     if (!session) {
-      return res.status(404).json({ message: "Session not found" });
+      return failure(res, 404, "Session not found!");
     }
 
     if (!session.isActive) {
-      return res.status(400).json({ message: "Session is closed" });
+      return failure(res, 400, "Cannot join session!");
     }
 
     if (!isFutureSession(session.time)) {
       session.isActive = false;
       await session.save();
-      return res.status(400).json({ message: "Session has already started" });
+      return failure(res, 400, "Cannot join session!");
     }
 
     if ((session.participants as any[]).includes(userId)) {
-      return res.status(400).json({ message: "Already joined" });
+      return failure(res, 400, "Already joined!");
     }
 
     if (session.participants.length >= session.slots) {
-      return res.status(400).json({ message: "Session full" });
+      return failure(res, 400, "Cannot join session!");
     }
 
     const existing = await MealSession.findOne({
@@ -230,9 +240,7 @@ export const joinMealSession = async (req: AuthenticatedRequest, res: any) => {
     } as any);
 
     if (existing) {
-      return res.status(400).json({
-        message: "You are already in an active session",
-      });
+      return failure(res, 400, "Cannot join session!");
     }
 
     (session.participants as any[]).push(userId);
@@ -244,15 +252,11 @@ export const joinMealSession = async (req: AuthenticatedRequest, res: any) => {
       ? normalizeSession(populatedSession)
       : normalizeSession(session);
 
-    res.json({
-      message: "Joined session",
-      session: payload,
-      data: payload,
-    });
+    success(res, 200, "Joined session.", payload);
 
     emitMealSlotsUpdated(String(session._id));
-  } catch (err) {
-    res.status(500).json({ message: "Error joining session", err });
+  } catch (_err) {
+    failure(res, 500, "Cannot join session!");
   }
 };
 
@@ -262,19 +266,23 @@ export const leaveMealSession = async (req: AuthenticatedRequest, res: any) => {
     const sessionId = req.params.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return failure(res, 401, "Unauthorized!");
+    }
+
+    if (!sessionId || !sessionId.match(/^[0-9a-fA-F]{24}$/)) {
+      return failure(res, 400, "Error leaving session!");
     }
 
     const session = await MealSession.findById(sessionId);
 
     if (!session) {
-      return res.status(404).json({ message: "Session not found" });
+      return failure(res, 400, "Meal session not found!");
     }
 
     const index = (session.participants as any[]).indexOf(userId);
 
     if (index === -1) {
-      return res.status(400).json({ message: "Not in session" });
+      return failure(res, 400, "Not in session!");
     }
 
     session.participants.splice(index, 1);
@@ -284,7 +292,11 @@ export const leaveMealSession = async (req: AuthenticatedRequest, res: any) => {
     }
 
     if (session.participants.length === 0) {
-      session.isActive = false;
+      await MealSession.findByIdAndDelete(sessionId);
+
+      emitMealRemoved(String(session._id));
+
+      return success(res, 200, "Left session.", normalizeSession(session));
     }
 
     await session.save();
@@ -295,19 +307,11 @@ export const leaveMealSession = async (req: AuthenticatedRequest, res: any) => {
       ? normalizeSession(populatedSession)
       : normalizeSession(session);
 
-    res.json({
-      message: session.isActive ? "Left session" : "Session closed after everyone left",
-      session: payload,
-      data: payload,
-    });
+    success(res, 200, "Left session.", payload);
 
-    if (session.isActive) {
-      emitMealSlotsUpdated(String(session._id));
-    } else {
-      emitMealRemoved(String(session._id));
-    }
-  } catch (err) {
-    res.status(500).json({ message: "Error leaving session", err });
+    emitMealSlotsUpdated(String(session._id));
+  } catch (_err) {
+    failure(res, 500, "Error leaving session!");
   }
 };
 

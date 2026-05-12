@@ -6,7 +6,7 @@ import Blacklist from "../models/Blacklist.js";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
 const buildToken = (userId: string) =>
-  jwt.sign({ userId, tokenId: randomUUID() }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+  jwt.sign({ userId, jti: randomUUID() }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
 const sanitizeUser = (user: {
   _id: unknown;
@@ -35,6 +35,22 @@ const buildAuthPayload = (token: string, user: ReturnType<typeof sanitizeUser>) 
   user,
 });
 
+const failure = (res: any, status: number, message: string) =>
+  res.status(status).json({ success: false, message });
+
+const success = (res: any, status: number, message: string, data?: unknown) =>
+  res.status(status).json({
+    success: true,
+    message,
+    ...(data !== undefined ? { data } : {}),
+    ...(data && typeof data === "object" && "token" in (data as Record<string, unknown>)
+      ? data
+      : {}),
+    ...(data && typeof data === "object" && "user" in (data as Record<string, unknown>)
+      ? { user: (data as any).user }
+      : {}),
+  });
+
 // REGISTER
 export const register = async (req: any, res: any) => {
   try {
@@ -43,27 +59,31 @@ export const register = async (req: any, res: any) => {
       .trim()
       .toLowerCase();
     const normalizedName = String(name || "").trim();
+    const normalizedPassword = String(password || "");
+    const upiRegex = /^[A-Za-z]{4}\d{3}@aucklanduni\.ac\.nz$/;
 
-    if (!normalizedName || normalizedName.length < 2) {
-      return res.status(400).json({ message: "Name must be at least 2 characters" });
+    if (!normalizedName) {
+      return failure(res, 400, "Name is required!");
     }
 
     if (!normalizedEmail.endsWith("@aucklanduni.ac.nz")) {
-      return res.status(400).json({
-        message: "Only University of Auckland students can register",
-      });
+      return failure(res, 400, "Only University of Auckland students can register!");
     }
 
-    if (String(password || "").length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    if (!upiRegex.test(normalizedEmail)) {
+      return failure(res, 400, "Invalid UPI format!");
+    }
+
+    if (!normalizedPassword || normalizedPassword.length < 6) {
+      return failure(res, 400, "Password must be at least 6 characters!");
     }
 
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return failure(res, 400, "User already exists!");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(normalizedPassword, 10);
 
     const user = await User.create({
       name: normalizedName,
@@ -75,9 +95,9 @@ export const register = async (req: any, res: any) => {
 
     const payload = buildAuthPayload(token, sanitizeUser(user));
 
-    res.status(201).json({ ...payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", err });
+    return success(res, 201, "User registered successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Server error!");
   }
 };
 
@@ -88,24 +108,29 @@ export const login = async (req: any, res: any) => {
     const normalizedEmail = String(email || "")
       .trim()
       .toLowerCase();
+    const normalizedPassword = String(password || "");
+
+    if (!normalizedEmail || !normalizedPassword) {
+      return failure(res, 400, "Email and password are required!");
+    }
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return failure(res, 400, "User not found!");
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(normalizedPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return failure(res, 400, "Invalid credentials!");
     }
 
     const token = buildToken(String(user._id));
 
     const payload = buildAuthPayload(token, sanitizeUser(user));
 
-    res.json({ ...payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", err });
+    return success(res, 200, "Login successful.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Server error!");
   }
 };
 
@@ -113,26 +138,36 @@ export const login = async (req: any, res: any) => {
 export const logout = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader?.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({ message: "Invalid token format" });
+    if (!authHeader) {
+      return failure(res, 401, "No token provided!");
     }
 
-    const decoded = jwt.decode(token) as jwt.JwtPayload | null;
-    const expiresAt = decoded?.exp
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return failure(res, 401, "Invalid or expired token!");
+    }
+
+    if (await Blacklist.findOne({ token }).lean()) {
+      return failure(res, 401, "Token is invalid (logged out)!");
+    }
+
+    let decoded: jwt.JwtPayload;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
+    } catch {
+      return failure(res, 401, "Invalid or expired token!");
+    }
+
+    const expiresAt = decoded.exp
       ? new Date(decoded.exp * 1000)
       : new Date(Date.now() + 7 * 86400000);
 
-    await Blacklist.findOneAndUpdate(
-      { token },
-      { token, expiresAt },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
-    );
+    await Blacklist.updateOne({ token }, { $set: { token, expiresAt } }, { upsert: true });
 
-    res.json({ message: "Logged out successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", err });
+    return success(res, 200, "Logged out successfully.");
+  } catch (_err) {
+    return failure(res, 500, "Server error!");
   }
 };
 
@@ -141,14 +176,14 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: any) => {
     const user = await User.findById(req.user?.userId).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return failure(res, 404, "User not found!");
     }
 
     const payload = sanitizeUser(user as any);
 
-    res.json({ user: payload, data: payload });
-  } catch (err) {
-    res.status(500).json({ message: "Unable to fetch profile", err });
+    return success(res, 200, "Profile fetched successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Unable to fetch profile!");
   }
 };
 
@@ -163,7 +198,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: any) => {
     };
 
     if (!updates.name || updates.name.length < 2) {
-      return res.status(400).json({ message: "Name must be at least 2 characters" });
+      return failure(res, 400, "Name must be at least 2 characters!");
     }
 
     const user = await User.findByIdAndUpdate(req.user?.userId, updates, {
@@ -172,17 +207,13 @@ export const updateProfile = async (req: AuthenticatedRequest, res: any) => {
     }).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return failure(res, 404, "User not found!");
     }
 
     const payload = sanitizeUser(user as any);
 
-    res.json({
-      message: "Profile updated successfully",
-      user: payload,
-      data: payload,
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Unable to update profile", err });
+    return success(res, 200, "Profile updated successfully.", payload);
+  } catch (_err) {
+    return failure(res, 500, "Unable to update profile!");
   }
 };
