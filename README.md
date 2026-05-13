@@ -295,6 +295,7 @@ Useful test commands:
 ```bash
 npm run lint
 npm run ci
+npm run fix
 npm --prefix frontend run test
 npm --prefix frontend run build
 npm run test:e2e
