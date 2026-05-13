@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -230,20 +230,6 @@ function App() {
   const currentUserId = useMemo(() => getUserIdFromToken(token), [token])
 
   useEffect(() => {
-    if (!token) {
-      setSessions([])
-      setProfile(null)
-      setProfileForm(emptyProfileForm)
-      setSessionError('')
-      setProfileError('')
-      return
-    }
-
-    void refreshSessions()
-    loadProfile()
-  }, [token])
-
-  useEffect(() => {
     if (!globalNotice) {
       return
     }
@@ -289,7 +275,7 @@ function App() {
     })
   }, [searchQuery, sessions, sortMode])
 
-  async function refreshSessions() {
+  const refreshSessions = useCallback(async () => {
     if (!token) {
       return
     }
@@ -305,9 +291,9 @@ function App() {
     } finally {
       setSessionLoading(false)
     }
-  }
+  }, [token])
 
-  function loadProfile() {
+  const loadProfile = useCallback(() => {
     if (!token) {
       return
     }
@@ -326,7 +312,21 @@ function App() {
     } finally {
       setProfileLoading(false)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (!token) {
+      setSessions([])
+      setProfile(null)
+      setProfileForm(emptyProfileForm)
+      setSessionError('')
+      setProfileError('')
+      return
+    }
+
+    void refreshSessions()
+    loadProfile()
+  }, [loadProfile, refreshSessions, token])
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>, mode: AuthMode) {
     event.preventDefault()
@@ -2521,10 +2521,11 @@ async function fetchJson<T>(
   })
 
   const text = await response.text()
-  const data = text ? (JSON.parse(text) as Record<string, any>) : {}
+  const data: Record<string, unknown> = text ? (JSON.parse(text) as Record<string, unknown>) : {}
 
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+    const message = typeof data.message === 'string' ? data.message : 'Request failed'
+    throw new Error(message)
   }
 
   return data as T
