@@ -363,21 +363,6 @@ PR review should confirm:
 - The PR does not rely only on manual testing for critical workflows.
 - CI passes before merge.
 
-## Known Risks and Future Improvements
+## Testing Summary
 
-Current known gaps:
-
-- Frontend unit tests and frontend build are not yet part of the root `npm run ci` command.
-- No enforced coverage threshold is configured yet.
-- Real-time Socket.IO behavior has only smoke/manual coverage.
-- Map behavior is partly mocked in E2E and still needs manual browser validation.
-- Accessibility testing is manual and basic.
-- Dependency/security checks such as `npm audit` are not yet enforced in CI.
-
-Recommended future improvements:
-
-- Add frontend tests and frontend build to the CI quality gate.
-- Add coverage reporting for backend and frontend tests.
-- Add tests for dashboard filtering, CreateMealModal, InviteCard states, and profile editing.
-- Add negative E2E tests for unauthorized access and invalid meal actions.
-- Add a lightweight dependency audit step before final submission.
+The project now combines manual functional verification with automated backend, frontend, and end-to-end tests. This improves regression protection for the main authentication, meal session, dashboard, join/leave, and logout workflows.
