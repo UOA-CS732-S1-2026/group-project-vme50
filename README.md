@@ -101,7 +101,6 @@ Platemates aims to create a simple and accessible platform that helps students:
 - Dynamic participant updates
 - Full session indication
 
-
 ---
 
 ## My Meals Section

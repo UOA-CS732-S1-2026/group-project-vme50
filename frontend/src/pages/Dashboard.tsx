@@ -35,6 +35,7 @@ function Dashboard() {
       console.log("🟢 Socket connected:", socket.id);
     });
 
+    /* MEAL SLOTS UPDATED */
     socket.on("mealSlotsUpdated", (data) => {
       console.log("📡 SOCKET UPDATE:", data);
 
@@ -44,14 +45,31 @@ function Dashboard() {
             ? {
                 ...meal,
                 _realtimeCount: data.current,
+                participants: data.participants,
               }
             : meal,
         ),
       );
     });
 
+    /* NEW MEAL CREATED */
+    socket.on("mealCreated", (newMeal) => {
+      console.log("🆕 NEW MEAL:", newMeal);
+
+      setMeals((prev) => [newMeal, ...prev]);
+    });
+
+    /* MEAL DELETED */
+    socket.on("mealDeleted", (mealId) => {
+      console.log("🗑️ MEAL DELETED:", mealId);
+
+      setMeals((prev) => prev.filter((meal) => meal._id !== mealId));
+    });
+
     return () => {
       socket.off("mealSlotsUpdated");
+      socket.off("mealCreated");
+      socket.off("mealDeleted");
       socket.off("connect");
     };
   }, []);

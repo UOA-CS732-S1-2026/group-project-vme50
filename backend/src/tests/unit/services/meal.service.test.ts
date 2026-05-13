@@ -219,12 +219,12 @@ describe("Meal Service", () => {
 
       const result = await leaveMeal(MEAL_ID, USER_ID);
 
-      const hasUser = result.participants.map((p: any) => String(p)).includes(USER_ID);
+      const hasUser = result.session.participants.map((p: any) => String(p)).includes(USER_ID);
 
       expect(repo.saveMeal).toHaveBeenCalledTimes(1);
 
       expect(hasUser).toBe(false);
-      expect(result.participants.length).toBe(1);
+      expect(result.session.participants.length).toBe(1);
     });
 
     it("should reject leaving when user is not in session", async () => {
