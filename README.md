@@ -174,6 +174,10 @@ Users can view meals they have joined separately from the main dashboard.
 ```text
 group-project-vme50/
 │
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
 ├── backend/
 │   ├── src/
 │   │   ├── config/
@@ -190,22 +194,28 @@ group-project-vme50/
 │   └── tsconfig.json
 │
 ├── frontend/
+│   ├── e2e/
+│   │   └── core-user-flow.spec.ts
+│   │
 │   ├── src/
 │   │   ├── api/
 │   │   ├── components/
 │   │   ├── hooks/
 │   │   ├── pages/
 │   │   ├── socket/
+│   │   ├── tests/
 │   │   ├── utils/
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   │
 │   ├── package.json
+│   ├── playwright.config.ts
 │   └── vite.config.ts
 │
 ├── docs/
 │   └── TESTING.md
 │
+├── package.json
 ├── README.md
 └── .env.example
 ```
@@ -287,9 +297,28 @@ npm run dev
 
 # Testing
 
-Testing was conducted manually across all core workflows.
+Testing is covered through a combination of automated checks and manual acceptance testing.
 
-Tested features include:
+Automated testing includes:
+
+- Backend API tests with Vitest
+- Frontend unit and component tests with Vitest and React Testing Library
+- Playwright end-to-end smoke testing for the core user flow
+- GitHub Actions CI checks for linting, backend tests, and E2E smoke coverage
+
+Useful test commands:
+
+```bash
+npm run lint
+npm run ci
+npm --prefix frontend run test
+npm --prefix frontend run build
+npm run test:e2e
+```
+
+Manual acceptance testing was also used for browser responsiveness, profile editing, map interaction, and final user journey verification.
+
+Manual testing covered:
 
 - User registration
 - Login/logout
