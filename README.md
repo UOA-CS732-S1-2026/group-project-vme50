@@ -90,7 +90,6 @@ Platemates aims to create a simple and accessible platform that helps students:
 - Leave meal sessions
 - View all active meal sessions
 - Participant limit handling
-- Restriction to one active joined meal
 
 ---
 
@@ -302,7 +301,7 @@ npm --prefix frontend run build
 npm run test:e2e
 ```
 
-Manual acceptance testing was also used for browser responsiveness, profile editing, map interaction, and final user journey verification.
+Manual acceptance testing was also used for browser responsiveness, map interaction, and final user journey verification.
 
 Manual testing covered:
 
@@ -314,8 +313,6 @@ Manual testing covered:
 - Joining/leaving meals
 - Participant count updates
 - Full session handling
-- Profile editing
-- Avatar colour updates
 - Frontend-backend integration
 - Protected route handling
 

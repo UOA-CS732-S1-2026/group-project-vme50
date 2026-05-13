@@ -95,7 +95,9 @@ describe("Register page", () => {
     await user.click(screen.getByRole("button", { name: "Register" }));
 
     await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith("Only University of Auckland students can register");
+      expect(window.alert).toHaveBeenCalledWith(
+        "Only University of Auckland students can register",
+      );
     });
   });
 });
