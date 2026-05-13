@@ -17,16 +17,42 @@ dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://localhost:5174",
-  "http://127.0.0.1:5174",
+const configuredOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  ...(process.env.CLIENT_URLS?.split(",").map((value) => value.trim()) ?? []),
 ].filter(Boolean);
+
+const allowedOriginPatterns = [
+  /^http:\/\/localhost:517\d$/,
+  /^http:\/\/127\.0\.0\.1:517\d$/,
+  /^https:\/\/.*\.vercel\.app$/,
+];
+
+const isAllowedOrigin = (origin?: string) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (configuredOrigins.includes(origin)) {
+    return true;
+  }
+
+  return allowedOriginPatterns.some((pattern) => pattern.test(origin));
+};
+
+const corsOrigin = (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
+  if (isAllowedOrigin(origin)) {
+    callback(null, true);
+    return;
+  }
+
+  callback(new Error(`Origin not allowed by CORS: ${origin}`));
+};
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: corsOrigin,
     credentials: true,
   },
 });
@@ -38,7 +64,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: corsOrigin,
   }),
 );
 
