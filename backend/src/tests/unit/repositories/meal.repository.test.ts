@@ -90,7 +90,7 @@ describe("Meal Repository", () => {
       lat: -36.8485,
       lng: 174.7633,
     });
-    expect(meal.creator).toBe(user._id);
+    expect(meal.creator._id.equals(user._id)).toBe(true);
     expect(meal.participants).toStrictEqual([user._id]);
     expect(meal.isActive).toBe(true);
   });
