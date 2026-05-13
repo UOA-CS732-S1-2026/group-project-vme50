@@ -1,43 +1,36 @@
 :root {
-  --bg: #f5efe6;
-  --bg-soft: #fdf7ef;
-  --surface: rgba(255, 255, 255, 0.74);
-  --surface-strong: rgba(255, 255, 255, 0.88);
-  --surface-solid: rgba(255, 249, 241, 0.95);
-  --surface-muted: rgba(245, 232, 214, 0.74);
-  --surface-deep: rgba(232, 210, 184, 0.46);
-  --line: rgba(255, 255, 255, 0.5);
-  --line-strong: rgba(61, 41, 22, 0.12);
-  --glass-shine: rgba(255, 255, 255, 0.62);
-  --glass-shadow: rgba(24, 30, 24, 0.06);
-  --ink: #25302a;
-  --ink-soft: #5f4738;
-  --ink-faint: #7a6d63;
-  --accent: #9a5a35;
-  --accent-dark: #6f3d22;
-  --accent-soft: #f1dfcf;
-  --accent-contrast: #fff8f1;
-  --danger: #984534;
-  --danger-soft: #f8ded5;
-  --success: #5b6a2f;
-  --success-soft: #ebf0df;
+  --bg: #f1e7e2;
+  --bg-soft: #f8f0ec;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-strong: rgba(255, 255, 255, 0.84);
+  --surface-solid: rgba(251, 248, 243, 0.94);
+  --surface-muted: rgba(241, 226, 220, 0.78);
+  --surface-deep: rgba(223, 202, 194, 0.5);
+  --line: rgba(255, 255, 255, 0.48);
+  --line-strong: rgba(50, 44, 36, 0.1);
+  --glass-shine: rgba(255, 255, 255, 0.58);
+  --glass-shadow: rgba(28, 26, 22, 0.06);
+  --ink: #232722;
+  --ink-soft: #5f4d45;
+  --ink-faint: #80716a;
+  --accent: #8c4f3a;
+  --accent-dark: #633626;
+  --accent-soft: #f0ddd5;
+  --accent-contrast: #fdf9f4;
+  --danger: #9b493c;
+  --danger-soft: #f6ddd7;
+  --success: #6a5a43;
+  --success-soft: #eee5d8;
   --shadow-soft:
-    0 12px 32px rgba(80, 54, 30, 0.08),
+    0 24px 80px rgba(73, 40, 30, 0.14),
     0 2px 0 rgba(255, 255, 255, 0.28) inset;
   --shadow-card:
-    0 12px 32px rgba(80, 54, 30, 0.08),
+    0 20px 54px rgba(73, 40, 30, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.55) inset;
-  --radius-shell: 32px;
-  --radius-panel: 28px;
-  --radius-session: 20px;
-  --radius-card: 28px;
-  --card-bg: rgba(255, 255, 255, 0.72);
-  --card-border: rgba(255, 255, 255, 0.55);
-  --card-shadow: 0 12px 32px rgba(80, 54, 30, 0.08);
   --blur-1: 18px;
   --blur-2: 28px;
   --radius-xl: 32px;
-  --radius-lg: 28px;
+  --radius-lg: 24px;
   --radius-md: 18px;
   --radius-sm: 14px;
   --space-1: 0.4rem;
@@ -52,10 +45,10 @@
   font-weight: 400;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(223, 177, 109, 0.32), transparent 24%),
-    radial-gradient(circle at 80% 16%, rgba(143, 102, 53, 0.16), transparent 18%),
-    radial-gradient(circle at 18% 82%, rgba(255, 235, 206, 0.34), transparent 18%),
-    linear-gradient(180deg, #f6eee3 0%, #faf4ea 40%, #f4eadf 100%);
+    radial-gradient(circle at top left, rgba(198, 118, 91, 0.18), transparent 24%),
+    radial-gradient(circle at 80% 16%, rgba(147, 87, 68, 0.1), transparent 18%),
+    radial-gradient(circle at 18% 82%, rgba(255, 243, 238, 0.3), transparent 18%),
+    linear-gradient(180deg, #f3ebe7 0%, #f8f1ed 40%, #eee3dc 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -75,10 +68,10 @@ body {
   min-width: 320px;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(196, 144, 86, 0.28), transparent 22%),
-    radial-gradient(circle at 82% 18%, rgba(119, 82, 47, 0.12), transparent 18%),
-    radial-gradient(circle at 15% 82%, rgba(255, 238, 216, 0.28), transparent 22%),
-    linear-gradient(180deg, #f4ecdf 0%, #faf4ea 42%, #f2e7db 100%);
+    radial-gradient(circle at top left, rgba(196, 115, 85, 0.18), transparent 22%),
+    radial-gradient(circle at 82% 18%, rgba(144, 84, 67, 0.08), transparent 18%),
+    radial-gradient(circle at 15% 82%, rgba(251, 239, 234, 0.24), transparent 22%),
+    linear-gradient(180deg, #f1e9e4 0%, #f8f2ee 42%, #ede1da 100%);
 }
 
 button,
@@ -98,7 +91,7 @@ h3,
 h4 {
   margin: 0;
   font-family: "Iowan Old Style", "New York", "Times New Roman", Georgia, serif;
-  color: #1c241d;
+  color: #212520;
   letter-spacing: -0.03em;
 }
 
