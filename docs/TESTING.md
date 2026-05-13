@@ -94,9 +94,6 @@ The UI correctly reflects:
 - Joined session status
 - Full session status when maximum capacity is reached
 
-## Single Active Session Restriction
-Testing confirmed that users can only participate in one active meal session at a time, as required by the project specifications.
-
 ## My Meals Section
 The “My Meals” feature was tested successfully.
 
@@ -173,7 +170,7 @@ The following must-have requirements were fully implemented and tested successfu
 
 ## Join/Leave Meal Session Feature
 - Users can join and leave meal sessions
-- Users can only join one active meal session at a time
+- Users can only join one active meal session at a time (changed to multiple meal sessions)
 
 ---
 

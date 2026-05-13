@@ -32,8 +32,7 @@ export default defineConfig({
         ...process.env,
         CLIENT_URL: frontendUrl,
         JWT_SECRET: process.env.JWT_SECRET ?? "playwright-e2e-secret",
-        MONGO_URI:
-          process.env.MONGO_URI ?? `mongodb://127.0.0.1:27017/platemates_e2e_${e2eRunId}`,
+        MONGO_URI: process.env.MONGO_URI ?? `mongodb://127.0.0.1:27017/platemates_e2e_${e2eRunId}`,
         NODE_ENV: "development",
         PORT: "5050",
       },
