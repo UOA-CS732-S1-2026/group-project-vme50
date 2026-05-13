@@ -102,20 +102,6 @@ Platemates aims to create a simple and accessible platform that helps students:
 - Dynamic participant updates
 - Full session indication
 
----
-
-## User Profile Feature
-
-Users can personalise and edit their profile.
-
-Profile includes:
-
-- Name
-- Email
-- Course
-- Bio / About Me section
-- Interests
-- Avatar colour customisation
 
 ---
 
