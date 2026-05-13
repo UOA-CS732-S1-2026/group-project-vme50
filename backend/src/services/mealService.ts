@@ -65,15 +65,9 @@ export const leaveMeal = async (mealId: string, userId: string) => {
 
   await mealRepository.saveMeal(session);
 
-  let deleted = false;
-
   if (session.participants.length === 0) {
     await mealRepository.deleteMeal(mealId);
-    deleted = true;
   }
 
-  return {
-    session,
-    deleted,
-  };
+  return session;
 };

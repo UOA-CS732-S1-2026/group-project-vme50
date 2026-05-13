@@ -3,10 +3,7 @@ import MealSession from "../models/MealSession.js";
 
 export const mealRepository = {
   async createMeal(data: any) {
-    const meal = await MealSession.create(data);
-    const populatedMeal = await meal.populate("creator", "name email");
-
-    return populatedMeal;
+    return await MealSession.create(data);
   },
 
   async findActiveMeals() {

@@ -8,8 +8,6 @@ export const createMealSession = async (req: any, res: Response) => {
   try {
     const session = await createMeal(req.body, req.user.userId);
 
-    io.emit("mealCreated", session);
-
     return res.status(201).json({
       success: true,
       message: "Meal session created.",
@@ -87,22 +85,17 @@ export const joinMealSession = async (req: any, res: Response) => {
 /* ================= LEAVE MEAL ================= */
 export const leaveMealSession = async (req: any, res: Response) => {
   try {
-    const result = await leaveMeal(req.params.id, req.user.userId);
+    const session = await leaveMeal(req.params.id, req.user.userId);
 
     io.emit("mealSlotsUpdated", {
-      mealId: result.session._id,
-      current: result.session.participants.length,
-      participants: result.session.participants,
+      mealId: session._id,
+      current: session.participants.length,
     });
-
-    if (result.deleted) {
-      io.emit("mealDeleted", result.session._id);
-    }
 
     return res.status(200).json({
       success: true,
       message: "Left session.",
-      data: result.session,
+      data: session,
     });
   } catch (_err: any) {
     if (_err.message === "NOT_IN_SESSION") {
