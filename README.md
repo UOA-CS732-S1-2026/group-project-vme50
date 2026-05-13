@@ -101,7 +101,6 @@ Platemates aims to create a simple and accessible platform that helps students:
 - Dynamic participant updates
 - Full session indication
 
-
 ---
 
 ## My Meals Section
@@ -296,6 +295,7 @@ Useful test commands:
 ```bash
 npm run lint
 npm run ci
+npm run fix
 npm --prefix frontend run test
 npm --prefix frontend run build
 npm run test:e2e

@@ -341,7 +341,7 @@ Before opening or merging a PR, contributors should run the checks relevant to t
 Minimum recommended checks:
 
 ```bash
-npm run lint
+npm run fix
 npm --prefix backend run test
 npm --prefix frontend run test
 npm --prefix frontend run build
