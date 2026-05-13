@@ -54,7 +54,7 @@ function Dashboard() {
 
     /* NEW MEAL CREATED */
     socket.on("mealCreated", (newMeal) => {
-      console.log("🆕 NEW MEAL:", newMeal);
+      console.log("🆕 NEW MEAL:", newMeal._id);
 
       setMeals((prev) => [newMeal, ...prev]);
     });
