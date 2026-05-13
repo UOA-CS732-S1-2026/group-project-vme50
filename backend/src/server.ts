@@ -41,7 +41,10 @@ const isAllowedOrigin = (origin?: string) => {
   return allowedOriginPatterns.some((pattern) => pattern.test(origin));
 };
 
-const corsOrigin = (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
+const corsOrigin = (
+  origin: string | undefined,
+  callback: (error: Error | null, allow?: boolean) => void,
+) => {
   if (isAllowedOrigin(origin)) {
     callback(null, true);
     return;
