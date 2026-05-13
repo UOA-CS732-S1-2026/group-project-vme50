@@ -62,7 +62,10 @@ function InviteCard({
 
   return (
     <>
-      <div className="w-full rounded-2xl bg-white p-4 pb-3 shadow-sm border border-gray-200 hover:shadow-md transition h-full flex flex-col">
+      <div
+        data-testid="meal-card"
+        className="w-full rounded-2xl bg-white p-4 pb-3 shadow-sm border border-gray-200 hover:shadow-md transition h-full flex flex-col"
+      >
         {/* TITLE */}
         <h3 className="text-lg font-bold text-gray-900 line-clamp-1 break-words">{title}</h3>
 

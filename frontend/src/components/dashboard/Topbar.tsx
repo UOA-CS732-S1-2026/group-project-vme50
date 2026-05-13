@@ -46,6 +46,7 @@ function Topbar() {
         {/* PROFILE AVATAR */}
         <div className="relative">
           <div
+            data-testid="user-menu-button"
             onClick={() => setOpen(!open)}
             className={`
               flex h-10 w-10 cursor-pointer items-center justify-center
