@@ -34,6 +34,14 @@ jobs:
       - name: Install frontend
         run: npm --prefix frontend ci
 
+      # Install browser for E2E smoke tests
+      - name: Install Playwright Chromium
+        run: npm --prefix frontend run test:e2e:install
+
       # Run tests + lint
       - name: Run CI
         run: npm run ci
+
+      # Run browser-level smoke tests
+      - name: Run E2E smoke tests
+        run: npm run test:e2e
